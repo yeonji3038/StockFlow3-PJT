@@ -64,4 +64,3 @@
 | **역할 기반 인증 및 접근 제어** | Spring Security + JWT로 매장 직원 / 본사 관리자 역할을 분리하여 API 및 화면 접근 권한 제어 |
 | **마이크로서비스 독립 배포** | 매장 서비스·본사 서비스·AI 서비스를 독립 Pod로 분리 배포, Kubernetes(k3s) 환경에서 서비스별 트래픽 패턴에 따라 HPA 자동 스케일링 적용 |
 | **GitOps 자동 배포 파이프라인** | GitHub Actions로 코드 푸시 시 Docker 이미지 빌드·ECR 푸시 자동화, ArgoCD가 Git 상태를 감지하여 k3s 클러스터에 무중단 롤링 배포 |
-| **운영 모니터링** | Prometheus + Grafana로 서비스별 CPU·메모리·요청 수 및 Kafka 컨슈머 랙(lag)을 실시간 수집·시각화하여 이상 징후 즉시 파악 가능 |
