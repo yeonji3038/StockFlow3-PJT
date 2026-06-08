@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stockflow-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stockflow-store
+  template:
+    metadata:
+      labels:
+        app: stockflow-store
+    spec:
+      imagePullSecrets:
+      - name: ecr-secret
+      containers:
+      - name: stockflow-store
+        image: 836533914314.dkr.ecr.ap-northeast-2.amazonaws.com/stockflow-store:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: stockflow-secret
+              key: DB_URL
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: stockflow-secret
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: stockflow-secret
+              key: DB_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: stockflow-secret
+              key: JWT_SECRET
+        - name: JWT_EXPIRATION
+          v          v           secretKeyRef:
+              name: stockflow-secret
+              key: JWT_EXPIRATION
+        - name: JWT_REFRESH_EXPIRATION
+          valueFrom:
+            secretKeyRef:
+              name: stockflow-secret
+              key: JWT_REFRESH_EXPIRATION
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: stockflow-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: stockflow-config
+              key: REDIS_HOST
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stockflow-store-service
+spec:
+  selector:
+    app: stockflow-store
+  type: NodePort
+  ports:
+  - port: 8081
+    targetPort: 8081
+    nodePort: 30081
