@@ -179,7 +179,7 @@ export default function AllocationNewPage() {
   const role = getRole()
 
   useLayoutEffect(() => {
-    if (role === 'STORE_MANAGER') {
+    if (role === 'STORE_MANAGER' || role === 'WAREHOUSE_STAFF') {
       navigate('/allocations', { replace: true })
     }
   }, [navigate, role])

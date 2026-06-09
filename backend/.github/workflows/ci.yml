@@ -13,6 +13,9 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -46,7 +49,7 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build and push store-service
+    - n     Build and push store-service
       run: |
         docker build -t $ECR_REGISTRY/stockflow-store:${{ github.sha }} \
           -f store-service/Dockerfile .
@@ -55,11 +58,8 @@ jobs:
           $ECR_REGISTRY/stockflow-store:latest
         docker push $ECR_REGISTRY/stockflow-store:latest
 
-    - name: Build and push hq-service
-      run: |
-        docker build -t $ECR_REGISTRY/stockflow-hq:${{ github.sha }} \
+    -    -    -    -    -    -    -    -    -    -    -    docker build -t $ECR_REGISTRY/stockflow-hq:${{ github.sha }} \
           -f hq-service/Dockerfile .
-        docker push $ECR_REGISTRY/stockflow-hq:${{ github.sha }}
-        docker tag $ECR_REGISTRY/stockflow-hq:${{ github.sha }} \
+        doc        doc        doc        doc        doc        doc        docer tag $ECR_REGISTRY/stockflow-hq:${{ github.sha }} \
           $ECR_REGISTRY/stockflow-hq:latest
         docker push $ECR_REGISTRY/stockflow-hq:latest

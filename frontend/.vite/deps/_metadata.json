@@ -2,7 +2,7 @@
   "hash": "a4e3891d",
   "configHash": "8772d62c",
   "lockfileHash": "83b2aecb",
-  "browserHash": "de0fb42b",
+  "browserHash": "387d3674",
   "optimized": {
     "@heroui/react": {
       "src": "../../node_modules/@heroui/react/dist/index.js",

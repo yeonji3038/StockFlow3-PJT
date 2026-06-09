@@ -1,2 +1,4 @@
 infra/.env
 backend/.env
+.DS_Store
+.idea/

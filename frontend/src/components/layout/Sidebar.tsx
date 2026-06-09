@@ -30,9 +30,15 @@ export default function Sidebar() {
   const role = getRole()
   const isHq = role === 'HQ_STAFF'
   const isStoreManager = role === 'STORE_MANAGER'
+  const isWarehouseStaff = role === 'WAREHOUSE_STAFF'
 
-  /** HQ만 창고 재고. 매장 관리자는 대시보드·발주·매장 재고·입출고(+아래 배분 관리 링크) */
+  /** HQ만 타 역할 메뉴에 창고 재고. 매장: 발주·매장재고·입출고. 창고: 대시보드·창고재고·입출고 */
   const nav = useMemo(() => {
+    if (isWarehouseStaff) {
+      return baseNav.filter((item) =>
+        ['/dashboard', '/warehouse-stock', '/movements'].includes(item.to),
+      )
+    }
     if (isStoreManager) {
       return baseNav.filter((item) =>
         ['/dashboard', '/orders', '/store-stock', '/movements'].includes(item.to),
@@ -42,7 +48,7 @@ export default function Sidebar() {
       if (item.to === '/warehouse-stock') return isHq
       return true
     })
-  }, [isHq, isStoreManager])
+  }, [isHq, isStoreManager, isWarehouseStaff])
 
   const allocationsManageActive =
     pathname === '/allocations' || /^\/allocations\/\d+$/.test(pathname)
@@ -149,7 +155,7 @@ export default function Sidebar() {
               </div>
             ) : null}
           </div>
-        ) : isStoreManager ? (
+        ) : isStoreManager || isWarehouseStaff ? (
           <NavLink
             to="/allocations"
             end

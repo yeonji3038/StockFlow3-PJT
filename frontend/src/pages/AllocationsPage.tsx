@@ -8,7 +8,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useTablePagination } from '../hooks/useTablePagination'
 import type { Allocation } from '../types/models'
 import { useStockStore } from '../stores/stockStore'
-import { getRole, getStoreId } from '../lib/auth'
+import { getRole, getStoreId, getWarehouseId } from '../lib/auth'
 
 function toInputDate(d: Date): string {
   const yyyy = String(d.getFullYear())
@@ -37,7 +37,9 @@ export default function AllocationsPage() {
   const [searchParams] = useSearchParams()
   const role = getRole()
   const myStoreId = getStoreId()
+  const myWarehouseId = getWarehouseId()
   const isStoreManager = role === 'STORE_MANAGER'
+  const isWarehouseStaff = role === 'WAREHOUSE_STAFF'
   const allocationRefreshTrigger = useStockStore((s) => s.allocationRefreshTrigger)
   const hasFetchedOnce = useRef(false)
   const [rows, setRows] = useState<Allocation[]>([])
@@ -45,14 +47,19 @@ export default function AllocationsPage() {
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState<string>(() => {
+    if (getRole() === 'WAREHOUSE_STAFF') return 'APPROVED'
     const s = searchParams.get('status')
     return s != null && s !== '' ? s : 'ALL'
   })
 
   useEffect(() => {
+    if (isWarehouseStaff) {
+      setStatus('APPROVED')
+      return
+    }
     const s = searchParams.get('status')
     setStatus(s != null && s !== '' ? s : 'ALL')
-  }, [searchParams])
+  }, [searchParams, isWarehouseStaff])
 
   const [warehouse, setWarehouse] = useState<number | 'ALL'>('ALL')
   const [store, setStore] = useState<number | 'ALL'>('ALL')
@@ -80,6 +87,12 @@ export default function AllocationsPage() {
           } else {
             list = list.filter((a) => a.storeId === myStoreId)
           }
+        } else if (isWarehouseStaff) {
+          if (myWarehouseId == null) {
+            list = []
+          } else {
+            list = list.filter((a) => a.warehouseId === myWarehouseId)
+          }
         }
         if (!cancelled) setRows(list)
       } catch {
@@ -94,7 +107,7 @@ export default function AllocationsPage() {
     return () => {
       cancelled = true
     }
-  }, [allocationRefreshTrigger, isStoreManager, myStoreId])
+  }, [allocationRefreshTrigger, isStoreManager, isWarehouseStaff, myStoreId, myWarehouseId])
 
   const filterOptions = useMemo(() => {
     const warehouses = new Map<number, string>()
@@ -120,7 +133,11 @@ export default function AllocationsPage() {
 
     return rows
       .filter((a) => {
-        if (!matchesStatusFilter(status, a.status)) return false
+        if (isWarehouseStaff) {
+          if (a.status !== 'APPROVED') return false
+        } else if (!matchesStatusFilter(status, a.status)) {
+          return false
+        }
         if (warehouse !== 'ALL' && a.warehouseId !== warehouse) return false
         if (store !== 'ALL' && a.storeId !== store) return false
 
@@ -151,7 +168,7 @@ export default function AllocationsPage() {
         const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0
         return bt - at
       })
-  }, [rows, q, status, warehouse, store, from, to])
+  }, [rows, q, status, warehouse, store, from, to, isWarehouseStaff])
 
   const allocPagination = useTablePagination(filtered)
   const isHq = role === 'HQ_STAFF'
@@ -159,7 +176,12 @@ export default function AllocationsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold text-slate-900">배분 관리</h1>
+        <h1 className="text-lg font-semibold text-slate-900">
+          배분 관리
+          {isWarehouseStaff ? (
+            <span className="ml-2 text-sm font-normal text-slate-500">(출고 대기 · 승인됨)</span>
+          ) : null}
+        </h1>
         {isHq ? (
           <Link
             to="/allocations/new"
@@ -171,38 +193,44 @@ export default function AllocationsPage() {
       </div>
 
       <SectionCard
-        title="배분 목록"
+        title={isWarehouseStaff ? '출고 대기 배분' : '배분 목록'}
         headerRight={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={
-                isStoreManager ? '창고/SKU/상품명/요청자 검색' : '창고/매장/SKU/상품명/요청자 검색'
+                isWarehouseStaff
+                  ? '매장/SKU/상품명/요청자 검색'
+                  : isStoreManager
+                    ? '창고/SKU/상품명/요청자 검색'
+                    : '창고/매장/SKU/상품명/요청자 검색'
               }
               className="h-9 w-64 rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
 
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-slate-500">상태</span>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="ALL">전체</option>
-                {!isStoreManager ? (
-                  <option value="REQUESTED,APPROVED">처리 대기 (요청·승인)</option>
-                ) : null}
-                {filterOptions.statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {allocationStatusLabel(s)}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {!isWarehouseStaff ? (
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-slate-500">상태</span>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="ALL">전체</option>
+                  {!isStoreManager ? (
+                    <option value="REQUESTED,APPROVED">처리 대기 (요청·승인)</option>
+                  ) : null}
+                  {filterOptions.statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {allocationStatusLabel(s)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
 
-            {!isStoreManager ? (
+            {!isStoreManager && !isWarehouseStaff ? (
               <>
                 <label className="flex items-center gap-2 text-sm">
                   <span className="text-slate-500">창고</span>
@@ -265,7 +293,7 @@ export default function AllocationsPage() {
               type="button"
               onClick={() => {
                 setQ('')
-                setStatus('ALL')
+                setStatus(isWarehouseStaff ? 'APPROVED' : 'ALL')
                 setWarehouse('ALL')
                 setStore('ALL')
                 const d = new Date()
@@ -287,6 +315,10 @@ export default function AllocationsPage() {
         ) : isStoreManager && myStoreId == null ? (
           <p className="text-sm text-amber-700">
             매장 정보가 없어 배분 목록을 표시할 수 없습니다. 다시 로그인하거나 관리자에게 문의해 주세요.
+          </p>
+        ) : isWarehouseStaff && myWarehouseId == null ? (
+          <p className="text-sm text-amber-700">
+            창고 정보가 없어 배분 목록을 표시할 수 없습니다. 다시 로그인하거나 관리자에게 문의해 주세요.
           </p>
         ) : (
           <div>
