@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REGISTRY: 836533914314.dkr.ecr.ap-northeast-2.amazonaws.com
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
 
 jobs:
   build-and-push:
@@ -49,17 +49,16 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - n     Build and push store-service
+    - name: Build and push store-service
       run: |
-        docker build -t $ECR_REGISTRY/stockflow-store:${{ github.sha }} \
-          -f store-service/Dockerfile .
+        docker build -t $ECR_REGISTRY/stockflow-store:${{ github.sha }} -f store-service/Dockerfile .
         docker push $ECR_REGISTRY/stockflow-store:${{ github.sha }}
-        docker tag $ECR_REGISTRY/stockflow-store:${{ github.sha }} \
-          $ECR_REGISTRY/stockflow-store:latest
+        docker tag $ECR_REGISTRY/stockflow-store:${{ github.sha }} $ECR_REGISTRY/stockflow-store:latest
         docker push $ECR_REGISTRY/stockflow-store:latest
 
-    -    -    -    -    -    -    -    -    -    -    -    docker build -t $ECR_REGISTRY/stockflow-hq:${{ github.sha }} \
-          -f hq-service/Dockerfile .
-        doc        doc        doc        doc        doc        doc        docer tag $ECR_REGISTRY/stockflow-hq:${{ github.sha }} \
-          $ECR_REGISTRY/stockflow-hq:latest
+    - name: Build and push hq-service
+      run: |
+        docker build -t $ECR_REGISTRY/stockflow-hq:${{ github.sha }} -f hq-service/Dockerfile .
+        docker push $ECR_REGISTRY/stockflow-hq:${{ github.sha }}
+        docker tag $ECR_REGISTRY/stockflow-hq:${{ github.sha }} $ECR_REGISTRY/stockflow-hq:latest
         docker push $ECR_REGISTRY/stockflow-hq:latest
