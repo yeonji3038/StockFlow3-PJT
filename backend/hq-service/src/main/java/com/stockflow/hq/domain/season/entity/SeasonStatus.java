@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.season.entity;
+package com.stockflow.hq.domain.season.entity;
 
 public enum SeasonStatus {
     PLANNING,   // 기획중

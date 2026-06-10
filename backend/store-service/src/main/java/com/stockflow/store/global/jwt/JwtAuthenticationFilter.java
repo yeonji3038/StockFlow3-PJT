@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.jwt;
+package com.stockflow.store.global.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

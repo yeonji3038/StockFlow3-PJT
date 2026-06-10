@@ -1,8 +1,8 @@
-package com.stockflow.backend.domain.stockhistory.dto;
+package com.stockflow.hq.domain.stockhistory.dto;
 
-import com.stockflow.backend.domain.stockhistory.entity.StockHistory;
-import com.stockflow.backend.domain.stockhistory.entity.StockHistoryReason;
-import com.stockflow.backend.domain.stockhistory.entity.StockHistoryType;
+import com.stockflow.hq.domain.stockhistory.entity.StockHistory;
+import com.stockflow.hq.domain.stockhistory.entity.StockHistoryReason;
+import com.stockflow.hq.domain.stockhistory.entity.StockHistoryType;
 import lombok.Builder;
 import lombok.Getter;
 

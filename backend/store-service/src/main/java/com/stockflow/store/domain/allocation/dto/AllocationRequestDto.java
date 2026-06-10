@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.allocation.dto;
+package com.stockflow.store.domain.allocation.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

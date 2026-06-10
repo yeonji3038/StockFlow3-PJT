@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.store.dto;
+package com.stockflow.store.domain.store.dto;
 
-import com.stockflow.backend.domain.store.entity.StoreType;
+import com.stockflow.store.domain.store.entity.StoreType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

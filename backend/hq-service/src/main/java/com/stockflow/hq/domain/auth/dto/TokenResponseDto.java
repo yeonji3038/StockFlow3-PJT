@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.auth.dto;
+package com.stockflow.hq.domain.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;

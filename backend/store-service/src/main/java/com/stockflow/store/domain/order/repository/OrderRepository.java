@@ -1,7 +1,7 @@
-package com.stockflow.backend.domain.order.repository;
+package com.stockflow.store.domain.order.repository;
 
-import com.stockflow.backend.domain.order.entity.Order;
-import com.stockflow.backend.domain.order.entity.OrderStatus;
+import com.stockflow.store.domain.order.entity.Order;
+import com.stockflow.store.domain.order.entity.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

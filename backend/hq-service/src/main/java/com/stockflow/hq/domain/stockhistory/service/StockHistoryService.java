@@ -1,14 +1,14 @@
-package com.stockflow.backend.domain.stockhistory.service;
+package com.stockflow.hq.domain.stockhistory.service;
 
-import com.stockflow.backend.domain.stockhistory.dto.StockHistoryResponseDto;
-import com.stockflow.backend.domain.stockhistory.entity.StockHistory;
-import com.stockflow.backend.domain.stockhistory.entity.StockHistoryReason;
-import com.stockflow.backend.domain.stockhistory.entity.StockHistoryType;
-import com.stockflow.backend.domain.stockhistory.repository.StockHistoryRepository;
-import com.stockflow.backend.domain.product.entity.ProductOption;
-import com.stockflow.backend.domain.store.entity.Store;
-import com.stockflow.backend.domain.user.entity.User;
-import com.stockflow.backend.domain.warehouse.entity.Warehouse;
+import com.stockflow.hq.domain.stockhistory.dto.StockHistoryResponseDto;
+import com.stockflow.hq.domain.stockhistory.entity.StockHistory;
+import com.stockflow.hq.domain.stockhistory.entity.StockHistoryReason;
+import com.stockflow.hq.domain.stockhistory.entity.StockHistoryType;
+import com.stockflow.hq.domain.stockhistory.repository.StockHistoryRepository;
+import com.stockflow.hq.domain.product.entity.ProductOption;
+import com.stockflow.hq.domain.store.entity.Store;
+import com.stockflow.hq.domain.user.entity.User;
+import com.stockflow.hq.domain.warehouse.entity.Warehouse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

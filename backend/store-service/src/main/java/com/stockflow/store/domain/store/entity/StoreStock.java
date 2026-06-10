@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.store.entity;
+package com.stockflow.store.domain.store.entity;
 
-import com.stockflow.backend.domain.product.entity.ProductOption;
+import com.stockflow.store.domain.product.entity.ProductOption;
 import jakarta.persistence.*;
 import lombok.*;
 

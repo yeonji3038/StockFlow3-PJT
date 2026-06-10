@@ -1,7 +1,7 @@
-package com.stockflow.backend.domain.stockhistory.repository;
+package com.stockflow.store.domain.stockhistory.repository;
 
-import com.stockflow.backend.domain.stockhistory.entity.StockHistory;
-import com.stockflow.backend.domain.stockhistory.entity.StockHistoryType;
+import com.stockflow.store.domain.stockhistory.entity.StockHistory;
+import com.stockflow.store.domain.stockhistory.entity.StockHistoryType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

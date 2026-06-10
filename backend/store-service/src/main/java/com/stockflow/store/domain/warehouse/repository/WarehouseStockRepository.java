@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.warehouse.repository;
+package com.stockflow.store.domain.warehouse.repository;
 
-import com.stockflow.backend.domain.warehouse.entity.WarehouseStock;
+import com.stockflow.store.domain.warehouse.entity.WarehouseStock;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

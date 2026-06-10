@@ -1,6 +1,6 @@
-package com.stockflow.backend.global.kafka.producer;
+package com.stockflow.hq.global.kafka.producer;
 
-import com.stockflow.backend.global.kafka.dto.StockChangeEvent;
+import com.stockflow.common.kafka.dto.StockChangeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

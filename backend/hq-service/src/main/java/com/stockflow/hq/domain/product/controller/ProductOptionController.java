@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.product.controller;
+package com.stockflow.hq.domain.product.controller;
 
-import com.stockflow.backend.domain.product.dto.ProductOptionRequestDto;
-import com.stockflow.backend.domain.product.dto.ProductOptionResponseDto;
-import com.stockflow.backend.domain.product.service.ProductOptionService;
-import com.stockflow.backend.global.docs.product.ProductOptionApiSpecification;
+import com.stockflow.hq.domain.product.dto.ProductOptionRequestDto;
+import com.stockflow.hq.domain.product.dto.ProductOptionResponseDto;
+import com.stockflow.hq.domain.product.service.ProductOptionService;
+import com.stockflow.hq.global.docs.product.ProductOptionApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

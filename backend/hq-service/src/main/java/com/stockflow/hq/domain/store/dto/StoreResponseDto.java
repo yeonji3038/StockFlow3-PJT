@@ -1,7 +1,7 @@
-package com.stockflow.backend.domain.store.dto;
+package com.stockflow.hq.domain.store.dto;
 
-import com.stockflow.backend.domain.store.entity.Store;
-import com.stockflow.backend.domain.store.entity.StoreType;
+import com.stockflow.hq.domain.store.entity.Store;
+import com.stockflow.hq.domain.store.entity.StoreType;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.warehouse;
+package com.stockflow.store.global.docs.warehouse;
 
-import com.stockflow.backend.domain.warehouse.dto.WarehouseRequestDto;
-import com.stockflow.backend.domain.warehouse.dto.WarehouseResponseDto;
+import com.stockflow.store.domain.warehouse.dto.WarehouseRequestDto;
+import com.stockflow.store.domain.warehouse.dto.WarehouseResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.config;
+package com.stockflow.hq.global.config;
 
-import com.stockflow.backend.global.jwt.JwtAuthenticationFilter;
-import com.stockflow.backend.global.jwt.JwtTokenProvider;
+import com.stockflow.hq.global.jwt.JwtAuthenticationFilter;
+import com.stockflow.hq.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

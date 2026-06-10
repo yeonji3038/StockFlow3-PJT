@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.user.controller;
+package com.stockflow.store.domain.user.controller;
 
-import com.stockflow.backend.domain.user.dto.UserRequestDto;
-import com.stockflow.backend.domain.user.dto.UserResponseDto;
-import com.stockflow.backend.domain.user.service.UserService;
-import com.stockflow.backend.global.docs.user.UserApiSpecification;
+import com.stockflow.store.domain.user.dto.UserRequestDto;
+import com.stockflow.store.domain.user.dto.UserResponseDto;
+import com.stockflow.store.domain.user.service.UserService;
+import com.stockflow.store.global.docs.user.UserApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

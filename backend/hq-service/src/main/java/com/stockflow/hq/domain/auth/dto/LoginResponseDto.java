@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.auth.dto;
+package com.stockflow.hq.domain.auth.dto;
 
-import com.stockflow.backend.domain.user.entity.UserRole;
+import com.stockflow.hq.domain.user.entity.UserRole;
 import lombok.Builder;
 import lombok.Getter;
 

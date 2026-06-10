@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.user.repository;
+package com.stockflow.store.domain.user.repository;
 
-import com.stockflow.backend.domain.user.entity.User;
+import com.stockflow.store.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
-package com.stockflow.backend.global.docs.stockhistory;
+package com.stockflow.store.global.docs.stockhistory;
 
-import com.stockflow.backend.domain.stockhistory.dto.StockHistoryResponseDto;
+import com.stockflow.store.domain.stockhistory.dto.StockHistoryResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;

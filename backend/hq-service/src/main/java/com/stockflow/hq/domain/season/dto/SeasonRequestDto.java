@@ -1,7 +1,7 @@
-package com.stockflow.backend.domain.season.dto;
+package com.stockflow.hq.domain.season.dto;
 
-import com.stockflow.backend.domain.season.entity.SeasonStatus;
-import com.stockflow.backend.domain.season.entity.SeasonType;
+import com.stockflow.hq.domain.season.entity.SeasonStatus;
+import com.stockflow.hq.domain.season.entity.SeasonType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

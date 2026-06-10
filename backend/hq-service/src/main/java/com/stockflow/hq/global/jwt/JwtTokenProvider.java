@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.jwt;
+package com.stockflow.hq.global.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

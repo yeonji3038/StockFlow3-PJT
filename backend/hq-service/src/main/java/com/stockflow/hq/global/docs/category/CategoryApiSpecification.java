@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.category;
+package com.stockflow.hq.global.docs.category;
 
-import com.stockflow.backend.domain.category.dto.CategoryRequestDto;
-import com.stockflow.backend.domain.category.dto.CategoryResponseDto;
+import com.stockflow.hq.domain.category.dto.CategoryRequestDto;
+import com.stockflow.hq.domain.category.dto.CategoryResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.store.entity;
+package com.stockflow.store.domain.store.entity;
 
 public enum StoreType {
     HQ,         // 본사

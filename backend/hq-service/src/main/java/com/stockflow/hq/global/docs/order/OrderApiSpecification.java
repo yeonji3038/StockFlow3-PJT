@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.order;
+package com.stockflow.hq.global.docs.order;
 
-import com.stockflow.backend.domain.order.dto.OrderRequestDto;
-import com.stockflow.backend.domain.order.dto.OrderResponseDto;
+import com.stockflow.hq.domain.order.dto.OrderRequestDto;
+import com.stockflow.hq.domain.order.dto.OrderResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

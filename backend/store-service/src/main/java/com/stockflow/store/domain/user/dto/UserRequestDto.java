@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.user.dto;
+package com.stockflow.store.domain.user.dto;
 
-import com.stockflow.backend.domain.user.entity.UserRole;
+import com.stockflow.store.domain.user.entity.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

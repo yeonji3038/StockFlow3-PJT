@@ -1,15 +1,15 @@
-package com.stockflow.backend.domain.auth.service;
+package com.stockflow.store.domain.auth.service;
 
-import com.stockflow.backend.domain.auth.dto.LoginRequestDto;
-import com.stockflow.backend.domain.auth.dto.LoginResponseDto;
-import com.stockflow.backend.domain.auth.dto.TokenResponseDto;
-import com.stockflow.backend.domain.auth.entity.RefreshToken;
-import com.stockflow.backend.domain.auth.repository.RefreshTokenRepository;
-import com.stockflow.backend.domain.user.entity.User;
-import com.stockflow.backend.domain.user.repository.UserRepository;
-import com.stockflow.backend.global.exception.BusinessException;
-import com.stockflow.backend.global.exception.ErrorCode;
-import com.stockflow.backend.global.jwt.JwtTokenProvider;
+import com.stockflow.store.domain.auth.dto.LoginRequestDto;
+import com.stockflow.store.domain.auth.dto.LoginResponseDto;
+import com.stockflow.store.domain.auth.dto.TokenResponseDto;
+import com.stockflow.store.domain.auth.entity.RefreshToken;
+import com.stockflow.store.domain.auth.repository.RefreshTokenRepository;
+import com.stockflow.store.domain.user.entity.User;
+import com.stockflow.store.domain.user.repository.UserRepository;
+import com.stockflow.store.global.exception.BusinessException;
+import com.stockflow.store.global.exception.ErrorCode;
+import com.stockflow.store.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

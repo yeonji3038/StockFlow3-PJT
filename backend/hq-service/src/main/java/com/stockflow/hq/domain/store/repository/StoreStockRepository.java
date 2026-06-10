@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.store.repository;
+package com.stockflow.hq.domain.store.repository;
 
-import com.stockflow.backend.domain.store.entity.StoreStock;
+import com.stockflow.hq.domain.store.entity.StoreStock;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

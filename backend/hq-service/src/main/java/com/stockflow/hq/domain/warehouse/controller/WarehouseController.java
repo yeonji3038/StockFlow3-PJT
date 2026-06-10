@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.warehouse.controller;
+package com.stockflow.hq.domain.warehouse.controller;
 
-import com.stockflow.backend.domain.warehouse.dto.WarehouseRequestDto;
-import com.stockflow.backend.domain.warehouse.dto.WarehouseResponseDto;
-import com.stockflow.backend.domain.warehouse.service.WarehouseService;
-import com.stockflow.backend.global.docs.warehouse.WarehouseApiSpecification;
+import com.stockflow.hq.domain.warehouse.dto.WarehouseRequestDto;
+import com.stockflow.hq.domain.warehouse.dto.WarehouseResponseDto;
+import com.stockflow.hq.domain.warehouse.service.WarehouseService;
+import com.stockflow.hq.global.docs.warehouse.WarehouseApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

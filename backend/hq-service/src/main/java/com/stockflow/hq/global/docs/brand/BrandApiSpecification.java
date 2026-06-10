@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.brand;
+package com.stockflow.hq.global.docs.brand;
 
-import com.stockflow.backend.domain.brand.dto.BrandRequestDto;
-import com.stockflow.backend.domain.brand.dto.BrandResponseDto;
+import com.stockflow.hq.domain.brand.dto.BrandRequestDto;
+import com.stockflow.hq.domain.brand.dto.BrandResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

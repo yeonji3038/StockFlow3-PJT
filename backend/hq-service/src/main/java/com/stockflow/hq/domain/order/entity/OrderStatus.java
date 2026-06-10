@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.order.entity;
+package com.stockflow.hq.domain.order.entity;
 
 public enum OrderStatus {
     REQUESTED("요청"),

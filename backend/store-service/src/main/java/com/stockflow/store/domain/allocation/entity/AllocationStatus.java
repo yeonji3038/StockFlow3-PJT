@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.allocation.entity;
+package com.stockflow.store.domain.allocation.entity;
 
 public enum AllocationStatus {
     REQUESTED,  // 요청

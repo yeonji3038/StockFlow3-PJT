@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.warehouse.dto;
+package com.stockflow.hq.domain.warehouse.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

@@ -1,8 +1,8 @@
-package com.stockflow.backend.domain.season.dto;
+package com.stockflow.store.domain.season.dto;
 
-import com.stockflow.backend.domain.season.entity.Season;
-import com.stockflow.backend.domain.season.entity.SeasonStatus;
-import com.stockflow.backend.domain.season.entity.SeasonType;
+import com.stockflow.store.domain.season.entity.Season;
+import com.stockflow.store.domain.season.entity.SeasonStatus;
+import com.stockflow.store.domain.season.entity.SeasonType;
 import lombok.Builder;
 import lombok.Getter;
 

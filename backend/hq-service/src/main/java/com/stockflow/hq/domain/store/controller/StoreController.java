@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.store.controller;
+package com.stockflow.hq.domain.store.controller;
 
-import com.stockflow.backend.domain.store.dto.StoreRequestDto;
-import com.stockflow.backend.domain.store.dto.StoreResponseDto;
-import com.stockflow.backend.domain.store.service.StoreService;
-import com.stockflow.backend.global.docs.store.StoreApiSpecification;
+import com.stockflow.hq.domain.store.dto.StoreRequestDto;
+import com.stockflow.hq.domain.store.dto.StoreResponseDto;
+import com.stockflow.hq.domain.store.service.StoreService;
+import com.stockflow.hq.global.docs.store.StoreApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,13 +1,13 @@
-package com.stockflow.backend.domain.product.service;
+package com.stockflow.hq.domain.product.service;
 
-import com.stockflow.backend.domain.product.dto.ProductOptionRequestDto;
-import com.stockflow.backend.domain.product.dto.ProductOptionResponseDto;
-import com.stockflow.backend.domain.product.entity.Product;
-import com.stockflow.backend.domain.product.entity.ProductOption;
-import com.stockflow.backend.domain.product.repository.ProductOptionRepository;
-import com.stockflow.backend.domain.product.repository.ProductRepository;
-import com.stockflow.backend.global.exception.BusinessException;
-import com.stockflow.backend.global.exception.ErrorCode;
+import com.stockflow.hq.domain.product.dto.ProductOptionRequestDto;
+import com.stockflow.hq.domain.product.dto.ProductOptionResponseDto;
+import com.stockflow.hq.domain.product.entity.Product;
+import com.stockflow.hq.domain.product.entity.ProductOption;
+import com.stockflow.hq.domain.product.repository.ProductOptionRepository;
+import com.stockflow.hq.domain.product.repository.ProductRepository;
+import com.stockflow.hq.global.exception.BusinessException;
+import com.stockflow.hq.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

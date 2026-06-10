@@ -1,11 +1,11 @@
-package com.stockflow.backend.domain.category.service;
+package com.stockflow.store.domain.category.service;
 
-import com.stockflow.backend.domain.category.dto.CategoryRequestDto;
-import com.stockflow.backend.domain.category.dto.CategoryResponseDto;
-import com.stockflow.backend.domain.category.entity.Category;
-import com.stockflow.backend.domain.category.repository.CategoryRepository;
-import com.stockflow.backend.global.exception.BusinessException;
-import com.stockflow.backend.global.exception.ErrorCode;
+import com.stockflow.store.domain.category.dto.CategoryRequestDto;
+import com.stockflow.store.domain.category.dto.CategoryResponseDto;
+import com.stockflow.store.domain.category.entity.Category;
+import com.stockflow.store.domain.category.repository.CategoryRepository;
+import com.stockflow.store.global.exception.BusinessException;
+import com.stockflow.store.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

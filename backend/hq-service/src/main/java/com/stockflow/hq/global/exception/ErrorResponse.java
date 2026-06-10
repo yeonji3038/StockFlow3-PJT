@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.exception;
+package com.stockflow.hq.global.exception;
 
 import lombok.Builder;
 import lombok.Getter;

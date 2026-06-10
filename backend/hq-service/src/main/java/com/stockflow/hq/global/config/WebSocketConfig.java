@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.config;
+package com.stockflow.hq.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

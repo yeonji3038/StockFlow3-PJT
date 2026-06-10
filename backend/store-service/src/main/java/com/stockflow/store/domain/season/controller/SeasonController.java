@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.season.controller;
+package com.stockflow.store.domain.season.controller;
 
-import com.stockflow.backend.domain.season.dto.SeasonRequestDto;
-import com.stockflow.backend.domain.season.dto.SeasonResponseDto;
-import com.stockflow.backend.domain.season.service.SeasonService;
-import com.stockflow.backend.global.docs.season.SeasonApiSpecification;
+import com.stockflow.store.domain.season.dto.SeasonRequestDto;
+import com.stockflow.store.domain.season.dto.SeasonResponseDto;
+import com.stockflow.store.domain.season.service.SeasonService;
+import com.stockflow.store.global.docs.season.SeasonApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

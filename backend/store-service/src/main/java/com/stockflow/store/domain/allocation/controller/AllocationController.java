@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.allocation.controller;
+package com.stockflow.store.domain.allocation.controller;
 
-import com.stockflow.backend.domain.allocation.dto.AllocationRequestDto;
-import com.stockflow.backend.domain.allocation.dto.AllocationResponseDto;
-import com.stockflow.backend.domain.allocation.service.AllocationService;
-import com.stockflow.backend.global.docs.allocation.AllocationApiSpecification;
+import com.stockflow.store.domain.allocation.dto.AllocationRequestDto;
+import com.stockflow.store.domain.allocation.dto.AllocationResponseDto;
+import com.stockflow.store.domain.allocation.service.AllocationService;
+import com.stockflow.store.global.docs.allocation.AllocationApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

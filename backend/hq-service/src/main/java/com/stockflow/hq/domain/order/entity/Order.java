@@ -1,8 +1,8 @@
-package com.stockflow.backend.domain.order.entity;
+package com.stockflow.hq.domain.order.entity;
 
-import com.stockflow.backend.domain.store.entity.Store;
-import com.stockflow.backend.domain.user.entity.User;
-import com.stockflow.backend.global.common.BaseTimeEntity;
+import com.stockflow.hq.domain.store.entity.Store;
+import com.stockflow.hq.domain.user.entity.User;
+import com.stockflow.hq.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

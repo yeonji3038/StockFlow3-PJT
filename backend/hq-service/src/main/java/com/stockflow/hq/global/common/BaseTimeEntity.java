@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.common;
+package com.stockflow.hq.global.common;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

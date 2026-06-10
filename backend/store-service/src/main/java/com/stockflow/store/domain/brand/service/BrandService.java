@@ -1,11 +1,11 @@
-package com.stockflow.backend.domain.brand.service;
+package com.stockflow.store.domain.brand.service;
 
-import com.stockflow.backend.domain.brand.dto.BrandRequestDto;
-import com.stockflow.backend.domain.brand.dto.BrandResponseDto;
-import com.stockflow.backend.domain.brand.entity.Brand;
-import com.stockflow.backend.domain.brand.repository.BrandRepository;
-import com.stockflow.backend.global.exception.BusinessException;
-import com.stockflow.backend.global.exception.ErrorCode;
+import com.stockflow.store.domain.brand.dto.BrandRequestDto;
+import com.stockflow.store.domain.brand.dto.BrandResponseDto;
+import com.stockflow.store.domain.brand.entity.Brand;
+import com.stockflow.store.domain.brand.repository.BrandRepository;
+import com.stockflow.store.global.exception.BusinessException;
+import com.stockflow.store.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

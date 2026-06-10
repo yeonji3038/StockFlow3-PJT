@@ -1,9 +1,9 @@
-package com.stockflow.backend.domain.category.controller;
+package com.stockflow.store.domain.category.controller;
 
-import com.stockflow.backend.domain.category.dto.CategoryRequestDto;
-import com.stockflow.backend.domain.category.dto.CategoryResponseDto;
-import com.stockflow.backend.domain.category.service.CategoryService;
-import com.stockflow.backend.global.docs.category.CategoryApiSpecification;
+import com.stockflow.store.domain.category.dto.CategoryRequestDto;
+import com.stockflow.store.domain.category.dto.CategoryResponseDto;
+import com.stockflow.store.domain.category.service.CategoryService;
+import com.stockflow.store.global.docs.category.CategoryApiSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,8 @@
-package com.stockflow.backend.domain.order.dto;
+package com.stockflow.hq.domain.order.dto;
 
-import com.stockflow.backend.domain.order.entity.Order;
-import com.stockflow.backend.domain.order.entity.OrderItem;
-import com.stockflow.backend.domain.order.entity.OrderStatus;
+import com.stockflow.hq.domain.order.entity.Order;
+import com.stockflow.hq.domain.order.entity.OrderItem;
+import com.stockflow.hq.domain.order.entity.OrderStatus;
 import lombok.Builder;
 import lombok.Getter;
 

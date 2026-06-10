@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.websocket;
+package com.stockflow.hq.global.websocket;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

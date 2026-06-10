@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.stockhistory.entity;
+package com.stockflow.hq.domain.stockhistory.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

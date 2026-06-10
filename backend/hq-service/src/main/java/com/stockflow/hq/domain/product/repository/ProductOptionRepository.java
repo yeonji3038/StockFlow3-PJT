@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.product.repository;
+package com.stockflow.hq.domain.product.repository;
 
-import com.stockflow.backend.domain.product.entity.ProductOption;
+import com.stockflow.hq.domain.product.entity.ProductOption;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

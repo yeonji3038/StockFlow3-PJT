@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.category.repository;
+package com.stockflow.store.domain.category.repository;
 
-import com.stockflow.backend.domain.category.entity.Category;
+import com.stockflow.store.domain.category.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

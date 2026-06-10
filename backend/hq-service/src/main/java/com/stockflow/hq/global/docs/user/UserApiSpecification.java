@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.user;
+package com.stockflow.hq.global.docs.user;
 
-import com.stockflow.backend.domain.user.dto.UserRequestDto;
-import com.stockflow.backend.domain.user.dto.UserResponseDto;
+import com.stockflow.hq.domain.user.dto.UserRequestDto;
+import com.stockflow.hq.domain.user.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -1,8 +1,8 @@
-package com.stockflow.backend.domain.allocation.dto;
+package com.stockflow.store.domain.allocation.dto;
 
-import com.stockflow.backend.domain.allocation.entity.Allocation;
-import com.stockflow.backend.domain.allocation.entity.AllocationItem;
-import com.stockflow.backend.domain.allocation.entity.AllocationStatus;
+import com.stockflow.store.domain.allocation.entity.Allocation;
+import com.stockflow.store.domain.allocation.entity.AllocationItem;
+import com.stockflow.store.domain.allocation.entity.AllocationStatus;
 import lombok.Builder;
 import lombok.Getter;
 

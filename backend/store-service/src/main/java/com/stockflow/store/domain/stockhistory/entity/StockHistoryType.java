@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.stockhistory.entity;
+package com.stockflow.store.domain.stockhistory.entity;
 
 public enum StockHistoryType {
     IN("입고"),

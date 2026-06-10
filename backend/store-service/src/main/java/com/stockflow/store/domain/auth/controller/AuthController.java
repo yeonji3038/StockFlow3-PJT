@@ -1,14 +1,14 @@
-package com.stockflow.backend.domain.auth.controller;
+package com.stockflow.store.domain.auth.controller;
 
-import com.stockflow.backend.domain.auth.dto.LoginRequestDto;
-import com.stockflow.backend.domain.auth.dto.LoginResponseDto;
-import com.stockflow.backend.domain.auth.dto.TokenResponseDto;
-import com.stockflow.backend.domain.auth.service.AuthService;
-import com.stockflow.backend.domain.user.dto.UserRequestDto;
-import com.stockflow.backend.domain.user.dto.UserResponseDto;
-import com.stockflow.backend.domain.user.service.UserService;
-import com.stockflow.backend.global.docs.auth.AuthApiSpecification;
-import com.stockflow.backend.global.jwt.JwtTokenProvider;
+import com.stockflow.store.domain.auth.dto.LoginRequestDto;
+import com.stockflow.store.domain.auth.dto.LoginResponseDto;
+import com.stockflow.store.domain.auth.dto.TokenResponseDto;
+import com.stockflow.store.domain.auth.service.AuthService;
+import com.stockflow.store.domain.user.dto.UserRequestDto;
+import com.stockflow.store.domain.user.dto.UserResponseDto;
+import com.stockflow.store.domain.user.service.UserService;
+import com.stockflow.store.global.docs.auth.AuthApiSpecification;
+import com.stockflow.store.global.jwt.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

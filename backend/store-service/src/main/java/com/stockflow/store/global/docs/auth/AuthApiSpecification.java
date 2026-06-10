@@ -1,10 +1,10 @@
-package com.stockflow.backend.global.docs.auth;
+package com.stockflow.store.global.docs.auth;
 
-import com.stockflow.backend.domain.auth.dto.LoginRequestDto;
-import com.stockflow.backend.domain.auth.dto.LoginResponseDto;
-import com.stockflow.backend.domain.auth.dto.TokenResponseDto;
-import com.stockflow.backend.domain.user.dto.UserRequestDto;
-import com.stockflow.backend.domain.user.dto.UserResponseDto;
+import com.stockflow.store.domain.auth.dto.LoginRequestDto;
+import com.stockflow.store.domain.auth.dto.LoginResponseDto;
+import com.stockflow.store.domain.auth.dto.TokenResponseDto;
+import com.stockflow.store.domain.user.dto.UserRequestDto;
+import com.stockflow.store.domain.user.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

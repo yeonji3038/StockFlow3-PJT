@@ -1,11 +1,11 @@
-package com.stockflow.backend.domain.season.service;
+package com.stockflow.store.domain.season.service;
 
-import com.stockflow.backend.domain.season.dto.SeasonRequestDto;
-import com.stockflow.backend.domain.season.dto.SeasonResponseDto;
-import com.stockflow.backend.domain.season.entity.Season;
-import com.stockflow.backend.domain.season.repository.SeasonRepository;
-import com.stockflow.backend.global.exception.BusinessException;
-import com.stockflow.backend.global.exception.ErrorCode;
+import com.stockflow.store.domain.season.dto.SeasonRequestDto;
+import com.stockflow.store.domain.season.dto.SeasonResponseDto;
+import com.stockflow.store.domain.season.entity.Season;
+import com.stockflow.store.domain.season.repository.SeasonRepository;
+import com.stockflow.store.global.exception.BusinessException;
+import com.stockflow.store.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

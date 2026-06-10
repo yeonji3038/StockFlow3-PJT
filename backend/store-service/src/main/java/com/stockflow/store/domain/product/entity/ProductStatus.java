@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.product.entity;
+package com.stockflow.store.domain.product.entity;
 
 public enum ProductStatus {
     ON_SALE,  // 판매중

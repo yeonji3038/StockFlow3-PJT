@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.allocation;
+package com.stockflow.hq.global.docs.allocation;
 
-import com.stockflow.backend.domain.allocation.dto.AllocationRequestDto;
-import com.stockflow.backend.domain.allocation.dto.AllocationResponseDto;
+import com.stockflow.hq.domain.allocation.dto.AllocationRequestDto;
+import com.stockflow.hq.domain.allocation.dto.AllocationResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

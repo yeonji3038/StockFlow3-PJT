@@ -1,8 +1,8 @@
-package com.stockflow.backend.domain.stockhistory.controller;
+package com.stockflow.store.domain.stockhistory.controller;
 
-import com.stockflow.backend.domain.stockhistory.dto.StockHistoryResponseDto;
-import com.stockflow.backend.domain.stockhistory.service.StockHistoryService;
-import com.stockflow.backend.global.docs.stockhistory.StockHistoryApiSpecification;
+import com.stockflow.store.domain.stockhistory.dto.StockHistoryResponseDto;
+import com.stockflow.store.domain.stockhistory.service.StockHistoryService;
+import com.stockflow.store.global.docs.stockhistory.StockHistoryApiSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

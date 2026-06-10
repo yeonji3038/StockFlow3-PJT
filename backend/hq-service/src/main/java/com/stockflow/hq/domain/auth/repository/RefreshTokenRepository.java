@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.auth.repository;
+package com.stockflow.hq.domain.auth.repository;
 
-import com.stockflow.backend.domain.auth.entity.RefreshToken;
+import com.stockflow.hq.domain.auth.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;

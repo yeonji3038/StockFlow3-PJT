@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.warehouse.dto;
+package com.stockflow.hq.domain.warehouse.dto;
 
-import com.stockflow.backend.domain.warehouse.entity.WarehouseStock;
+import com.stockflow.hq.domain.warehouse.entity.WarehouseStock;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

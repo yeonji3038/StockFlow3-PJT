@@ -1,6 +1,6 @@
-package com.stockflow.backend.domain.category.dto;
+package com.stockflow.hq.domain.category.dto;
 
-import com.stockflow.backend.domain.category.entity.Category;
+import com.stockflow.hq.domain.category.entity.Category;
 import lombok.Builder;
 import lombok.Getter;
 import com.fasterxml.jackson.annotation.JsonInclude;

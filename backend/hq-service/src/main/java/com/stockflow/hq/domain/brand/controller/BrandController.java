@@ -1,14 +1,14 @@
-package com.stockflow.backend.domain.brand.controller;
+package com.stockflow.hq.domain.brand.controller;
 
-import com.stockflow.backend.domain.brand.dto.BrandRequestDto;
-import com.stockflow.backend.domain.brand.dto.BrandResponseDto;
-import com.stockflow.backend.domain.brand.service.BrandService;
+import com.stockflow.hq.domain.brand.dto.BrandRequestDto;
+import com.stockflow.hq.domain.brand.dto.BrandResponseDto;
+import com.stockflow.hq.domain.brand.service.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.stockflow.backend.global.docs.brand.BrandApiSpecification;
+import com.stockflow.hq.global.docs.brand.BrandApiSpecification;
 
 
 import java.util.List;

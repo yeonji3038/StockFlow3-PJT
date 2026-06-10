@@ -1,15 +1,15 @@
-package com.stockflow.backend.domain.user.service;
+package com.stockflow.store.domain.user.service;
 
-import com.stockflow.backend.domain.store.entity.Store;
-import com.stockflow.backend.domain.store.repository.StoreRepository;
-import com.stockflow.backend.domain.user.dto.UserRequestDto;
-import com.stockflow.backend.domain.user.dto.UserResponseDto;
-import com.stockflow.backend.domain.user.entity.User;
-import com.stockflow.backend.domain.user.repository.UserRepository;
-import com.stockflow.backend.domain.warehouse.entity.Warehouse;
-import com.stockflow.backend.domain.warehouse.repository.WarehouseRepository;
-import com.stockflow.backend.global.exception.BusinessException;
-import com.stockflow.backend.global.exception.ErrorCode;
+import com.stockflow.store.domain.store.entity.Store;
+import com.stockflow.store.domain.store.repository.StoreRepository;
+import com.stockflow.store.domain.user.dto.UserRequestDto;
+import com.stockflow.store.domain.user.dto.UserResponseDto;
+import com.stockflow.store.domain.user.entity.User;
+import com.stockflow.store.domain.user.repository.UserRepository;
+import com.stockflow.store.domain.warehouse.entity.Warehouse;
+import com.stockflow.store.domain.warehouse.repository.WarehouseRepository;
+import com.stockflow.store.global.exception.BusinessException;
+import com.stockflow.store.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

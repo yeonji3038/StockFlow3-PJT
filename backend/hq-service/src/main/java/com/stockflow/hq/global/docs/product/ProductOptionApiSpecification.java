@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.product;
+package com.stockflow.hq.global.docs.product;
 
-import com.stockflow.backend.domain.product.dto.ProductOptionRequestDto;
-import com.stockflow.backend.domain.product.dto.ProductOptionResponseDto;
+import com.stockflow.hq.domain.product.dto.ProductOptionRequestDto;
+import com.stockflow.hq.domain.product.dto.ProductOptionResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

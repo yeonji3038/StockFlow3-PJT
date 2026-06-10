@@ -1,4 +1,4 @@
-package com.stockflow.backend.global.config;
+package com.stockflow.store.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,7 +1,7 @@
-package com.stockflow.backend.domain.allocation.repository;
+package com.stockflow.hq.domain.allocation.repository;
 
-import com.stockflow.backend.domain.allocation.entity.Allocation;
-import com.stockflow.backend.domain.allocation.entity.AllocationStatus;
+import com.stockflow.hq.domain.allocation.entity.Allocation;
+import com.stockflow.hq.domain.allocation.entity.AllocationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

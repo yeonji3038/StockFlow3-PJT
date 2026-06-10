@@ -1,4 +1,4 @@
-package com.stockflow.backend.domain.user.entity;
+package com.stockflow.hq.domain.user.entity;
 
 public enum UserRole {
     HQ_STAFF,       // 본사직원

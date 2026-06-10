@@ -1,7 +1,7 @@
-package com.stockflow.backend.global.docs.season;
+package com.stockflow.hq.global.docs.season;
 
-import com.stockflow.backend.domain.season.dto.SeasonRequestDto;
-import com.stockflow.backend.domain.season.dto.SeasonResponseDto;
+import com.stockflow.hq.domain.season.dto.SeasonRequestDto;
+import com.stockflow.hq.domain.season.dto.SeasonResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
