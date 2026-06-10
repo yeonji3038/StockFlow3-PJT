@@ -95,6 +95,25 @@ store-service (재고 변동 발생)
 
 ## 동작
 
+### ☸️ Kubernetes 배포 (k3s on EC2)
+
+**kubectl get pods**
+
+<img width="1596" height="248" alt="k8" src="https://github.com/user-attachments/assets/39cd4d89-a118-43c4-9880-00a9b891c390" />
+<br/>
+
+**GitHub Actions CI/CD**
+<img width="1693" height="898" alt="GitHub Actions CI 성공 화면" src="https://github.com/user-attachments/assets/3198dfab-0289-4bfe-a096-289e7560099a" />
+<br/>
+
+**ArgoCD GitOps 배포**
+
+<img width="768" height="829" alt="ArgoCD 배포 화면 " src="https://github.com/user-attachments/assets/4663e02c-4c27-41a8-8323-2a28b8171bcb" />
+
+<br/>
+
+---
+
 ### 🚀 서비스 독립 실행 (Docker Compose)
 
 <img width="1460" height="149" alt="image" src="https://github.com/user-attachments/assets/ff454b52-dcf0-44e2-b14b-934ad80c3275" />
