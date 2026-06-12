@@ -94,8 +94,8 @@ public class AuthService {
     }
 
     // 로그아웃
-    @Transactional
-    public void logout(String email) {
+    public void logout(String refreshToken) {
+        String email = jwtTokenProvider.getEmail(refreshToken);
         refreshTokenRedisService.delete(email);
     }
 }
