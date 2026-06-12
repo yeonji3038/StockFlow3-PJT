@@ -92,9 +92,8 @@ public class AuthService {
     }
 
     // 로그아웃
-    @Transactional
-    public void logout(String email) {
-        // Redis에서 삭제
+    public void logout(String refreshToken) {
+        String email = jwtTokenProvider.getEmail(refreshToken);
         refreshTokenRedisService.delete(email);
     }
 }

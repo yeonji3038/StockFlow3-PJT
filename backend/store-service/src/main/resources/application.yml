@@ -45,3 +45,8 @@ jwt:
 logging:
   level:
     org.springframework.security: DEBUG
+
+
+app:
+  cookie:
+    secure: false

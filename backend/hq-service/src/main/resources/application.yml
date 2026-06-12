@@ -29,7 +29,6 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.stockflow.common.*"
-
 server:
   port: 8082
 
@@ -45,3 +44,7 @@ jwt:
 logging:
   level:
     org.springframework.security: DEBUG
+
+app:
+  cookie:
+    secure: false
