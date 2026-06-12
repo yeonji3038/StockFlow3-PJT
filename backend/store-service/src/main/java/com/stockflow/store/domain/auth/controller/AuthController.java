@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.stockflow.store.domain.auth.dto.LoginResponseDto;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -47,7 +48,7 @@ public class AuthController implements AuthApiSpecification {
             @RequestBody @Valid LoginRequestDto request,
             HttpServletResponse response) {
 
-        TokenResponseDto tokens = authService.login(request);
+        LoginResponseDto tokens = authService.login(request);  // ← TokenResponseDto → LoginResponseDto
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
                 .httpOnly(true)
