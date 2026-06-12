@@ -44,7 +44,7 @@ public class AuthController implements AuthApiSpecification {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
+    public ResponseEntity<LoginResponseDto> login(
             @RequestBody @Valid LoginRequestDto request,
             HttpServletResponse response) {
 
@@ -69,7 +69,7 @@ public class AuthController implements AuthApiSpecification {
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tokens);  // ← Void → LoginResponseDto
     }
 
     // 토큰 재발급

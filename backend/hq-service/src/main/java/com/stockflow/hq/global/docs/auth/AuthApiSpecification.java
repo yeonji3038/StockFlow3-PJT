@@ -1,6 +1,7 @@
 package com.stockflow.hq.global.docs.auth;
 
 import com.stockflow.hq.domain.auth.dto.LoginRequestDto;
+import com.stockflow.hq.domain.auth.dto.LoginResponseDto;
 import com.stockflow.hq.domain.user.dto.UserRequestDto;
 import com.stockflow.hq.domain.user.dto.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,8 +56,8 @@ public interface AuthApiSpecification {
         - 액세스 토큰, 리프레시 토큰이 HttpOnly 쿠키로 설정됩니다.
         """)
     @PostMapping("/login")
-    ResponseEntity<Void> login(@RequestBody @Valid LoginRequestDto request,
-                               HttpServletResponse response);
+    ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto request,
+                                           HttpServletResponse response);
 
     @Operation(summary = "토큰 재발급", description = """
         💡 리프레시 토큰 쿠키로 액세스 토큰을 재발급합니다.

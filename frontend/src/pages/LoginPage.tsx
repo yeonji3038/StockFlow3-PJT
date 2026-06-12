@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
-import { getToken, setRefreshToken, trySilentRefresh } from '../lib/auth'
-import { API_BASE_URL } from '../lib/apiBase'
+import { api } from '../lib/api'
+import { hasUserSession, trySilentRefresh } from '../lib/auth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -14,7 +13,7 @@ export default function LoginPage() {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      if (getToken()) {
+      if (hasUserSession()) {
         navigate('/dashboard', { replace: true })
         return
       }
@@ -30,16 +29,11 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+      const response = await api.post('/api/auth/login', {
         email,
         password,
+        rememberMe,
       })
-      localStorage.setItem('token', response.data.accessToken)
-      if (rememberMe && response.data.refreshToken) {
-        setRefreshToken(response.data.refreshToken)
-      } else {
-        setRefreshToken(null)
-      }
       localStorage.setItem('role', response.data.role)
       localStorage.setItem('name', response.data.name)
       if (response.data.email) {

@@ -1,17 +1,9 @@
 import axios from 'axios'
 import { API_BASE_URL } from './apiBase'
-import { refreshAccessTokenSingleFlight } from './auth'
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
+  withCredentials: true,
 })
 
 api.interceptors.response.use(
@@ -28,15 +20,13 @@ api.interceptors.response.use(
     if (url.includes('/api/auth/refresh') || url.includes('/api/auth/login')) {
       return Promise.reject(error)
     }
-    const ok = await refreshAccessTokenSingleFlight()
-    if (!ok) {
+
+    try {
+      await api.post('/api/auth/refresh')
+      original._retry = true
+      return api(original)
+    } catch {
       return Promise.reject(error)
     }
-    original._retry = true
-    const token = localStorage.getItem('token')
-    if (token) {
-      original.headers.Authorization = `Bearer ${token}`
-    }
-    return api(original)
   },
 )
