@@ -26,7 +26,9 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.addAllowedOriginPattern("*");
+                    config.addAllowedOriginPattern("http://localhost:5173");  // 로컬 프론트
+                    config.addAllowedOriginPattern("http://localhost:3000");
+                    config.addAllowedOriginPattern("http://3.38.215.143:*"); // EC2
                     config.addAllowedMethod("*");
                     config.addAllowedHeader("*");
                     config.setAllowCredentials(true);

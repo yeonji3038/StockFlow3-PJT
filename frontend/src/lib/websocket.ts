@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client'
 import { Client, type IMessage } from '@stomp/stompjs'
 import { useStockStore, type LowStockAlert } from '../stores/stockStore'
 
-const WS_URL = 'http://localhost:8080/ws'
+const WS_URL = `${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'}/ws`
 
 const TOPICS = {
   allocations: '/topic/allocations',
