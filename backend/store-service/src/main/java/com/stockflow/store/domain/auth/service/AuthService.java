@@ -3,8 +3,6 @@ package com.stockflow.store.domain.auth.service;
 import com.stockflow.store.domain.auth.dto.LoginRequestDto;
 import com.stockflow.store.domain.auth.dto.LoginResponseDto;
 import com.stockflow.store.domain.auth.dto.TokenResponseDto;
-import com.stockflow.store.domain.auth.entity.RefreshToken;
-import com.stockflow.store.domain.auth.repository.RefreshTokenRepository;
 import com.stockflow.store.domain.user.entity.User;
 import com.stockflow.store.domain.user.repository.UserRepository;
 import com.stockflow.store.global.exception.BusinessException;
@@ -21,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRedisService refreshTokenRedisService;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -35,7 +33,6 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
 
-        // 액세스 토큰 생성 (storeId, warehouseId 포함)
         String accessToken = jwtTokenProvider.generateAccessToken(
                 user.getEmail(),
                 user.getRole().name(),
@@ -43,22 +40,11 @@ public class AuthService {
                 user.getWarehouse() != null ? user.getWarehouse().getId() : null
         );
 
-        // 리프레시 토큰 생성
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
-        // 기존 리프레시 토큰 삭제 후 새로 저장
-        RefreshToken refreshTokenEntity = refreshTokenRepository
-                .findByEmail(user.getEmail())
-                .map(token -> {
-                    token.updateToken(refreshToken);
-                    return token;
-                })
-                .orElse(RefreshToken.builder()
-                        .email(user.getEmail())
-                        .token(refreshToken)
-                        .build());
 
-        refreshTokenRepository.save(refreshTokenEntity);
+        // 같은 이메일로 저장하면 자동 덮어씌움, TTL 7일 자동 적용
+        refreshTokenRedisService.save(user.getEmail(), refreshToken);
 
         return LoginResponseDto.builder()
                 .accessToken(accessToken)
@@ -79,17 +65,22 @@ public class AuthService {
         }
 
         String email = jwtTokenProvider.getEmail(refreshToken);
-        RefreshToken savedToken = refreshTokenRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
-        if (!savedToken.getToken().equals(refreshToken)) {
+
+        // TTL 만료되거나 없으면 null 반환
+        String savedToken = refreshTokenRedisService.get(email);
+
+        if (savedToken == null) {
+            throw new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
+        if (!savedToken.equals(refreshToken)) {
             throw new BusinessException(ErrorCode.REFRESH_TOKEN_MISMATCH);
         }
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        // 새 액세스 토큰 발급 (storeId, warehouseId 포함)
         String newAccessToken = jwtTokenProvider.generateAccessToken(
                 user.getEmail(),
                 user.getRole().name(),
@@ -105,6 +96,6 @@ public class AuthService {
     // 로그아웃
     @Transactional
     public void logout(String email) {
-        refreshTokenRepository.deleteByEmail(email);
+        refreshTokenRedisService.delete(email);
     }
 }
