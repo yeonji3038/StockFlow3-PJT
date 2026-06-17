@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
-import { getToken } from '../lib/auth'
+import { api } from '../lib/api'
+import { hasUserSession } from '../lib/auth'
 
 type Role = 'HQ_STAFF' | 'STORE_MANAGER' | 'WAREHOUSE_STAFF'
 
@@ -16,7 +16,7 @@ export default function SignupPage() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (getToken()) {
+    if (hasUserSession()) {
       navigate('/dashboard', { replace: true })
     }
   }, [navigate])
@@ -32,7 +32,7 @@ export default function SignupPage() {
     setSubmitting(true)
     setError('')
     try {
-      await axios.post('http://localhost:8080/api/auth/signup', {
+      await api.post('/api/auth/signup', {
         email,
         password,
         name,
@@ -141,4 +141,3 @@ export default function SignupPage() {
     </div>
   )
 }
-

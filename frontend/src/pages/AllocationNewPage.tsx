@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { getRole } from '../lib/auth'
 import SectionCard from '../components/ui/SectionCard'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
 import type { Allocation, StoreSummary, WarehouseStock, WarehouseSummary } from '../types/models'
 
 type AddedLine = { productOptionId: number; quantity: number }
@@ -514,22 +515,24 @@ export default function AllocationNewPage() {
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           {error && <p className="text-sm text-rose-600">{error}</p>}
 
+          {(warehousesLoading || storesLoading) ? (
+            <LoadingSpinner />
+          ) : (
+            <>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">창고</label>
             <select
               value={warehouseId}
-              disabled={warehousesLoading || warehouses.length === 0}
+              disabled={warehouses.length === 0}
               onChange={(e) => handleWarehouseChange(e.target.value)}
               className="h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
             >
               <option value="">
-                {warehousesLoading
-                  ? '창고 목록 불러오는 중…'
-                  : warehousesError
-                    ? '창고 목록을 불러올 수 없음'
-                    : warehouses.length === 0
-                      ? '등록된 창고가 없습니다'
-                      : '창고를 선택하세요'}
+                {warehousesError
+                  ? '창고 목록을 불러올 수 없음'
+                  : warehouses.length === 0
+                    ? '등록된 창고가 없습니다'
+                    : '창고를 선택하세요'}
               </option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -555,7 +558,7 @@ export default function AllocationNewPage() {
             <label className="mb-1 block text-sm font-medium text-slate-700">매장</label>
             <select
               value={storeId}
-              disabled={storesLoading || stores.length === 0}
+              disabled={stores.length === 0}
               onChange={(e) => {
                 setStoreId(e.target.value)
                 setError(null)
@@ -563,13 +566,11 @@ export default function AllocationNewPage() {
               className="h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
             >
               <option value="">
-                {storesLoading
-                  ? '매장 목록 불러오는 중…'
-                  : storesError
-                    ? '매장 목록을 불러올 수 없음'
-                    : stores.length === 0
-                      ? '등록된 매장이 없습니다'
-                      : '매장을 선택하세요'}
+                {storesError
+                  ? '매장 목록을 불러올 수 없음'
+                  : stores.length === 0
+                    ? '등록된 매장이 없습니다'
+                    : '매장을 선택하세요'}
               </option>
               {stores.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -590,14 +591,14 @@ export default function AllocationNewPage() {
               </div>
             ) : null}
           </div>
+            </>
+          )}
 
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-sm font-medium text-slate-700">품목</span>
-              {stocksLoading ? (
-                <span className="text-xs text-slate-500">재고 불러오는 중…</span>
-              ) : null}
-            </div>
+            <span className="text-sm font-medium text-slate-700">품목</span>
+            {stocksLoading && warehouseId ? (
+              <LoadingSpinner label="재고 불러오는 중…" />
+            ) : null}
             {!stocksLoading && selectableStocks.length === 0 && warehouseId ? (
               <p className="text-sm text-amber-800">
                 선택한 창고에 출고 가능한 재고(수량 1 이상)가 없습니다.
