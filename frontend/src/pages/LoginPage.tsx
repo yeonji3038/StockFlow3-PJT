@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
-import { hasUserSession, trySilentRefresh } from '../lib/auth'
+import { hasUserSession} from '../lib/auth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,21 +11,11 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      if (hasUserSession()) {
-        navigate('/dashboard', { replace: true })
-        return
-      }
-      const ok = await trySilentRefresh()
-      if (!cancelled && ok) {
-        navigate('/dashboard', { replace: true })
-      }
-    })()
-    return () => {
-      cancelled = true
+    if (hasUserSession()) {
+      navigate('/dashboard', { replace: true })
     }
   }, [navigate])
+
 
   const handleLogin = async () => {
     try {
