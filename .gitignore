@@ -1,13 +1,13 @@
-<<<<<<< Updated upstream
+# 환경변수
 infra/.env
 backend/.env
 .DS_Store
 .idea/
-=======
+
+# Terraform
 terraform.tfvars
 *.tfstate
 *.tfstate.backup
 .terraform/
 *.pem
 .terraform.lock.hcl
->>>>>>> Stashed changes
