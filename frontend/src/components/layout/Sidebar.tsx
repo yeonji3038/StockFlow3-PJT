@@ -68,8 +68,8 @@ export default function Sidebar() {
   const showProductSub =
     productHover || productsNewActive || productFocusInside || productsDetailActive
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login', { replace: true })
   }
 

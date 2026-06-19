@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isAxiosError } from 'axios'
 import { api } from '../../../lib/api'
 import { PRODUCT_STATUS_OPTIONS, type ProductStatusValue } from '../../../lib/productStatus'
+import LoadingSpinner from '../../ui/LoadingSpinner'
 
 type BrandRow = { id: number; name: string }
 type CategoryNode = { id: number; name: string; children?: CategoryNode[] }
@@ -158,7 +159,7 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
   }
 
   if (metaLoading) {
-    return <p className="text-sm text-slate-500">선택 목록을 불러오는 중…</p>
+    return <LoadingSpinner label="선택 목록을 불러오는 중…" />
   }
 
   if (metaError) {
