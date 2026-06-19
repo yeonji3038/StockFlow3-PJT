@@ -1,0 +1,31 @@
+package com.stockflow.hq.domain.user.dto;
+
+import com.stockflow.hq.domain.user.entity.UserRole;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRequestDto {
+
+    @NotBlank(message = "이메일은 필수입니다.")
+    @Email(message = "이메일 형식이 올바르지 않습니다.")
+    private String email;
+
+    @NotBlank(message = "비밀번호는 필수입니다.")
+    private String password;
+
+    @NotBlank(message = "이름은 필수입니다.")
+    private String name;
+
+    @NotNull(message = "역할은 필수입니다.")
+    private UserRole role;
+
+    private Long storeId;     // 매장 직원/관리자
+    private Long warehouseId; // 창고 담당자
+}
