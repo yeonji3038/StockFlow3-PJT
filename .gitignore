@@ -1,4 +1,13 @@
+<<<<<<< Updated upstream
 infra/.env
 backend/.env
 .DS_Store
 .idea/
+=======
+terraform.tfvars
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.pem
+.terraform.lock.hcl
+>>>>>>> Stashed changes

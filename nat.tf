@@ -1,4 +1,3 @@
-# ── NAT Instance용 Security Group ──
 resource "aws_security_group" "nat" {
   name        = "${var.project}-nat-sg"
   description = "NAT Instance Security Group"
@@ -10,6 +9,14 @@ resource "aws_security_group" "nat" {
     protocol    = "-1"
     cidr_blocks = ["10.0.0.0/16"]
     description = "Allow all traffic from private subnet"
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow SSH"
   }
 
   egress {
@@ -24,7 +31,6 @@ resource "aws_security_group" "nat" {
   }
 }
 
-# ── NAT Instance ──
 resource "aws_instance" "nat" {
   ami                         = "ami-0765f9741eedf9c7b"
   instance_type               = "t3.micro"
@@ -32,6 +38,7 @@ resource "aws_instance" "nat" {
   vpc_security_group_ids      = [aws_security_group.nat.id]
   associate_public_ip_address = true
   source_dest_check           = false
+  key_name                    = "key-stockflow"
 
   user_data = <<-SCRIPT
     #!/bin/bash
@@ -47,7 +54,6 @@ resource "aws_instance" "nat" {
   }
 }
 
-# ── Private 라우팅 테이블에 NAT Instance 경로 추가 ──
 resource "aws_route" "private_nat" {
   route_table_id         = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"

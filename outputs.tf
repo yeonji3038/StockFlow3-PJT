@@ -37,3 +37,7 @@ output "rds_security_group_id" {
 output "nat_instance_id" {
   value = aws_instance.nat.id
 }
+
+output "rds_endpoint" {
+  value = aws_db_instance.main.endpoint
+}
