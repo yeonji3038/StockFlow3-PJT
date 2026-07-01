@@ -16,9 +16,15 @@ import StoreStockPage from './pages/StoreStockPage'
 import StoreStockDetailPage from './pages/StoreStockDetailPage'
 import MovementsPage from './pages/MovementsPage'
 import UsersAdminPage from './pages/admin/UsersAdminPage'
+import BrandsAdminPage from './pages/admin/BrandsAdminPage'
+import StoreListPage from './pages/admin/stores/StoreListPage'
+import StoreRegisterPage from './pages/admin/stores/StoreRegisterPage'
+import StoreDetailPage from './pages/admin/stores/StoreDetailPage'
 import ProductListPage from './pages/admin/products/ProductListPage'
 import ProductRegisterPage from './pages/admin/products/ProductRegisterPage'
 import ProductDetailPage from './pages/admin/products/ProductDetailPage'
+import ProductOptionsPage from './pages/admin/products/ProductOptionsPage'
+import ProductOptionDetailPage from './pages/admin/products/ProductOptionDetailPage'
 
 function App() {
   return (
@@ -42,8 +48,14 @@ function App() {
           <Route path="/store-stock" element={<StoreStockPage />} />
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/admin/users" element={<UsersAdminPage />} />
+          <Route path="/admin/brands" element={<BrandsAdminPage />} />
+          <Route path="/admin/stores" element={<StoreListPage />} />
+          <Route path="/admin/stores/new" element={<StoreRegisterPage />} />
+          <Route path="/admin/stores/:id" element={<StoreDetailPage />} />
           <Route path="/admin/products" element={<ProductListPage />} />
           <Route path="/admin/products/new" element={<ProductRegisterPage />} />
+          <Route path="/admin/product-options" element={<ProductOptionsPage />} />
+          <Route path="/admin/product-options/:productId" element={<ProductOptionDetailPage />} />
           <Route path="/admin/products/:id" element={<ProductDetailPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

@@ -15,7 +15,7 @@ type SeasonRow = {
 export type { ProductStatusValue }
 
 type Props = {
-  onRegistered?: () => void
+  onRegistered?: (productId: number) => void
 }
 
 function flattenCategories(nodes: CategoryNode[], parentLabel = ''): { id: number; label: string }[] {
@@ -143,7 +143,7 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
       const { data } = await api.post<{ id: number; name: string }>('/api/products', body)
       setSuccess(`상품이 등록되었습니다. (ID ${data.id}${data.name ? ` · ${data.name}` : ''})`)
       resetForm()
-      onRegistered?.()
+      onRegistered?.(data.id)
     } catch (err) {
       if (isAxiosError(err)) {
         const d = err.response?.data as { message?: string } | string | undefined

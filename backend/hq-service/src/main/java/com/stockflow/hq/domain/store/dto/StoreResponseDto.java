@@ -16,6 +16,7 @@ public class StoreResponseDto {
     private String location;
     private StoreType storeType;
     private String phone;
+    private String storeCode;
     private LocalDateTime createdAt;
 
     public static StoreResponseDto from(Store store) {
@@ -25,6 +26,7 @@ public class StoreResponseDto {
                 .location(store.getLocation())
                 .storeType(store.getStoreType())
                 .phone(store.getPhone())
+                .storeCode(store.getStoreCode())
                 .createdAt(store.getCreatedAt())
                 .build();
     }

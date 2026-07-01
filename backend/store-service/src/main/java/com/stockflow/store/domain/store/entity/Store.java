@@ -26,6 +26,10 @@ public class Store extends BaseTimeEntity {
 
     private String phone;
 
+    // 매장 관리자 가입 시 사용하는 매장 식별 코드 (예: DP-A3F9, OT-7K2M)
+    @Column(name = "store_code", nullable = false, unique = true)
+    private String storeCode;
+
     public void update(String name, String location, StoreType storeType, String phone) {
         this.name = name;
         this.location = location;

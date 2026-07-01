@@ -26,6 +26,7 @@ public class UserRequestDto {
     @NotNull(message = "역할은 필수입니다.")
     private UserRole role;
 
-    private Long storeId;     // 매장 직원/관리자
+    private Long storeId;     // 매장 직원/관리자 (storeId 직접 지정 - 본사 내부 등록용)
+    private String storeCode; // 매장 코드로 가입 (매장 관리자 셀프 가입용) - storeId보다 우선 적용
     private Long warehouseId; // 창고 담당자
 }

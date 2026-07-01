@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { isAxiosError } from 'axios'
 import { Trash2 } from 'lucide-react'
 import { api } from '../../../lib/api'
 import { getRole } from '../../../lib/auth'
@@ -8,9 +7,10 @@ import SectionCard from '../../../components/ui/SectionCard'
 import LoadingSpinner from '../../../components/ui/LoadingSpinner'
 import type { ProductListItem } from '../../../components/product/types'
 import { PRODUCT_STATUS_OPTIONS, productStatusLabel, type ProductStatusValue } from '../../../lib/productStatus'
+import { parseApiErrorMessage, productOptionInputClass } from '../../../lib/productOption'
 
 function inputClass() {
-  return 'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+  return productOptionInputClass()
 }
 
 function formatWon(n: number) {
@@ -100,14 +100,7 @@ export default function ProductDetailPage() {
       })
       await load()
     } catch (err) {
-      if (isAxiosError(err)) {
-        const d = err.response?.data as { message?: string } | string | undefined
-        if (typeof d === 'string') setSaveError(d)
-        else if (d && typeof d === 'object' && typeof d.message === 'string') setSaveError(d.message)
-        else setSaveError('저장에 실패했습니다.')
-      } else {
-        setSaveError('저장에 실패했습니다.')
-      }
+      setSaveError(parseApiErrorMessage(err, '저장에 실패했습니다.'))
     } finally {
       setSaving(false)
     }

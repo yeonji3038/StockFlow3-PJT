@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -11,9 +11,16 @@ import {
   Users,
   LogOut,
   Boxes,
+  Layers,
+  Award,
+  Building2,
+  Plus,
   Tag,
 } from 'lucide-react'
-import { getRole, logout, roleLabel } from '../../lib/auth'
+import { getRole, getStoreId, logout, roleLabel } from '../../lib/auth'
+import { api } from '../../lib/api'
+import type { StoreListItem } from '../../lib/store'
+import LoadingSpinner from '../ui/LoadingSpinner'
 
 const baseNav = [
   { to: '/dashboard', label: '대시보드', icon: LayoutDashboard },
@@ -28,6 +35,9 @@ export default function Sidebar() {
   const { pathname } = useLocation()
   const name = localStorage.getItem('name') ?? '사용자'
   const role = getRole()
+  const storeId = getStoreId()
+  const [storeName, setStoreName] = useState<string | null>(null)
+  const [storeNameLoading, setStoreNameLoading] = useState(storeId != null)
   const isHq = role === 'HQ_STAFF'
   const isStoreManager = role === 'STORE_MANAGER'
   const isWarehouseStaff = role === 'WAREHOUSE_STAFF'
@@ -60,13 +70,62 @@ export default function Sidebar() {
   const showAllocSub = allocHover || allocationNewActive || allocFocusInside
 
   const productsNewActive = pathname === '/admin/products/new'
+  const productsOptionsActive =
+    pathname === '/admin/product-options' || /^\/admin\/product-options\/\d+$/.test(pathname)
   const productsDetailActive = /^\/admin\/products\/\d+$/.test(pathname)
   const productSectionActive =
-    pathname === '/admin/products' || productsNewActive || productsDetailActive
+    pathname === '/admin/products' ||
+    productsNewActive ||
+    productsOptionsActive ||
+    productsDetailActive
   const [productHover, setProductHover] = useState(false)
   const [productFocusInside, setProductFocusInside] = useState(false)
   const showProductSub =
-    productHover || productsNewActive || productFocusInside || productsDetailActive
+    productHover ||
+    productsNewActive ||
+    productsOptionsActive ||
+    productFocusInside ||
+    productsDetailActive
+
+  const storesNewActive = pathname === '/admin/stores/new'
+  const storesDetailActive = /^\/admin\/stores\/\d+$/.test(pathname)
+  const storeSectionActive =
+    pathname === '/admin/stores' || storesNewActive || storesDetailActive
+  const [storeHover, setStoreHover] = useState(false)
+  const [storeFocusInside, setStoreFocusInside] = useState(false)
+  const showStoreSub = storeHover || storesNewActive || storeFocusInside || storesDetailActive
+
+  useEffect(() => {
+    if (storeId == null) {
+      setStoreName(null)
+      setStoreNameLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setStoreNameLoading(true)
+    ;(async () => {
+      try {
+        const { data } = await api.get<StoreListItem>(`/api/stores/${storeId}`)
+        if (!cancelled) setStoreName(data?.name?.trim() ? data.name.trim() : null)
+      } catch {
+        if (!cancelled) setStoreName(null)
+      } finally {
+        if (!cancelled) setStoreNameLoading(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [storeId])
+
+  const storeAffiliationLabel = useMemo(() => {
+    if (storeId == null) return null
+    if (storeNameLoading) return null
+    if (storeName) return storeName
+    return `매장 ID ${storeId}`
+  }, [storeId, storeName, storeNameLoading])
 
   const handleLogout = async () => {
     await logout()
@@ -193,7 +252,7 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   [
                     'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive || productsNewActive || productsDetailActive
+                    isActive || productsNewActive || productsOptionsActive || productsDetailActive
                       ? 'text-blue-700'
                       : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
                   ].join(' ')
@@ -218,6 +277,82 @@ export default function Sidebar() {
                     >
                       <PackagePlus className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                       상품 등록
+                    </NavLink>
+                    <NavLink
+                      to="/admin/product-options"
+                      className={({ isActive }) =>
+                        [
+                          'flex items-center gap-3 rounded-lg py-2 pl-2 pr-3 text-sm font-medium transition-colors',
+                          isActive
+                            ? 'bg-slate-50 text-blue-700 ring-1 ring-slate-200/80'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                        ].join(' ')
+                      }
+                    >
+                      <Layers className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                      상품 옵션 관리
+                    </NavLink>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <NavLink
+              to="/admin/brands"
+              className={({ isActive }) =>
+                [
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/80'
+                    : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                ].join(' ')
+              }
+            >
+              <Award className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              브랜드 관리
+            </NavLink>
+            <div
+              className={[
+                'rounded-lg transition-colors',
+                storeSectionActive ? 'bg-white shadow-sm ring-1 ring-slate-200/80' : '',
+              ].join(' ')}
+              onMouseEnter={() => setStoreHover(true)}
+              onMouseLeave={() => setStoreHover(false)}
+              onFocusCapture={() => setStoreFocusInside(true)}
+              onBlurCapture={(e) => {
+                const next = e.relatedTarget as Node | null
+                if (!e.currentTarget.contains(next)) setStoreFocusInside(false)
+              }}
+            >
+              <NavLink
+                to="/admin/stores"
+                className={({ isActive }) =>
+                  [
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive || storesNewActive || storesDetailActive
+                      ? 'text-blue-700'
+                      : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                  ].join(' ')
+                }
+              >
+                <Building2 className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                매장 관리
+              </NavLink>
+              {showStoreSub ? (
+                <div className="space-y-0.5 pb-1 pl-3">
+                  <div className="ml-3 border-l border-slate-200 pl-2">
+                    <NavLink
+                      to="/admin/stores/new"
+                      className={({ isActive }) =>
+                        [
+                          'flex items-center gap-3 rounded-lg py-2 pl-2 pr-3 text-sm font-medium transition-colors',
+                          isActive
+                            ? 'bg-slate-50 text-blue-700 ring-1 ring-slate-200/80'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                        ].join(' ')
+                      }
+                    >
+                      <Plus className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                      매장 등록
                     </NavLink>
                   </div>
                 </div>
@@ -244,6 +379,15 @@ export default function Sidebar() {
       <div className="border-t border-slate-200 bg-slate-100/80 p-4">
         <div className="mb-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
           <p className="truncate text-sm font-medium text-slate-900">{name}</p>
+          {storeId != null ? (
+            storeNameLoading ? (
+              <div className="mt-1">
+                <LoadingSpinner compact hideLabel />
+              </div>
+            ) : storeAffiliationLabel ? (
+              <p className="mt-0.5 truncate text-xs font-medium text-blue-700">{storeAffiliationLabel}</p>
+            ) : null
+          ) : null}
           <p className="mt-0.5 text-xs text-slate-500">
             {role ? roleLabel(role) : '역할 없음'}
           </p>

@@ -21,7 +21,11 @@ export default function ProductRegisterPage() {
     <div className="space-y-4">
       <h1 className="text-lg font-semibold text-slate-900">상품 등록</h1>
       <SectionCard title="신규 상품">
-        <ProductRegisterForm onRegistered={() => navigate('/admin/products', { replace: true })} />
+        <ProductRegisterForm
+          onRegistered={(productId) =>
+            navigate(`/admin/product-options/${productId}`, { replace: true })
+          }
+        />
       </SectionCard>
     </div>
   )

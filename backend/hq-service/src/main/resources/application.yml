@@ -48,3 +48,7 @@ logging:
 app:
   cookie:
     secure: false
+
+ai:
+  service:
+    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
