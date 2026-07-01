@@ -40,7 +40,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 접근 가능
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/stores/code/**").permitAll()
                         .requestMatchers("/docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
 

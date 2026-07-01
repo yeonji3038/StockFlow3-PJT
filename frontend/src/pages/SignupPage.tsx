@@ -1,9 +1,32 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { isAxiosError } from 'axios'
+import { Hash, Lock, Mail, User, Users } from 'lucide-react'
 import { api } from '../lib/api'
 import { hasUserSession } from '../lib/auth'
+import { parseStoreApiError } from '../lib/store'
+import AuthPageShell, {
+  authCodeFieldClass,
+  authFieldClass,
+  authInputRowClass,
+  authPrimaryButtonClass,
+  authSecondaryLinkClass,
+} from '../components/auth/AuthPageShell'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
 
-type Role = 'HQ_STAFF' | 'STORE_MANAGER' | 'WAREHOUSE_STAFF'
+type Role = 'HQ_STAFF' | 'STORE_MANAGER' | 'WAREHOUSE_STAFF' | 'STAFF'
+
+type StorePreview = {
+  id: number
+  name: string
+  storeCode: string
+}
+
+const STORE_ROLES: Role[] = ['STORE_MANAGER', 'STAFF']
+
+function needsStoreCode(role: Role): boolean {
+  return STORE_ROLES.includes(role)
+}
 
 export default function SignupPage() {
   const navigate = useNavigate()
@@ -11,8 +34,11 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [role, setRole] = useState<Role>('STORE_MANAGER')
-  const [storeId, setStoreId] = useState<string>('')
-  const [error, setError] = useState<string>('')
+  const [storeCode, setStoreCode] = useState('')
+  const [storePreview, setStorePreview] = useState<StorePreview | null>(null)
+  const [storeLookupLoading, setStoreLookupLoading] = useState(false)
+  const [storeLookupError, setStoreLookupError] = useState<string | null>(null)
+  const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -21,13 +47,60 @@ export default function SignupPage() {
     }
   }, [navigate])
 
+  useEffect(() => {
+    if (!needsStoreCode(role)) {
+      setStorePreview(null)
+      setStoreLookupError(null)
+      setStoreLookupLoading(false)
+      return
+    }
+
+    const code = storeCode.trim()
+    if (!code) {
+      setStorePreview(null)
+      setStoreLookupError(null)
+      setStoreLookupLoading(false)
+      return
+    }
+
+    setStoreLookupLoading(true)
+    setStoreLookupError(null)
+
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const { data } = await api.get<StorePreview>(`/api/stores/code/${encodeURIComponent(code)}`)
+          setStorePreview(data ?? null)
+          setStoreLookupError(null)
+        } catch (err) {
+          setStorePreview(null)
+          if (isAxiosError(err) && err.response?.status === 404) {
+            setStoreLookupError('Store code not found.')
+          } else {
+            setStoreLookupError('Could not verify store code.')
+          }
+        } finally {
+          setStoreLookupLoading(false)
+        }
+      })()
+    }, 400)
+
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [role, storeCode])
+
   const canSubmit = useMemo(() => {
     if (!email.trim() || !password.trim() || !name.trim()) return false
-    if (role === 'STORE_MANAGER' && !storeId.trim()) return false
+    if (needsStoreCode(role)) {
+      if (!storeCode.trim()) return false
+      if (storeLookupLoading || storeLookupError || !storePreview) return false
+    }
     return true
-  }, [email, password, name, role, storeId])
+  }, [email, password, name, role, storeCode, storeLookupLoading, storeLookupError, storePreview])
 
-  const handleSignup = async () => {
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!canSubmit || submitting) return
     setSubmitting(true)
     setError('')
@@ -37,107 +110,129 @@ export default function SignupPage() {
         password,
         name,
         role,
-        storeId: role === 'STORE_MANAGER' ? Number(storeId) : null,
+        storeCode: needsStoreCode(role) ? storeCode.trim() : null,
       })
       navigate('/login', { replace: true })
-    } catch {
-      setError('회원가입에 실패했습니다. 입력값을 확인해주세요.')
+    } catch (err) {
+      setError(parseStoreApiError(err, 'Sign up failed. Please check your input.'))
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-lg">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl">📦</span>
-          </div>
-          <h1 className="text-2xl font-bold">회원가입</h1>
-          <p className="text-gray-500 text-sm mt-1">StockFlow 계정을 생성합니다.</p>
-        </div>
+    <AuthPageShell>
+      <form
+        onSubmit={(e) => void handleSignup(e)}
+        className="mt-10 w-full max-w-[340px] space-y-[14px]"
+      >
+        <label className={authInputRowClass}>
+          <Mail className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            autoCapitalize="off"
+            placeholder="EMAIL"
+            className={authFieldClass}
+          />
+        </label>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">이메일</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="이메일 입력"
-            />
-          </div>
+        <label className={authInputRowClass}>
+          <Lock className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            autoCapitalize="off"
+            placeholder="PASSWORD"
+            className={authFieldClass}
+          />
+        </label>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">비밀번호</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="비밀번호 입력"
-            />
-          </div>
+        <label className={authInputRowClass}>
+          <User className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoComplete="name"
+            placeholder="NAME"
+            className={authFieldClass}
+          />
+        </label>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">이름</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="이름 입력"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">역할</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-              className="w-full border rounded-lg px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="HQ_STAFF">본사 (HQ_STAFF)</option>
-              <option value="STORE_MANAGER">매장 관리자 (STORE_MANAGER)</option>
-              <option value="WAREHOUSE_STAFF">창고 담당 (WAREHOUSE_STAFF)</option>
-            </select>
-          </div>
-
-          {role === 'STORE_MANAGER' ? (
-            <div>
-              <label className="block text-sm font-medium mb-1">매장 ID</label>
-              <input
-                inputMode="numeric"
-                value={storeId}
-                onChange={(e) => setStoreId(e.target.value)}
-                className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="예) 1"
-              />
-              <p className="mt-1 text-xs text-gray-400">매장 관리자는 매장 ID가 필요합니다.</p>
-            </div>
-          ) : null}
-
-          {error ? (
-            <div className="bg-red-50 text-red-500 text-sm px-4 py-3 rounded-lg">{error}</div>
-          ) : null}
-
-          <button
-            onClick={handleSignup}
-            disabled={!canSubmit || submitting}
-            className="w-full bg-blue-500 disabled:bg-blue-300 hover:bg-blue-600 text-white font-medium py-3 rounded-lg transition"
+        <label className={authInputRowClass}>
+          <Users className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+          <select
+            value={role}
+            onChange={(e) => {
+              setRole(e.target.value as Role)
+              setStoreCode('')
+              setStorePreview(null)
+              setStoreLookupError(null)
+            }}
+            className={`${authFieldClass} cursor-pointer appearance-none normal-case`}
           >
-            {submitting ? '처리 중…' : '회원가입'}
-          </button>
-        </div>
+            <option value="HQ_STAFF" className="bg-[#3b63e8] text-white">
+              HQ STAFF
+            </option>
+            <option value="STORE_MANAGER" className="bg-[#3b63e8] text-white">
+              STORE MANAGER
+            </option>
+            <option value="STAFF" className="bg-[#3b63e8] text-white">
+              STAFF
+            </option>
+            <option value="WAREHOUSE_STAFF" className="bg-[#3b63e8] text-white">
+              WAREHOUSE STAFF
+            </option>
+          </select>
+        </label>
 
-        <div className="mt-6 text-center text-sm text-gray-500">
-          이미 계정이 있나요?{' '}
-          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-700">
-            로그인
-          </Link>
-        </div>
-      </div>
-    </div>
+        {needsStoreCode(role) ? (
+          <div className="space-y-2">
+            <label className={authInputRowClass}>
+              <Hash className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+              <input
+                value={storeCode}
+                onChange={(e) => setStoreCode(e.target.value)}
+                placeholder="STORE CODE"
+                autoComplete="off"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className={authCodeFieldClass}
+              />
+            </label>
+            {storeLookupLoading ? (
+              <div className="flex justify-center py-1">
+                <LoadingSpinner compact variant="light" label="매장 확인 중…" />
+              </div>
+            ) : storePreview ? (
+              <p className="text-center text-[11px] text-emerald-200">
+                Store: <span className="font-medium">{storePreview.name}</span>
+              </p>
+            ) : storeLookupError ? (
+              <p className="text-center text-[11px] text-red-200">{storeLookupError}</p>
+            ) : (
+              <p className="text-center text-[11px] text-white/70">
+                Enter the store code issued by HQ.
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        {error ? <p className="text-center text-xs text-red-200">{error}</p> : null}
+
+        <button type="submit" disabled={!canSubmit || submitting} className={authPrimaryButtonClass}>
+          {submitting ? '…' : 'SIGN UP'}
+        </button>
+
+        <Link to="/login" className={authSecondaryLinkClass}>
+          LOG IN
+        </Link>
+      </form>
+    </AuthPageShell>
   )
 }

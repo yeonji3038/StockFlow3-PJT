@@ -52,7 +52,13 @@ public enum ErrorCode {
 
     // 발주
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "발주를 찾을 수 없습니다."),
-    ORDER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "ORDER_INVALID_STATUS", "현재 상태에서 처리할 수 없습니다.");
+    ORDER_INVALID_STATUS(HttpStatus.BAD_REQUEST, "ORDER_INVALID_STATUS", "현재 상태에서 처리할 수 없습니다."),
+
+    // AI 서비스
+    AI_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI_SERVICE_UNAVAILABLE", "AI 추천 서비스에 일시적으로 연결할 수 없습니다."),
+
+    // 매장 코드 / 회원가입
+    STORE_MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT, "STORE_MANAGER_ALREADY_EXISTS", "이미 해당 매장에 등록된 매장 관리자가 있습니다.");
 
     private final HttpStatus status;
     private final String code;

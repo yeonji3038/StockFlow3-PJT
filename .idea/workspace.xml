@@ -1,46 +1,282 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="3035d891-f1c3-45fc-a22c-284c931bade9" name="변경" comment="">
+      <change afterPath="$PROJECT_DIR$/ai/data/generate_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/consumer/StockEventConsumer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/dto/StockChangeEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/stockflow.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/stockflow.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/layout/AuthLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/layout/AuthLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/controller/StoreController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/controller/StoreController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/entity/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/entity/Store.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/repository/StoreRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/repository/StoreRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/service/StoreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/service/StoreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/dto/UserRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/dto/UserRequestDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/exception/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/exception/ErrorCode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/controller/StoreController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/controller/StoreController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/dto/StoreResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/dto/StoreResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/entity/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/entity/Store.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/repository/StoreRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/repository/StoreRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/service/StoreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/service/StoreService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/dto/UserRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/dto/UserRequestDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/exception/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/exception/ErrorCode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/layout/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/layout/Sidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/lib/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/lib/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/register/ProductRegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/register/ProductRegisterForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ui/LoadingSpinner.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ui/LoadingSpinner.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/OrderNewPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/OrderNewPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/SignupPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SignupPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductRegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductRegisterPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dashboard/StoreManagerDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dashboard/StoreManagerDashboard.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/backend">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="stockflow-backend" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4,
   &quot;fromUser&quot;: false
 }</component>
   <component name="ProjectId" id="3COaUThUkEWfphNAvdQHel2ysW0" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feat/infra/httponly",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/yeonji/Developer/stockflow"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.backend 빌드.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.anomaly_detection.executor&quot;: &quot;Run&quot;,
+    &quot;Python.baseline_anomaly.executor&quot;: &quot;Run&quot;,
+    &quot;Python.baseline_demand.executor&quot;: &quot;Run&quot;,
+    &quot;Python.demand_forecast.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_data.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.HqApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/infra/httponly&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/yeonji/Developer/stockflow&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;/Users/yeonji/Developer/stockflow/ai/src/Main.java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;모듈&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/ai/data" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.HqApplication">
+    <configuration name="anomaly_detection" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="stockflow" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ai/models" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ai/models/anomaly_detection.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="baseline_anomaly" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="stockflow" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ai/baseline" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ai/baseline/baseline_anomaly.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="baseline_demand" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="stockflow" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ai/baseline" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ai/baseline/baseline_demand.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="demand_forecast" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="stockflow" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ai/models" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ai/models/demand_forecast.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="generate_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="stockflow" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ai/data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ai/data/generate_data.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="HqApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="ms-21" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <envs>
+        <env name="DB_URL" value="jdbc:postgresql://localhost:5432/stockflow" />
+        <env name="DB_USERNAME" value="yeonji" />
+        <env name="DB_PASSWORD" value="stockflow2604" />
+        <env name="JWT_SECRET" value="stockflow-secret-key-must-be-at-least-256-bits-long-for-hs256" />
+        <env name="JWT_EXPIRATION" value="43200000" />
+        <env name="JWT_REFRESH_EXPIRATION" value="604800000" />
+      </envs>
+      <module name="stockflow-backend.hq-service.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.stockflow.hq.HqApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Python.anomaly_detection" />
+      <item itemvalue="Python.baseline_anomaly" />
+      <item itemvalue="Python.baseline_demand" />
+      <item itemvalue="Python.demand_forecast" />
+      <item itemvalue="Python.generate_data" />
+      <item itemvalue="Spring Boot.HqApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.anomaly_detection" />
+        <item itemvalue="Python.demand_forecast" />
+        <item itemvalue="Python.generate_data" />
+        <item itemvalue="Python.baseline_demand" />
+        <item itemvalue="Python.baseline_anomaly" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -57,5 +293,16 @@
       <updated>1776259085049</updated>
     </task>
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/ai/src/Main.java</url>
+          <line>11</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

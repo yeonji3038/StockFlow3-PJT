@@ -89,6 +89,43 @@ export default function OrderNewPage() {
 
   const [pickQty, setPickQty] = useState<Record<number, number>>({})
 
+  // AI 추천 발주량: productOptionId -> 추천 수량('loading'/'error' 상태 포함)
+  const [aiRecommend, setAiRecommend] = useState<Record<number, number | 'loading' | 'error'>>({})
+
+  // 발주는 보통 다음날 입고를 기준으로 하므로 내일 날짜로 예측 요청
+  const tomorrow = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().slice(0, 10)
+  }, [])
+
+  useEffect(() => {
+    if (storeId == null || displayedOptions.length === 0) return
+
+    // 화면에 보이는 옵션 중 아직 조회 안 한 것만 호출 (중복 호출 방지)
+    const targets = displayedOptions.filter((o) => aiRecommend[o.productOptionId] == null)
+    if (targets.length === 0) return
+
+    targets.forEach((o) => {
+      setAiRecommend((prev) => ({ ...prev, [o.productOptionId]: 'loading' }))
+      api
+        .get('/api/ai/demand-forecast', {
+          params: { storeId, productOptionId: o.productOptionId, targetDate: tomorrow },
+        })
+        .then(({ data }) => {
+          const recommended = (data as { recommendedOrderQuantity?: number })?.recommendedOrderQuantity
+          setAiRecommend((prev) => ({
+            ...prev,
+            [o.productOptionId]: typeof recommended === 'number' ? recommended : 'error',
+          }))
+        })
+        .catch(() => {
+          setAiRecommend((prev) => ({ ...prev, [o.productOptionId]: 'error' }))
+        })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedOptions, storeId, tomorrow])
+
   const loadProducts = useCallback(async () => {
     setProductsLoading(true)
     setProductsError(null)
@@ -513,6 +550,7 @@ export default function OrderNewPage() {
                       <th className="px-3 py-2.5">상품명</th>
                       <th className="px-3 py-2.5">색 / 사이즈</th>
                       <th className="px-3 py-2.5">수량</th>
+                      <th className="px-3 py-2.5">AI 추천</th>
                       <th className="px-3 py-2.5 text-right">담기</th>
                     </tr>
                   </thead>
@@ -540,6 +578,29 @@ export default function OrderNewPage() {
                               </option>
                             ))}
                           </select>
+                        </td>
+                        <td className="px-3 py-2">
+                          {(() => {
+                            const rec = aiRecommend[o.productOptionId]
+                            if (rec === 'loading') {
+                              return <LoadingSpinner compact hideLabel />
+                            }
+                            if (rec === 'error' || rec == null) {
+                              return <span className="text-xs text-slate-300">—</span>
+                            }
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPickQty((p) => ({ ...p, [o.productOptionId]: rec }))
+                                }
+                                title="AI가 예측한 수요 기반 추천 발주량입니다. 클릭하면 수량에 적용됩니다."
+                                className="rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                              >
+                                {rec}개 적용
+                              </button>
+                            )
+                          })()}
                         </td>
                         <td className="px-3 py-2 text-right">
                           <button

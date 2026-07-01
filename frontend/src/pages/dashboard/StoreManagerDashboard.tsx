@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { getStoreId } from '../../lib/auth'
+import type { StoreListItem } from '../../lib/store'
 import StatCard from '../../components/ui/StatCard'
 import SectionCard from '../../components/ui/SectionCard'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
@@ -24,6 +25,8 @@ function historyInOutLabel(row: StoreStockHistory): string {
 export default function StoreManagerDashboard() {
   const navigate = useNavigate()
   const storeId = getStoreId()
+  const [storeName, setStoreName] = useState<string | null>(null)
+  const [storeNameLoading, setStoreNameLoading] = useState(storeId != null)
   const [stocks, setStocks] = useState<StoreStock[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [history, setHistory] = useState<StoreStockHistory[]>([])
@@ -31,6 +34,31 @@ export default function StoreManagerDashboard() {
   const [historyUnavailable, setHistoryUnavailable] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (storeId == null) {
+      setStoreName(null)
+      setStoreNameLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setStoreNameLoading(true)
+    ;(async () => {
+      try {
+        const { data } = await api.get<StoreListItem>(`/api/stores/${storeId}`)
+        if (!cancelled) setStoreName(data?.name?.trim() ? data.name.trim() : null)
+      } catch {
+        if (!cancelled) setStoreName(null)
+      } finally {
+        if (!cancelled) setStoreNameLoading(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [storeId])
 
   useEffect(() => {
     let cancelled = false
@@ -121,9 +149,15 @@ export default function StoreManagerDashboard() {
       .slice(0, 5)
   }, [history])
 
-  if (loading) {
-    return <LoadingSpinner />
-  }
+  const storeSubtitle = useMemo(() => {
+    if (storeId == null) {
+      return '로그인에 매장 정보가 없습니다. 본사에 문의하세요.'
+    }
+    if (storeName) {
+      return storeName
+    }
+    return `매장 ID ${storeId} 기준`
+  }, [storeId, storeName])
 
   if (error) {
     return <p className="text-sm text-rose-600">{error}</p>
@@ -133,11 +167,19 @@ export default function StoreManagerDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-slate-900">매장 대시보드</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {storeId ? `매장 ID ${storeId} 기준` : '로그인에 매장 정보가 없습니다. 본사에 문의하세요.'}
-        </p>
+        {storeNameLoading ? (
+          <div className="mt-1">
+            <LoadingSpinner compact />
+          </div>
+        ) : (
+          <p className="mt-1 text-sm text-slate-500">{storeSubtitle}</p>
+        )}
       </div>
 
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
       <div className="w-full max-w-sm">
         <StatCard
           title="발주"
@@ -307,6 +349,8 @@ export default function StoreManagerDashboard() {
           </div>
         )}
       </SectionCard>
+        </>
+      )}
     </div>
   )
 }
