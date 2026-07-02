@@ -69,7 +69,8 @@
 <br/>
 
 ## ERD
-<img width="4691" height="2172" alt="StockFlow 3차" src="https://github.com/user-attachments/assets/86fbe0ba-d67b-4f90-93f6-006b52e90e93" />
+<img width="4691" height="2132" alt="StockFlow 3차 (1)" src="https://github.com/user-attachments/assets/d9a4f4d4-a06a-48ab-baa7-f7e1d6bb2456" />
+
 
 
 ## 시스템 아키텍쳐
