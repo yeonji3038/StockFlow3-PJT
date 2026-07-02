@@ -1,4 +1,3 @@
-
 # 🏭 StockFlow-3차
 **매장–본사 통합 재고관리 플랫폼 (MES + Kubernetes + AI)**  
 
@@ -70,7 +69,7 @@
 <br/>
 
 ## ERD
-<img width="4690" height="1942" alt="ERD" src="https://github.com/user-attachments/assets/f709ec3a-22ec-4853-ad32-185766d35c26" />
+<img width="4691" height="2172" alt="StockFlow 3차" src="https://github.com/user-attachments/assets/86fbe0ba-d67b-4f90-93f6-006b52e90e93" />
 
 
 ## 시스템 아키텍쳐
