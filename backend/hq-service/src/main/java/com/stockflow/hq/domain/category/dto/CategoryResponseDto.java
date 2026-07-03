@@ -16,12 +16,14 @@ public class CategoryResponseDto {
 
     private Long id;
     private String name;
+    private String code;
     private List<CategoryResponseDto> children;
 
     public static CategoryResponseDto from(Category category) {
         return CategoryResponseDto.builder()
                 .id(category.getId())
                 .name(category.getName())
+                .code(category.getCode())
                 .children(new ArrayList<>())
                 .build();
     }

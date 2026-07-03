@@ -1,9 +1,9 @@
 package com.stockflow.store.global.kafka.consumer;
 
-import com.stockflow.common.kafka.dto.StockChangeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import com.stockflow.common.kafka.dto.StockChangeEvent;
 
 /**
  * store-service용 StockEventConsumer

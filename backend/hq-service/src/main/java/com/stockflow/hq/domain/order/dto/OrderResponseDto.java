@@ -65,7 +65,7 @@ public class OrderResponseDto {
                     .skuCode(item.getProductOption().getSkuCode())
                     .productName(item.getProductOption().getProduct().getName())
                     .color(item.getProductOption().getColor())
-                    .size(item.getProductOption().getSize().name())
+                    .size(item.getProductOption().getSize().getName())
                     .quantity(item.getQuantity())
                     .build();
         }

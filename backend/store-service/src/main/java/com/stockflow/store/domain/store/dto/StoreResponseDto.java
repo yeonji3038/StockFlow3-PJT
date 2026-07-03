@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class StoreResponseDto {
 
     private Long id;
+    private Long brandId;
+    private String brandName;
     private String name;
     private String location;
     private StoreType storeType;
@@ -22,6 +24,8 @@ public class StoreResponseDto {
     public static StoreResponseDto from(Store store) {
         return StoreResponseDto.builder()
                 .id(store.getId())
+                .brandId(store.getBrand() != null ? store.getBrand().getId() : null)
+                .brandName(store.getBrand() != null ? store.getBrand().getName() : null)
                 .name(store.getName())
                 .location(store.getLocation())
                 .storeType(store.getStoreType())

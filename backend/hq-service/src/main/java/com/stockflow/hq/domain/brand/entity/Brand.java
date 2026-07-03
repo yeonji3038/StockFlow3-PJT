@@ -19,10 +19,14 @@ public class Brand extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "code", nullable = false, unique = true)
+    private String code; // SKU 조합용 브랜드 코드: LEE, COV 등
+
     private String description;
 
-    public void update(String name, String description) {
+    public void update(String name, String code, String description) {
         this.name = name;
+        this.code = code;
         this.description = description;
     }
 }

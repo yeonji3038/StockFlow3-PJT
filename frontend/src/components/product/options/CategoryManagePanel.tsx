@@ -1,20 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { api } from '../../../lib/api'
-import SectionCard from '../../ui/SectionCard'
 import LoadingSpinner from '../../ui/LoadingSpinner'
 import Modal from '../../ui/Modal'
-import { parseApiErrorMessage, productOptionInputClass } from '../../../lib/productOption'
+import {
+  ErpDataTable,
+  ErpFooterBar,
+  ErpFooterPrimary,
+  ErpGridWrap,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpToolbar,
+  ErpToolbarButton,
+} from '../../ui/erp/ErpLayout'
+import { erpGridCellClass, erpGridHeadClass, erpInputClass } from '../../../lib/erpUi'
+import { parseApiErrorMessage } from '../../../lib/productOption'
 
 type CategoryNode = {
   id: number
   name: string
+  code: string
   children?: CategoryNode[]
 }
 
 type CategoryRow = {
   id: number
   name: string
+  code: string
   path: string
   parentId: number | null
   depth: number
@@ -22,16 +34,17 @@ type CategoryRow = {
 
 type CategoryForm = {
   name: string
+  code: string
   parentId: string
 }
 
-const emptyForm: CategoryForm = { name: '', parentId: '' }
+const emptyForm: CategoryForm = { name: '', code: '', parentId: '' }
 
 function flattenCategories(nodes: CategoryNode[], parentLabel = '', parentId: number | null = null, depth = 0): CategoryRow[] {
   const rows: CategoryRow[] = []
   for (const n of nodes) {
     const path = parentLabel ? `${parentLabel} › ${n.name}` : n.name
-    rows.push({ id: n.id, name: n.name, path, parentId, depth })
+    rows.push({ id: n.id, name: n.name, code: n.code, path, parentId, depth })
     if (n.children?.length) {
       rows.push(...flattenCategories(n.children, path, n.id, depth + 1))
     }
@@ -39,11 +52,12 @@ function flattenCategories(nodes: CategoryNode[], parentLabel = '', parentId: nu
   return rows
 }
 
-function inputClass() {
-  return productOptionInputClass()
+type Props = {
+  brandId: number
+  brandName: string
 }
 
-export default function CategoryManagePanel() {
+export default function CategoryManagePanel({ brandName }: Props) {
   const [tree, setTree] = useState<CategoryNode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -79,7 +93,10 @@ export default function CategoryManagePanel() {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     if (!needle) return rows
-    return rows.filter((r) => r.path.toLowerCase().includes(needle))
+    return rows.filter((r) => {
+      const hay = [r.path, r.code].join(' ').toLowerCase()
+      return hay.includes(needle)
+    })
   }, [rows, q])
 
   const openCreate = () => {
@@ -92,18 +109,20 @@ export default function CategoryManagePanel() {
     setEditingId(row.id)
     setForm({
       name: row.name,
+      code: row.code,
       parentId: row.parentId != null ? String(row.parentId) : '',
     })
     setModalOpen(true)
   }
 
   const save = async () => {
-    if (!form.name.trim() || saving) return
+    if (!form.name.trim() || !form.code.trim() || saving) return
     setSaving(true)
     setError(null)
     try {
       const body = {
         name: form.name.trim(),
+        code: form.code.trim().toUpperCase(),
         parentId: form.parentId ? Number(form.parentId) : null,
       }
       if (editingId != null) {
@@ -137,89 +156,93 @@ export default function CategoryManagePanel() {
 
   return (
     <>
-      <SectionCard
-        title="카테고리"
-        headerRight={
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="카테고리명 검색"
-              className="h-9 min-w-[10rem] rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <button
-              type="button"
-              onClick={openCreate}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              카테고리 등록
-            </button>
-          </div>
-        }
-      >
-        {loading ? (
+      <ErpToolbar>
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="카테고리명 검색"
+          className={[erpInputClass(), 'max-w-[12rem]'].join(' ')}
+        />
+        <ErpToolbarButton onClick={() => setQ('')}>초기화</ErpToolbarButton>
+        <ErpToolbarButton onClick={() => void load()}>새로고침</ErpToolbarButton>
+        <span className="ml-auto text-[11px] text-slate-500">{brandName}</span>
+      </ErpToolbar>
+
+      {error ? (
+        <div className="border-b border-slate-300 px-2 py-1.5 text-xs text-rose-600">{error}</div>
+      ) : null}
+
+      {loading ? (
+        <div className="py-8">
           <LoadingSpinner />
-        ) : (
-          <div className="space-y-3">
-            {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-            <p className="text-xs text-slate-500">
-              상의, 바지, 바람막이 등 상품 분류를 만듭니다. 소분류는 상위 카테고리를 선택해 등록합니다.
-            </p>
-            <div className="overflow-x-auto rounded-md border border-slate-100">
-              <table className="w-full min-w-[480px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                    <th className="px-3 py-2.5">카테고리</th>
-                    <th className="px-3 py-2.5 text-right">관리</th>
+        </div>
+      ) : (
+        <>
+          <ErpGridWrap maxHeight="max-h-[min(24rem,calc(100vh-20rem))]">
+            <ErpDataTable minWidth="480px">
+              <thead>
+                <tr>
+                  <th className={erpGridHeadClass()}>카테고리</th>
+                  <th className={erpGridHeadClass()}>코드</th>
+                  <th className={[erpGridHeadClass(), 'w-10 text-center'].join(' ')}>
+                    <span className="sr-only">삭제</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className={erpGridCellClass('py-10 text-center text-slate-400')}>
+                      등록된 카테고리가 없습니다.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={2} className="px-3 py-10 text-center text-slate-400">
-                        등록된 카테고리가 없습니다.
+                ) : (
+                  filtered.map((row) => (
+                    <tr
+                      key={row.id}
+                      onClick={() => openEdit(row)}
+                      className="cursor-pointer hover:bg-blue-50/60"
+                    >
+                      <td
+                        className={erpGridCellClass()}
+                        style={{ paddingLeft: `${8 + row.depth * 14}px` }}
+                      >
+                        {row.path}
+                      </td>
+                      <td className={erpGridCellClass('font-mono text-[11px]')}>{row.code}</td>
+                      <td className={erpGridCellClass('text-center')}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            void remove(row)
+                          }}
+                          disabled={deletingId === row.id}
+                          className="inline-flex items-center justify-center text-rose-600 hover:text-rose-800 disabled:opacity-60"
+                          aria-label={deletingId === row.id ? '삭제 중…' : '삭제'}
+                          title={deletingId === row.id ? '삭제 중…' : '삭제'}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden />
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    filtered.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
-                      >
-                        <td className="px-3 py-2 text-slate-800" style={{ paddingLeft: `${12 + row.depth * 16}px` }}>
-                          {row.path}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openEdit(row)}
-                              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-                            >
-                              <Pencil className="h-3.5 w-3.5" aria-hidden />
-                              수정
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void remove(row)}
-                              disabled={deletingId === row.id}
-                              className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 shadow-sm hover:bg-rose-100 disabled:opacity-60"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                              삭제
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </SectionCard>
+                  ))
+                )}
+              </tbody>
+            </ErpDataTable>
+          </ErpGridWrap>
+
+          <ErpFooterBar>
+            <ErpSecondaryButton onClick={() => void load()}>조회</ErpSecondaryButton>
+            <ErpFooterPrimary>
+              <ErpPrimaryButton onClick={openCreate}>
+                <Plus className="mr-1 inline h-3.5 w-3.5" aria-hidden />
+                카테고리 등록
+              </ErpPrimaryButton>
+            </ErpFooterPrimary>
+          </ErpFooterBar>
+        </>
+      )}
 
       <Modal
         title={editingId != null ? '카테고리 수정' : '카테고리 등록'}
@@ -232,9 +255,19 @@ export default function CategoryManagePanel() {
             <input
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className={inputClass()}
+              className={erpInputClass()}
               placeholder="예: 바지, 바람막이, 상의"
               maxLength={100}
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">카테고리 코드</span>
+            <input
+              value={form.code}
+              onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
+              className={erpInputClass()}
+              placeholder="예: TS"
+              maxLength={20}
             />
           </label>
           <label className="block">
@@ -242,7 +275,7 @@ export default function CategoryManagePanel() {
             <select
               value={form.parentId}
               onChange={(e) => setForm((f) => ({ ...f, parentId: e.target.value }))}
-              className={inputClass()}
+              className={erpInputClass()}
             >
               <option value="">없음 (대분류)</option>
               {topLevel

@@ -1,17 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { api } from '../../../lib/api'
 import { getRole } from '../../../lib/auth'
-import SectionCard from '../../../components/ui/SectionCard'
+import ErpPageFrame from '../../../components/ui/ErpPageFrame'
 import LoadingSpinner from '../../../components/ui/LoadingSpinner'
+import {
+  ErpChevronBack,
+  ErpFooterPrimary,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpPrimaryButton,
+} from '../../../components/ui/erp/ErpLayout'
+import { erpInputClass, erpSelectClass } from '../../../lib/erpUi'
 import type { ProductListItem } from '../../../components/product/types'
 import { PRODUCT_STATUS_OPTIONS, productStatusLabel, type ProductStatusValue } from '../../../lib/productStatus'
-import { parseApiErrorMessage, productOptionInputClass } from '../../../lib/productOption'
-
-function inputClass() {
-  return productOptionInputClass()
-}
+import { parseApiErrorMessage } from '../../../lib/productOption'
 
 function formatWon(n: number) {
   return `${n.toLocaleString('ko-KR')}원`
@@ -122,176 +128,179 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/admin/products"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 상품 목록
-        </Link>
-        <LoadingSpinner />
-      </div>
+      <ErpPageFrame title="상품 상세" actions={<ErpChevronBack to="/admin/products" label="상품 목록" />}>
+        <div className="px-3 py-12">
+          <LoadingSpinner />
+        </div>
+      </ErpPageFrame>
     )
   }
 
   if (error || !product) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/admin/products"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 상품 목록
-        </Link>
-        <p className="text-sm text-rose-600">{error ?? '상품을 찾을 수 없습니다.'}</p>
-      </div>
+      <ErpPageFrame title="상품 상세" actions={<ErpChevronBack to="/admin/products" label="상품 목록" />}>
+        <div className="px-3 py-8 text-center text-sm text-rose-600">{error ?? '상품을 찾을 수 없습니다.'}</div>
+      </ErpPageFrame>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Link
-            to="/admin/products"
-            className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-          >
-            ← 상품 목록
-          </Link>
-          <h1 className="mt-2 text-lg font-semibold text-slate-900">{product.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">상품 ID {product.id}</p>
-        </div>
-        {isHq ? (
-          <button
-            type="button"
-            onClick={() => void remove()}
-            disabled={deleting}
-            className="inline-flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 shadow-sm hover:bg-rose-100 disabled:opacity-60"
-          >
-            <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
-            {deleting ? '삭제 중…' : '상품 삭제'}
-          </button>
-        ) : null}
-      </div>
-
-      <SectionCard title="기본 정보">
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-medium text-slate-500">브랜드</dt>
-            <dd className="mt-0.5 text-slate-900">{product.brandName}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">카테고리</dt>
-            <dd className="mt-0.5 text-slate-900">{product.categoryName}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">시즌</dt>
-            <dd className="mt-0.5 text-slate-900">{product.seasonName}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">등록일</dt>
-            <dd className="mt-0.5 text-slate-900">
+    <ErpPageFrame
+      title={`상품 · ${product.name}`}
+      actions={
+        <>
+          <ErpChevronBack to="/admin/products" label="상품 목록" />
+          {isHq ? (
+            <button
+              type="button"
+              onClick={() => void remove()}
+              disabled={deleting}
+              className="ml-auto inline-flex items-center justify-center text-rose-600 hover:text-rose-800 disabled:opacity-60"
+              aria-label={deleting ? '삭제 중…' : '삭제'}
+              title={deleting ? '삭제 중…' : '삭제'}
+            >
+              <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
+            </button>
+          ) : null}
+        </>
+      }
+      footer={
+        isHq ? (
+          <>
+            {saveError ? <span className="mr-auto text-xs text-rose-600">{saveError}</span> : null}
+            <ErpFooterPrimary>
+              <ErpPrimaryButton onClick={() => void save()} disabled={saving}>
+                {saving ? '저장 중…' : '변경 저장'}
+              </ErpPrimaryButton>
+            </ErpFooterPrimary>
+          </>
+        ) : null
+      }
+    >
+      <ErpFormTable>
+        <ErpFormRow>
+          <ErpFormLabel>상품코드</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 font-mono text-xs font-semibold text-slate-800">
+              {product.productCode ?? '—'}
+            </span>
+          </ErpFormCell>
+          <ErpFormLabel>등록일</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 text-xs text-slate-700">
               {product.createdAt ? new Date(product.createdAt).toLocaleString('ko-KR') : '—'}
-            </dd>
-          </div>
-        </dl>
-      </SectionCard>
+            </span>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>브랜드</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 text-xs text-slate-800">{product.brandName}</span>
+          </ErpFormCell>
+          <ErpFormLabel>카테고리</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 text-xs text-slate-800">{product.categoryName}</span>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>시즌</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <span className="px-1 text-xs text-slate-800">{product.seasonName}</span>
+          </ErpFormCell>
+        </ErpFormRow>
+      </ErpFormTable>
 
       {isHq ? (
-        <SectionCard title="상품 수정">
-          <div className="space-y-4">
-            <p className="text-xs text-slate-500">
-              브랜드·카테고리·시즌은 API 제약으로 이 화면에서 바꾸지 않습니다.
-            </p>
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-slate-600">상품명</span>
-              <input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className={inputClass()}
-                maxLength={200}
-              />
-            </label>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium text-slate-600">판매가 (원)</span>
+        <ErpFormTable>
+            <ErpFormRow>
+              <ErpFormLabel required>상품명</ErpFormLabel>
+              <ErpFormCell colSpan={3}>
+                <input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className={erpInputClass()}
+                  maxLength={200}
+                />
+              </ErpFormCell>
+            </ErpFormRow>
+            <ErpFormRow>
+              <ErpFormLabel required>판매가</ErpFormLabel>
+              <ErpFormCell>
                 <input
                   value={editPrice}
                   onChange={(e) => setEditPrice(e.target.value)}
-                  className={inputClass()}
+                  className={erpInputClass()}
                   inputMode="numeric"
+                  placeholder="원"
                 />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium text-slate-600">원가 (원)</span>
+              </ErpFormCell>
+              <ErpFormLabel required>원가</ErpFormLabel>
+              <ErpFormCell>
                 <input
                   value={editCost}
                   onChange={(e) => setEditCost(e.target.value)}
-                  className={inputClass()}
+                  className={erpInputClass()}
                   inputMode="numeric"
+                  placeholder="원"
                 />
-              </label>
-            </div>
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-slate-600">상태</span>
-              <select
-                value={editStatus}
-                onChange={(e) => setEditStatus(e.target.value as ProductStatusValue)}
-                className={inputClass()}
-              >
-                {PRODUCT_STATUS_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-slate-600">설명</span>
-              <textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                className="min-h-[88px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                rows={3}
-              />
-            </label>
-            {saveError ? <p className="text-sm text-rose-600">{saveError}</p> : null}
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => void save()}
-                disabled={saving}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-300"
-              >
-                {saving ? '저장 중…' : '변경 저장'}
-              </button>
-            </div>
-          </div>
-        </SectionCard>
+              </ErpFormCell>
+            </ErpFormRow>
+            <ErpFormRow>
+              <ErpFormLabel required>상태</ErpFormLabel>
+              <ErpFormCell colSpan={3}>
+                <select
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value as ProductStatusValue)}
+                  className={erpSelectClass()}
+                >
+                  {PRODUCT_STATUS_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </ErpFormCell>
+            </ErpFormRow>
+            <ErpFormRow>
+              <ErpFormLabel>설명</ErpFormLabel>
+              <ErpFormCell colSpan={3}>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="min-h-[4.5rem] w-full border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500"
+                  rows={3}
+                />
+              </ErpFormCell>
+            </ErpFormRow>
+          </ErpFormTable>
       ) : (
-        <SectionCard title="가격·상태">
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-xs font-medium text-slate-500">판매가</dt>
-              <dd className="mt-0.5 text-slate-900">{formatWon(product.price)}</dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-slate-500">원가</dt>
-              <dd className="mt-0.5 text-slate-900">{formatWon(product.cost)}</dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className="text-xs font-medium text-slate-500">상태</dt>
-              <dd className="mt-0.5 text-slate-900">{productStatusLabel(product.status)}</dd>
-            </div>
-            {product.description ? (
-              <div className="sm:col-span-2">
-                <dt className="text-xs font-medium text-slate-500">설명</dt>
-                <dd className="mt-0.5 whitespace-pre-wrap text-slate-800">{product.description}</dd>
-              </div>
-            ) : null}
-          </dl>
-        </SectionCard>
+        <ErpFormTable>
+          <ErpFormRow>
+            <ErpFormLabel>판매가</ErpFormLabel>
+            <ErpFormCell>
+              <span className="px-1 text-xs text-slate-800">{formatWon(product.price)}</span>
+            </ErpFormCell>
+            <ErpFormLabel>원가</ErpFormLabel>
+            <ErpFormCell>
+              <span className="px-1 text-xs text-slate-800">{formatWon(product.cost)}</span>
+            </ErpFormCell>
+          </ErpFormRow>
+          <ErpFormRow>
+            <ErpFormLabel>상태</ErpFormLabel>
+            <ErpFormCell colSpan={3}>
+              <span className="px-1 text-xs text-slate-800">{productStatusLabel(product.status)}</span>
+            </ErpFormCell>
+          </ErpFormRow>
+          {product.description ? (
+            <ErpFormRow>
+              <ErpFormLabel>설명</ErpFormLabel>
+              <ErpFormCell colSpan={3}>
+                <span className="whitespace-pre-wrap px-1 text-xs text-slate-800">{product.description}</span>
+              </ErpFormCell>
+            </ErpFormRow>
+          ) : null}
+        </ErpFormTable>
       )}
-    </div>
+    </ErpPageFrame>
   )
 }

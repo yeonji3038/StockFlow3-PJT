@@ -2,8 +2,16 @@ import { isAxiosError } from 'axios'
 
 export type StoreType = 'HQ' | 'DEPARTMENT' | 'OUTLET'
 
+export type BrandListItem = {
+  id: number
+  name: string
+  code?: string
+}
+
 export type StoreListItem = {
   id: number
+  brandId?: number | null
+  brandName?: string | null
   name: string
   location: string | null
   storeType: StoreType
@@ -44,8 +52,10 @@ export function userRoleLabel(role: string): string {
   }
 }
 
-export function storeInputClass() {
-  return 'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+import { erpInputClass } from './erpUi'
+
+export function storeInputClass(invalid = false) {
+  return erpInputClass(invalid)
 }
 
 export function parseStoreApiError(err: unknown, fallback: string): string {

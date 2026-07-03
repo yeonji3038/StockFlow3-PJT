@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 import { api } from '../lib/api'
 import { getRole } from '../lib/auth'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame, { ErpAccessDenied } from '../components/ui/ErpPageFrame'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import type { Allocation, StoreSummary, WarehouseStock, WarehouseSummary } from '../types/models'
+import { warehouseAvailableQty } from '../lib/warehouseStock'
 
 type AddedLine = { productOptionId: number; quantity: number }
 
@@ -39,8 +42,12 @@ function displayProductCode(s: WarehouseStock): string {
 
 function normalizeWarehouseStock(row: WarehouseStock): WarehouseStock {
   const r = row as WarehouseStock & Record<string, unknown>
+  const reservedRaw = row.reservedQuantity ?? r.reserved_quantity
+  const availableRaw = row.availableQuantity ?? r.available_quantity
   return {
     ...row,
+    reservedQuantity: typeof reservedRaw === 'number' ? reservedRaw : undefined,
+    availableQuantity: typeof availableRaw === 'number' ? availableRaw : undefined,
     productCode: strNorm(row.productCode) || strNorm(r.product_code) || undefined,
     brand: strNorm(row.brand) || strNorm(r.brand_name) || undefined,
     category:
@@ -162,11 +169,15 @@ function storeOptionLabel(s: StoreSummary): string {
   return bits.join(' · ')
 }
 
+function stockMaxQty(st: WarehouseStock | undefined): number {
+  return st ? warehouseAvailableQty(st) : 0
+}
+
 function stockOptionLabel(s: WarehouseStock): string {
   const meta = [strNorm(s.brand), strNorm(s.category), strNorm(s.season)]
     .filter(Boolean)
     .join(' · ')
-  const base = `${s.skuCode} - ${s.productName} - ${s.color} - ${s.size} (재고: ${s.quantity}개)`
+  const base = `${s.skuCode} - ${s.productName} - ${s.color} - ${s.size} (가용: ${warehouseAvailableQty(s)}개)`
   return meta ? `${base} · ${meta}` : base
 }
 
@@ -283,7 +294,7 @@ export default function AllocationNewPage() {
   }, [warehouseId, role])
 
   const selectableStocks = useMemo(
-    () => warehouseStocks.filter((s) => s.quantity > 0),
+    () => warehouseStocks.filter((s) => warehouseAvailableQty(s) > 0),
     [warehouseStocks],
   )
 
@@ -372,7 +383,7 @@ export default function AllocationNewPage() {
     setPendingQty(1)
   }
 
-  const pendingMax = pendingPick ? pendingPick.quantity : 0
+  const pendingMax = pendingPick ? warehouseAvailableQty(pendingPick) : 0
 
   const adjustPendingQty = (delta: number) => {
     if (!pendingPick || pendingMax < 1) return
@@ -404,7 +415,7 @@ export default function AllocationNewPage() {
     setAddedItems((prev) => {
       const line = prev[index]
       if (!line) return prev
-      const maxQ = stockByOptionId.get(line.productOptionId)?.quantity ?? 0
+      const maxQ = stockMaxQty(stockByOptionId.get(line.productOptionId))
       if (maxQ < 1) return prev
       let nextQ = line.quantity
       if (raw === '') nextQ = 1
@@ -421,7 +432,7 @@ export default function AllocationNewPage() {
     setAddedItems((prev) => {
       const line = prev[index]
       if (!line) return prev
-      const maxQ = stockByOptionId.get(line.productOptionId)?.quantity ?? 0
+      const maxQ = stockMaxQty(stockByOptionId.get(line.productOptionId))
       if (maxQ < 1) return prev
       return prev.map((l, i) =>
         i === index ? { ...l, quantity: clampIntQty(l.quantity + delta, maxQ) } : l,
@@ -435,12 +446,7 @@ export default function AllocationNewPage() {
 
   if (role !== 'HQ_STAFF') {
     return (
-      <div className="space-y-4">
-        <Link to="/allocations" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          ← 배분 목록
-        </Link>
-        <p className="text-sm text-slate-600">배분 생성은 본사(HQ) 계정으로만 이용할 수 있습니다.</p>
-      </div>
+      <ErpAccessDenied title="배분 생성" message="배분 생성은 본사(HQ) 계정으로만 이용할 수 있습니다." />
     )
   }
 
@@ -465,14 +471,14 @@ export default function AllocationNewPage() {
         return
       }
       seen.add(line.productOptionId)
-      const maxQ = stockByOptionId.get(line.productOptionId)?.quantity ?? 0
+      const maxQ = stockMaxQty(stockByOptionId.get(line.productOptionId))
       const q = line.quantity
       if (!Number.isFinite(q) || q < 1) {
         setError('각 품목의 수량을 확인해 주세요.')
         return
       }
       if (maxQ < 1 || q > maxQ) {
-        setError('수량이 해당 SKU 재고를 초과할 수 없습니다.')
+        setError('수량이 해당 SKU 가용재고를 초과할 수 없습니다.')
         return
       }
       items.push({ productOptionId: line.productOptionId, quantity: Math.floor(q) })
@@ -502,16 +508,22 @@ export default function AllocationNewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <Link to="/allocations" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+    <ErpPageFrame
+      title="배분 생성"
+      actions={
+        <Link
+          to="/allocations"
+          className="inline-flex h-7 items-center border border-slate-300 bg-white px-2 text-xs text-slate-700 hover:bg-slate-100"
+        >
           ← 배분 목록
         </Link>
-        <h1 className="mt-2 text-lg font-semibold text-slate-900">배분 생성</h1>
-        <p className="mt-1 text-sm text-slate-500">창고에서 매장으로 보낼 재고를 등록합니다.</p>
+      }
+    >
+      <div className="border-b border-slate-300 px-3 py-1 text-[11px] text-slate-500">
+        창고에서 매장으로 보낼 재고를 등록합니다.
       </div>
 
-      <SectionCard title="요청서">
+      <SectionCard embedded title="요청서">
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           {error && <p className="text-sm text-rose-600">{error}</p>}
 
@@ -601,7 +613,7 @@ export default function AllocationNewPage() {
             ) : null}
             {!stocksLoading && selectableStocks.length === 0 && warehouseId ? (
               <p className="text-sm text-amber-800">
-                선택한 창고에 출고 가능한 재고(수량 1 이상)가 없습니다.
+                선택한 창고에 출고 가능한 재고(가용재고 1 이상)가 없습니다.
               </p>
             ) : null}
 
@@ -801,13 +813,15 @@ export default function AllocationNewPage() {
                       </div>
                       <span className="text-xs text-slate-500">최대 {pendingMax}개</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleAddPendingToList}
-                      className="mt-3 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                    >
-                      + 품목 추가
-                    </button>
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleAddPendingToList}
+                        className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                      >
+                        + 품목 추가
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -819,7 +833,7 @@ export default function AllocationNewPage() {
                 <ul className="space-y-2">
                   {addedItems.map((line, idx) => {
                     const st = stockByOptionId.get(line.productOptionId)
-                    const maxQ = st?.quantity ?? 0
+                    const maxQ = stockMaxQty(st)
                     const label = st
                       ? stockOptionLabel(st)
                       : `옵션 #${line.productOptionId} (재고 정보 없음)`
@@ -863,9 +877,11 @@ export default function AllocationNewPage() {
                           <button
                             type="button"
                             onClick={() => removeAddedLine(idx)}
-                            className="ml-1 text-sm font-medium text-rose-600 hover:underline"
+                            className="ml-1 inline-flex items-center justify-center text-rose-600 hover:text-rose-800"
+                            aria-label="삭제"
+                            title="삭제"
                           >
-                            삭제
+                            <Trash2 className="h-4 w-4" aria-hidden />
                           </button>
                         </div>
                       </li>
@@ -876,7 +892,13 @@ export default function AllocationNewPage() {
             ) : null}
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex justify-end gap-3 pt-2">
+            <Link
+              to="/allocations"
+              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              취소
+            </Link>
             <button
               type="submit"
               disabled={
@@ -891,15 +913,9 @@ export default function AllocationNewPage() {
             >
               등록하기
             </button>
-            <Link
-              to="/allocations"
-              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              취소
-            </Link>
           </div>
         </form>
       </SectionCard>
-    </div>
+    </ErpPageFrame>
   )
 }

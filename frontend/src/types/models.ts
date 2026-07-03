@@ -37,6 +37,8 @@ export interface WarehouseStock {
   color: string
   size: string
   quantity: number
+  reservedQuantity?: number
+  availableQuantity?: number
   /** 제품 코드(SKU와 별도일 때). 없으면 필터·표시는 skuCode 사용 */
   productCode?: string | null
   brand?: string | null
@@ -65,6 +67,9 @@ export interface StoreStockHistory {
   size?: string
   type: string
   typeDescription?: string
+  reason?: string
+  reasonDescription?: string
+  productOptionId?: number
   quantity: number
   createdAt: string
 }
@@ -108,6 +113,7 @@ export interface Order {
   items: OrderItem[]
   createdAt?: string
   updatedAt?: string
+  approvedAt?: string | null
 }
 
 export interface UserSummary {
@@ -117,5 +123,57 @@ export interface UserSummary {
   role: string
   storeId: number | null
   storeName: string | null
+  warehouseId: number | null
+  warehouseName: string | null
+  createdAt?: string | null
+}
+
+export interface Brand {
+  id: number
+  name: string
+  code: string
+  description?: string | null
+}
+
+export interface Category {
+  id: number
+  name: string
+  code: string
+  children?: Category[]
+}
+
+export interface Size {
+  id: number
+  name: string
+  skuCode: string
+  sortOrder?: number | null
+}
+
+export type ProductOptionStatus = 'ON_SALE' | 'DISCONTINUED'
+
+export interface ProductOptionItem {
+  id: number
+  productId: number
+  productName: string
+  color: string
+  colorCode: string
+  sizeId: number
+  sizeName: string
+  skuCode: string
+  status: ProductOptionStatus
+}
+
+export interface AnomalyAlert {
+  id: number
+  storeId: number
+  storeName: string | null
+  productOptionId: number
+  skuCode: string | null
+  productName: string | null
+  quantity: number
+  reason: string | null
+  eventDate: string
+  anomalyScore: number
+  resolved: boolean
   createdAt: string
 }

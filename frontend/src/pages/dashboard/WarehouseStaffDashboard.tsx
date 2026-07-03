@@ -6,8 +6,16 @@ import { getWarehouseId } from '../../lib/auth'
 import { resolveDefaultWarehouseId } from '../../lib/warehouseContext'
 import StatCard from '../../components/ui/StatCard'
 import SectionCard from '../../components/ui/SectionCard'
+import ErpPageFrame from '../../components/ui/ErpPageFrame'
+import { ErpChevronNav } from '../../components/ui/erp/ErpLayout'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
-import type { Allocation, StoreStockHistory, WarehouseStock } from '../../types/models'
+import type { Allocation, Order, StoreStockHistory, WarehouseStock } from '../../types/models'
+import { filterApprovedOrders } from '../../lib/orderLabels'
+import {
+  isWarehouseLowStock,
+  warehouseAvailableQty,
+  WAREHOUSE_LOW_STOCK_MAX,
+} from '../../lib/warehouseStock'
 
 function formatHistoryDate(iso: string | undefined): string {
   if (!iso) return '—'
@@ -27,6 +35,7 @@ export default function WarehouseStaffDashboard() {
   const navigate = useNavigate()
   const [warehouseId, setWarehouseId] = useState<number | null>(null)
   const [allocations, setAllocations] = useState<Allocation[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [stocks, setStocks] = useState<WarehouseStock[]>([])
   const [history, setHistory] = useState<StoreStockHistory[]>([])
   const [historyFail, setHistoryFail] = useState(false)
@@ -46,6 +55,7 @@ export default function WarehouseStaffDashboard() {
         setWarehouseId(wid)
 
         const allocP = api.get<Allocation[]>('/api/allocations').catch(() => ({ data: [] as Allocation[] }))
+        const ordersP = api.get<Order[]>('/api/orders').catch(() => ({ data: [] as Order[] }))
         const stocksP =
           wid != null
             ? api.get<WarehouseStock[]>(`/api/warehouses/${wid}/stocks`).catch(() => ({ data: [] as WarehouseStock[] }))
@@ -57,7 +67,7 @@ export default function WarehouseStaffDashboard() {
                 .catch(() => ({ data: null as StoreStockHistory[] | null }))
             : Promise.resolve({ data: [] as StoreStockHistory[] })
 
-        const [allocRes, stocksRes, histRes] = await Promise.all([allocP, stocksP, histP])
+        const [allocRes, ordersRes, stocksRes, histRes] = await Promise.all([allocP, ordersP, stocksP, histP])
         if (cancelled) return
 
         let allAlloc = Array.isArray(allocRes.data) ? allocRes.data : []
@@ -65,6 +75,7 @@ export default function WarehouseStaffDashboard() {
           allAlloc = allAlloc.filter((a) => a.warehouseId === wid)
         }
         setAllocations(allAlloc)
+        setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : [])
 
         setStocks(Array.isArray(stocksRes.data) ? stocksRes.data : [])
 
@@ -88,7 +99,10 @@ export default function WarehouseStaffDashboard() {
   const totalSkuRows = stocks.length
 
   const lowStocks = useMemo(
-    () => stocks.filter((s) => s.quantity <= 10).sort((a, b) => a.quantity - b.quantity),
+    () =>
+      stocks
+        .filter((s) => isWarehouseLowStock(s))
+        .sort((a, b) => warehouseAvailableQty(a) - warehouseAvailableQty(b)),
     [stocks],
   )
   const lowStockCount = lowStocks.length
@@ -99,6 +113,9 @@ export default function WarehouseStaffDashboard() {
     [allocations],
   )
   const approvedPreview = useMemo(() => approvedAllocations.slice(0, 10), [approvedAllocations])
+
+  const approvedOrders = useMemo(() => filterApprovedOrders(orders), [orders])
+  const approvedOrdersPreview = useMemo(() => approvedOrders.slice(0, 10), [approvedOrders])
 
   const recentHistory = useMemo(() => {
     return [...history]
@@ -119,12 +136,8 @@ export default function WarehouseStaffDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">창고 대시보드</h1>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ErpPageFrame title="창고 대시보드">
+      <div className="grid gap-0 border-b border-slate-300 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="창고 재고 현황"
           value={warehouseId == null ? '—' : totalSkuRows}
@@ -134,7 +147,7 @@ export default function WarehouseStaffDashboard() {
         <StatCard
           title="저재고 SKU"
           value={warehouseId == null ? '—' : lowStockCount}
-          hint="수량 10 이하"
+          hint={`가용재고 ${WAREHOUSE_LOW_STOCK_MAX} 이하`}
           tone={lowStockCount > 0 ? 'rose' : 'default'}
           onClick={() => navigate('/warehouse-stock')}
         />
@@ -145,12 +158,20 @@ export default function WarehouseStaffDashboard() {
           tone="amber"
           onClick={() => navigate('/allocations')}
         />
+        <StatCard
+          title="출고 대기 발주"
+          value={approvedOrders.length}
+          hint="APPROVED"
+          tone={approvedOrders.length > 0 ? 'amber' : 'default'}
+          onClick={() => navigate('/warehouse-orders')}
+        />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-0 lg:grid-cols-3">
         <SectionCard
+          embedded
           title="저재고 SKU"
-          description="수량 10 이하 품목입니다."
+          description={`가용재고 ${WAREHOUSE_LOW_STOCK_MAX} 이하 품목입니다.`}
           headerRight={
             <Link to="/warehouse-stock" className="text-xs font-medium text-blue-600 hover:text-blue-700">
               창고 재고
@@ -163,7 +184,7 @@ export default function WarehouseStaffDashboard() {
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <th className="px-2 py-2">SKU</th>
                   <th className="px-2 py-2">상품</th>
-                  <th className="px-2 py-2 text-right">수량</th>
+                  <th className="px-2 py-2 text-right">가용재고</th>
                 </tr>
               </thead>
               <tbody>
@@ -194,7 +215,7 @@ export default function WarehouseStaffDashboard() {
                         </span>
                       </td>
                       <td className="px-2 py-2 text-right font-medium tabular-nums text-rose-700">
-                        {s.quantity}
+                        {warehouseAvailableQty(s)}
                       </td>
                     </tr>
                   ))
@@ -205,6 +226,7 @@ export default function WarehouseStaffDashboard() {
         </SectionCard>
 
         <SectionCard
+          embedded
           title="출고 대기 배분"
           description="승인(APPROVED)된 배분만 표시합니다."
           headerRight={
@@ -251,16 +273,59 @@ export default function WarehouseStaffDashboard() {
             </table>
           </div>
         </SectionCard>
+
+        <SectionCard
+          embedded
+          title="출고 대기 발주"
+          description="본사 승인(APPROVED)된 발주입니다."
+          headerRight={
+            <Link to="/warehouse-orders" className="text-xs font-medium text-blue-600 hover:text-blue-700">
+              발주 출고
+            </Link>
+          }
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[420px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <th className="px-2 py-2">번호</th>
+                  <th className="px-2 py-2">매장</th>
+                  <th className="px-2 py-2 text-right">품목 수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {approvedOrdersPreview.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-2 py-8 text-center text-slate-400">
+                      출고 대기 발주가 없습니다.
+                    </td>
+                  </tr>
+                ) : (
+                  approvedOrdersPreview.map((o) => (
+                    <tr
+                      key={o.id}
+                      className="cursor-pointer border-b border-slate-100 even:bg-slate-50/50 hover:bg-blue-50/40"
+                      onClick={() => navigate('/warehouse-orders')}
+                    >
+                      <td className="px-2 py-2 font-mono text-xs text-slate-600">{o.id}</td>
+                      <td className="px-2 py-2 text-slate-800">{o.storeName}</td>
+                      <td className="px-2 py-2 text-right tabular-nums text-slate-700">
+                        {o.items?.length ?? 0}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
       </div>
 
       <SectionCard
+        embedded
         title="최근 입출고 이력"
         description="창고 기준 최근 5건입니다."
-        headerRight={
-          <Link to="/movements" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-            전체 보기
-          </Link>
-        }
+        headerRight={<ErpChevronNav to="/movements" />}
       >
         {warehouseId == null ? (
           <p className="text-sm text-slate-500">창고 ID가 없어 이력을 불러올 수 없습니다.</p>
@@ -297,6 +362,6 @@ export default function WarehouseStaffDashboard() {
           </div>
         )}
       </SectionCard>
-    </div>
+    </ErpPageFrame>
   )
 }

@@ -42,8 +42,11 @@ public class ProductService {
         Season season = seasonRepository.findById(request.getSeasonId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SEASON_NOT_FOUND));
 
+        String productCode = generateProductCode(brand, category, season);
+
         Product product = Product.builder()
                 .name(request.getName())
+                .productCode(productCode)
                 .brand(brand)
                 .category(category)
                 .season(season)
@@ -55,6 +58,17 @@ public class ProductService {
 
         return ProductResponseDto.from(productRepository.save(product));
     }
+
+    // 브랜드+시즌+카테고리 조합별 일련번호를 매겨 상품코드 생성 (예: LEE26SSST01)
+    private String generateProductCode(Brand brand, Category category, Season season) {
+        String seasonCode = String.valueOf(season.getYear()).substring(2) + season.getType().name(); // 2026,SS → "26SS"
+        long count = productRepository.countByBrandIdAndSeasonIdAndCategoryId(
+                brand.getId(), season.getId(), category.getId());
+        String sequence = String.format("%02d", count + 1); // 01, 02, 03 ...
+        return brand.getCode() + seasonCode + category.getCode() + sequence;
+    }
+
+
 
     // 상품 전체 조회
     @Cacheable(value = "products", key = "'all'")

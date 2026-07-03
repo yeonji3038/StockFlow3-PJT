@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Copy, MapPin, Search } from 'lucide-react'
 import { api } from '../../../lib/api'
+import LoadingSpinner from '../../ui/LoadingSpinner'
 import {
   parseStoreApiError,
   storeInputClass,
   STORE_TYPE_OPTIONS,
+  type BrandListItem,
   type StoreListItem,
   type StoreType,
 } from '../../../lib/store'
@@ -119,12 +121,35 @@ export default function StoreRegisterForm({ onRegistered }: Props) {
   const [latitude, setLatitude] = useState<number | null>(null)
   const [longitude, setLongitude] = useState<number | null>(null)
   const [storeType, setStoreType] = useState<StoreType>('DEPARTMENT')
+  const [brandId, setBrandId] = useState('')
   const [phone, setPhone] = useState('')
+
+  const [brands, setBrands] = useState<BrandListItem[]>([])
+  const [brandsLoading, setBrandsLoading] = useState(true)
+  const [brandsError, setBrandsError] = useState<string | null>(null)
 
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [registered, setRegistered] = useState<StoreListItem | null>(null)
   const [copied, setCopied] = useState(false)
+
+  const loadBrands = useCallback(async () => {
+    setBrandsLoading(true)
+    setBrandsError(null)
+    try {
+      const { data } = await api.get<BrandListItem[]>('/api/brands')
+      setBrands(data ?? [])
+    } catch {
+      setBrands([])
+      setBrandsError('브랜드 목록을 불러오지 못했습니다.')
+    } finally {
+      setBrandsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadBrands()
+  }, [loadBrands])
 
   const resetForm = () => {
     setName('')
@@ -134,6 +159,7 @@ export default function StoreRegisterForm({ onRegistered }: Props) {
     setLatitude(null)
     setLongitude(null)
     setStoreType('DEPARTMENT')
+    setBrandId('')
     setPhone('')
     setFormError(null)
     setRegistered(null)
@@ -170,14 +196,24 @@ export default function StoreRegisterForm({ onRegistered }: Props) {
       setFormError('매장명을 입력하세요.')
       return
     }
+    const selectedBrandId = Number(brandId)
+    if (!Number.isFinite(selectedBrandId) || selectedBrandId < 1) {
+      setFormError('브랜드를 선택하세요.')
+      return
+    }
 
     const locationParts = [baseAddress.trim(), detailAddress.trim()].filter(Boolean)
-    const location = locationParts.length > 0 ? locationParts.join(' ') : undefined
+    const location = locationParts.join(' ')
+    if (!location) {
+      setFormError('위치(주소)를 입력하세요.')
+      return
+    }
 
     setSubmitting(true)
     setFormError(null)
     try {
       const { data } = await api.post<StoreListItem>('/api/stores', {
+        brandId: selectedBrandId,
         name: name.trim(),
         location,
         storeType,
@@ -211,6 +247,9 @@ export default function StoreRegisterForm({ onRegistered }: Props) {
         <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-6 py-8 text-center">
           <p className="text-sm font-medium text-emerald-800">매장이 등록되었습니다</p>
           <p className="mt-1 text-xs text-emerald-700">{registered.name}</p>
+          {registered.brandName ? (
+            <p className="mt-1 text-xs text-emerald-600">{registered.brandName}</p>
+          ) : null}
           <p className="mt-6 text-xs font-medium uppercase tracking-wide text-slate-500">
             발급된 매장 코드
           </p>
@@ -253,6 +292,27 @@ export default function StoreRegisterForm({ onRegistered }: Props) {
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+      {brandsLoading ? (
+        <LoadingSpinner label="브랜드 목록을 불러오는 중…" />
+      ) : (
+        <>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-slate-600">브랜드</span>
+        <select
+          value={brandId}
+          onChange={(e) => setBrandId(e.target.value)}
+          className={storeInputClass()}
+          required
+        >
+          <option value="">브랜드 선택</option>
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-slate-600">매장명</span>
         <input
@@ -304,16 +364,19 @@ export default function StoreRegisterForm({ onRegistered }: Props) {
           />
         </label>
       </div>
+      {brandsError ? <p className="text-sm text-amber-600">{brandsError}</p> : null}
       {formError ? <p className="text-sm text-rose-600">{formError}</p> : null}
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || brands.length === 0}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-300"
         >
           {submitting ? '등록 중…' : '매장 등록'}
         </button>
       </div>
+        </>
+      )}
     </form>
   )
 }

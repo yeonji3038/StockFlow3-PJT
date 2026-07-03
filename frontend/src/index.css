@@ -1,3 +1,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .erp-section-toolbar input:not([type='checkbox']):not([type='radio']):not([type='date']),
+  .erp-section-toolbar select,
+  .erp-form-toolbar input:not([type='checkbox']):not([type='radio']):not([type='date']),
+  .erp-form-toolbar select {
+    @apply h-7 min-w-[6rem] border border-slate-300 bg-white px-2 text-xs text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500;
+  }
+
+  .erp-section-toolbar label,
+  .erp-form-toolbar label {
+    @apply flex items-center gap-1 text-xs text-slate-600;
+  }
+
+  .erp-section-toolbar button,
+  .erp-form-toolbar button {
+    @apply h-7 shrink-0 border border-slate-300 bg-white px-2 text-xs text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .erp-section-toolbar a.rounded-md,
+  .erp-form-toolbar a.rounded-md,
+  .erp-page-actions a.rounded-md {
+    @apply inline-flex h-8 items-center border border-blue-600 bg-blue-600 px-3 text-xs font-medium text-white hover:bg-blue-700;
+  }
+
+  .erp-section-body table,
+  .erp-page-body table {
+    @apply w-full border-collapse text-xs;
+  }
+
+  .erp-section-body thead th,
+  .erp-page-body thead th {
+    @apply border border-slate-300 bg-slate-100 px-2 py-1.5 text-left text-[11px] font-semibold text-slate-700 whitespace-nowrap;
+  }
+
+  .erp-section-body tbody td,
+  .erp-page-body tbody td {
+    @apply border border-slate-300 px-2 py-1 text-xs text-slate-800;
+  }
+
+  .erp-section-body tbody tr.cursor-pointer:hover,
+  .erp-section-body tbody tr[role='button']:hover,
+  .erp-page-body tbody tr.cursor-pointer:hover,
+  .erp-page-body tbody tr[role='button']:hover {
+    @apply bg-blue-50/60;
+  }
+
+  .erp-section-body .overflow-x-auto,
+  .erp-page-body .overflow-x-auto {
+    @apply rounded-none border-0;
+  }
+
+  .erp-section-toolbar input[type='date'],
+  .erp-form-toolbar input[type='date'],
+  .erp-page-actions input[type='date'] {
+    @apply h-7 border border-slate-300 bg-white px-2 text-xs text-slate-800 outline-none focus:border-blue-500;
+  }
+
+  .erp-page-body > .grid.gap-6,
+  .erp-page-body > .space-y-6 {
+    @apply gap-0 space-y-0;
+  }
+
+  .erp-page-body .grid.lg\:grid-cols-2 > .erp-section,
+  .erp-page-body .grid.lg\:grid-cols-2 > section {
+    @apply border-l-0 border-r-0 border-t-0;
+  }
+}

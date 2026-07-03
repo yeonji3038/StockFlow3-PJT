@@ -1,5 +1,7 @@
 package com.stockflow.store.domain.store.service;
 
+import com.stockflow.store.domain.brand.entity.Brand;
+import com.stockflow.store.domain.brand.repository.BrandRepository;
 import com.stockflow.store.domain.store.dto.StoreRequestDto;
 import com.stockflow.store.domain.store.dto.StoreResponseDto;
 import com.stockflow.store.domain.store.entity.Store;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class StoreService {
 
     private final StoreRepository storeRepository;
+    private final BrandRepository brandRepository;
 
     private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 혼동되는 0/O, 1/I 제외
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -28,7 +31,11 @@ public class StoreService {
     // 매장 생성
     @Transactional
     public StoreResponseDto create(StoreRequestDto request) {
+        Brand brand = brandRepository.findById(request.getBrandId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.BRAND_NOT_FOUND));
+
         Store store = Store.builder()
+                .brand(brand)
                 .name(request.getName())
                 .location(request.getLocation())
                 .storeType(request.getStoreType())
@@ -99,7 +106,9 @@ public class StoreService {
     public StoreResponseDto update(Long id, StoreRequestDto request) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
-        store.update(request.getName(), request.getLocation(), request.getStoreType(), request.getPhone());
+        Brand brand = brandRepository.findById(request.getBrandId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.BRAND_NOT_FOUND));
+        store.update(request.getName(), request.getLocation(), request.getStoreType(), request.getPhone(), brand);
         return StoreResponseDto.from(store);
     }
 

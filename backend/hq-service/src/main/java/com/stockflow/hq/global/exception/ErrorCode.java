@@ -58,7 +58,16 @@ public enum ErrorCode {
     AI_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI_SERVICE_UNAVAILABLE", "AI 추천 서비스에 일시적으로 연결할 수 없습니다."),
 
     // 매장 코드 / 회원가입
-    STORE_MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT, "STORE_MANAGER_ALREADY_EXISTS", "이미 해당 매장에 등록된 매장 관리자가 있습니다.");
+    STORE_MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT, "STORE_MANAGER_ALREADY_EXISTS", "이미 해당 매장에 등록된 매장 관리자가 있습니다."),
+
+    // 이상탐지 알림
+    ANOMALY_ALERT_NOT_FOUND(HttpStatus.NOT_FOUND, "ANOMALY_ALERT_NOT_FOUND", "이상탐지 알림을 찾을 수 없습니다."),
+
+    // 사이즈
+    SIZE_NOT_FOUND(HttpStatus.NOT_FOUND, "SIZE_NOT_FOUND", "사이즈를 찾을 수 없습니다."),
+
+    // 매장-창고 연결
+    STORE_WAREHOUSE_NOT_ASSIGNED(HttpStatus.BAD_REQUEST, "STORE_WAREHOUSE_NOT_ASSIGNED", "이 매장에 지정된 창고가 없습니다. 매장 정보에서 담당 창고를 먼저 설정해주세요.");
 
     private final HttpStatus status;
     private final String code;

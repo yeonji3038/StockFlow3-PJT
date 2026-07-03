@@ -42,7 +42,7 @@ public class StockHistoryResponseDto {
                 .skuCode(history.getProductOption().getSkuCode())
                 .productName(history.getProductOption().getProduct().getName())
                 .color(history.getProductOption().getColor())
-                .size(history.getProductOption().getSize().name())
+                .size(history.getProductOption().getSize().getName())
                 .type(history.getType())
                 .typeDescription(history.getType().getDescription())
                 .reason(history.getReason())

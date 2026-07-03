@@ -1,32 +1,30 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getRole } from '../../../lib/auth'
-import SectionCard from '../../../components/ui/SectionCard'
+import ErpPageFrame, { ErpAccessDenied } from '../../../components/ui/ErpPageFrame'
 import ProductRegisterForm from '../../../components/product/register/ProductRegisterForm'
 
 export default function ProductRegisterPage() {
   const role = getRole()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isHq = role === 'HQ_STAFF'
+  const defaultBrandId = Number(searchParams.get('brandId'))
+  const presetBrandId = Number.isFinite(defaultBrandId) && defaultBrandId > 0 ? defaultBrandId : undefined
 
   if (!isHq) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-lg font-semibold text-slate-900">상품 등록</h1>
-        <p className="text-sm text-slate-500">본사(HQ) 권한에서만 접근할 수 있습니다.</p>
-      </div>
+      <ErpAccessDenied title="상품 등록" message="본사(HQ) 권한에서만 접근할 수 있습니다." />
     )
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-slate-900">상품 등록</h1>
-      <SectionCard title="신규 상품">
-        <ProductRegisterForm
-          onRegistered={(productId) =>
-            navigate(`/admin/product-options/${productId}`, { replace: true })
-          }
-        />
-      </SectionCard>
-    </div>
+    <ErpPageFrame title="상품 등록">
+      <ProductRegisterForm
+        defaultBrandId={presetBrandId}
+        onGoToOptions={(productId) =>
+          navigate(`/admin/product-options/${productId}`, { replace: true })
+        }
+      />
+    </ErpPageFrame>
   )
 }

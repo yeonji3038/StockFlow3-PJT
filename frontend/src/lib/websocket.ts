@@ -7,6 +7,7 @@ const WS_URL = `${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'}/
 
 const TOPICS = {
   allocations: '/topic/allocations',
+  orders: '/topic/orders',
   lowStock: '/topic/low-stock',
   dashboard: '/topic/dashboard',
 } as const
@@ -53,16 +54,19 @@ function parseLowStockItems(raw: unknown): Omit<LowStockAlert, 'id'>[] {
 export function useWebSocket(): void {
   const bumpDashboardRefresh = useStockStore((s) => s.bumpDashboardRefresh)
   const bumpAllocationRefresh = useStockStore((s) => s.bumpAllocationRefresh)
+  const bumpOrderRefresh = useStockStore((s) => s.bumpOrderRefresh)
   const pushLowStockAlert = useStockStore((s) => s.pushLowStockAlert)
 
   const actionsRef = useRef({
     bumpDashboardRefresh,
     bumpAllocationRefresh,
+    bumpOrderRefresh,
     pushLowStockAlert,
   })
   actionsRef.current = {
     bumpDashboardRefresh,
     bumpAllocationRefresh,
+    bumpOrderRefresh,
     pushLowStockAlert,
   }
 
@@ -73,7 +77,7 @@ export function useWebSocket(): void {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       onConnect: () => {
-        const { bumpDashboardRefresh, bumpAllocationRefresh, pushLowStockAlert } =
+        const { bumpDashboardRefresh, bumpAllocationRefresh, bumpOrderRefresh, pushLowStockAlert } =
           actionsRef.current
 
         client.subscribe(TOPICS.dashboard, () => {
@@ -82,6 +86,10 @@ export function useWebSocket(): void {
 
         client.subscribe(TOPICS.allocations, () => {
           bumpAllocationRefresh()
+        })
+
+        client.subscribe(TOPICS.orders, () => {
+          bumpOrderRefresh()
         })
 
         client.subscribe(TOPICS.lowStock, (message: IMessage) => {

@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { api } from '../../../lib/api'
-import SectionCard from '../../ui/SectionCard'
 import LoadingSpinner from '../../ui/LoadingSpinner'
 import Modal from '../../ui/Modal'
-import { parseApiErrorMessage, productOptionInputClass } from '../../../lib/productOption'
+import {
+  ErpDataTable,
+  ErpFooterBar,
+  ErpFooterPrimary,
+  ErpGridWrap,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpToolbar,
+  ErpToolbarButton,
+} from '../../ui/erp/ErpLayout'
+import { erpGridCellClass, erpGridHeadClass, erpInputClass } from '../../../lib/erpUi'
+import { parseApiErrorMessage } from '../../../lib/productOption'
 
 type SeasonType = 'SS' | 'FW'
 type SeasonStatus = 'PLANNING' | 'IN_PROGRESS' | 'ENDED'
@@ -56,11 +66,12 @@ function seasonStatusLabel(status: SeasonStatus): string {
   return SEASON_STATUS_OPTIONS.find((o) => o.value === status)?.label ?? status
 }
 
-function inputClass() {
-  return productOptionInputClass()
+type Props = {
+  brandId: number
+  brandName: string
 }
 
-export default function SeasonManagePanel() {
+export default function SeasonManagePanel({ brandName }: Props) {
   const [seasons, setSeasons] = useState<SeasonRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -169,96 +180,98 @@ export default function SeasonManagePanel() {
 
   return (
     <>
-      <SectionCard
-        title="시즌"
-        headerRight={
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="시즌명 · 연도"
-              className="h-9 min-w-[10rem] rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <button
-              type="button"
-              onClick={openCreate}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              시즌 등록
-            </button>
-          </div>
-        }
-      >
-        {loading ? (
+      <ErpToolbar>
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="시즌명 · 연도"
+          className={[erpInputClass(), 'max-w-[12rem]'].join(' ')}
+        />
+        <ErpToolbarButton onClick={() => setQ('')}>초기화</ErpToolbarButton>
+        <ErpToolbarButton onClick={() => void load()}>새로고침</ErpToolbarButton>
+        <span className="ml-auto text-[11px] text-slate-500">{brandName}</span>
+      </ErpToolbar>
+
+      {error ? (
+        <div className="border-b border-slate-300 px-2 py-1.5 text-xs text-rose-600">{error}</div>
+      ) : null}
+
+      {loading ? (
+        <div className="py-8">
           <LoadingSpinner />
-        ) : (
-          <div className="space-y-3">
-            {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-            <div className="overflow-x-auto rounded-md border border-slate-100">
-              <table className="w-full min-w-[640px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                    <th className="px-3 py-2.5">시즌명</th>
-                    <th className="px-3 py-2.5">유형</th>
-                    <th className="px-3 py-2.5">연도</th>
-                    <th className="px-3 py-2.5">기간</th>
-                    <th className="px-3 py-2.5">상태</th>
-                    <th className="px-3 py-2.5 text-right">관리</th>
+        </div>
+      ) : (
+        <>
+          <ErpGridWrap maxHeight="max-h-[min(24rem,calc(100vh-20rem))]">
+            <ErpDataTable minWidth="640px">
+              <thead>
+                <tr>
+                  <th className={erpGridHeadClass()}>시즌명</th>
+                  <th className={erpGridHeadClass()}>유형</th>
+                  <th className={erpGridHeadClass()}>연도</th>
+                  <th className={erpGridHeadClass()}>기간</th>
+                  <th className={erpGridHeadClass()}>상태</th>
+                  <th className={[erpGridHeadClass(), 'w-10 text-center'].join(' ')}>
+                    <span className="sr-only">삭제</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className={erpGridCellClass('py-10 text-center text-slate-400')}>
+                      등록된 시즌이 없습니다.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-3 py-10 text-center text-slate-400">
-                        등록된 시즌이 없습니다.
+                ) : (
+                  filtered.map((row) => (
+                    <tr
+                      key={row.id}
+                      onClick={() => openEdit(row)}
+                      className="cursor-pointer hover:bg-blue-50/60"
+                    >
+                      <td className={erpGridCellClass('font-medium')}>{row.name}</td>
+                      <td className={erpGridCellClass()}>{seasonTypeLabel(row.type)}</td>
+                      <td className={erpGridCellClass()}>{row.year}</td>
+                      <td className={erpGridCellClass('text-[11px]')}>
+                        {row.startDate || row.endDate
+                          ? `${row.startDate ?? '—'} ~ ${row.endDate ?? '—'}`
+                          : '—'}
+                      </td>
+                      <td className={erpGridCellClass()}>{seasonStatusLabel(row.status)}</td>
+                      <td className={erpGridCellClass('text-center')}>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            void remove(row)
+                          }}
+                          disabled={deletingId === row.id}
+                          className="inline-flex items-center justify-center text-rose-600 hover:text-rose-800 disabled:opacity-60"
+                          aria-label={deletingId === row.id ? '삭제 중…' : '삭제'}
+                          title={deletingId === row.id ? '삭제 중…' : '삭제'}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden />
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    filtered.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
-                      >
-                        <td className="px-3 py-2 font-medium text-slate-900">{row.name}</td>
-                        <td className="px-3 py-2 text-slate-700">{seasonTypeLabel(row.type)}</td>
-                        <td className="px-3 py-2 text-slate-700">{row.year}</td>
-                        <td className="px-3 py-2 text-xs text-slate-600">
-                          {row.startDate || row.endDate
-                            ? `${row.startDate ?? '—'} ~ ${row.endDate ?? '—'}`
-                            : '—'}
-                        </td>
-                        <td className="px-3 py-2 text-slate-700">{seasonStatusLabel(row.status)}</td>
-                        <td className="px-3 py-2">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openEdit(row)}
-                              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-                            >
-                              <Pencil className="h-3.5 w-3.5" aria-hidden />
-                              수정
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void remove(row)}
-                              disabled={deletingId === row.id}
-                              className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 shadow-sm hover:bg-rose-100 disabled:opacity-60"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                              삭제
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </SectionCard>
+                  ))
+                )}
+              </tbody>
+            </ErpDataTable>
+          </ErpGridWrap>
+
+          <ErpFooterBar>
+            <ErpSecondaryButton onClick={() => void load()}>조회</ErpSecondaryButton>
+            <ErpFooterPrimary>
+              <ErpPrimaryButton onClick={openCreate}>
+                <Plus className="mr-1 inline h-3.5 w-3.5" aria-hidden />
+                시즌 등록
+              </ErpPrimaryButton>
+            </ErpFooterPrimary>
+          </ErpFooterBar>
+        </>
+      )}
 
       <Modal
         title={editingId != null ? '시즌 수정' : '시즌 등록'}
@@ -271,7 +284,7 @@ export default function SeasonManagePanel() {
             <input
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className={inputClass()}
+              className={erpInputClass()}
               placeholder="예: 2026 SS"
               maxLength={100}
             />
@@ -282,7 +295,7 @@ export default function SeasonManagePanel() {
               <select
                 value={form.type}
                 onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as SeasonType }))}
-                className={inputClass()}
+                className={erpInputClass()}
               >
                 {SEASON_TYPE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -296,7 +309,7 @@ export default function SeasonManagePanel() {
               <input
                 value={form.year}
                 onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))}
-                className={inputClass()}
+                className={erpInputClass()}
                 inputMode="numeric"
               />
             </label>
@@ -306,7 +319,7 @@ export default function SeasonManagePanel() {
                 type="date"
                 value={form.startDate}
                 onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-                className={inputClass()}
+                className={erpInputClass()}
               />
             </label>
             <label className="block">
@@ -315,7 +328,7 @@ export default function SeasonManagePanel() {
                 type="date"
                 value={form.endDate}
                 onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
-                className={inputClass()}
+                className={erpInputClass()}
               />
             </label>
             <label className="block sm:col-span-2">
@@ -323,7 +336,7 @@ export default function SeasonManagePanel() {
               <select
                 value={form.status}
                 onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as SeasonStatus }))}
-                className={inputClass()}
+                className={erpInputClass()}
               >
                 {SEASON_STATUS_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>

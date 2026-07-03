@@ -40,23 +40,27 @@ function LowStockToastItem({
 }
 
 /** `lowStockAlerts`를 우측 하단 토스트로 표시합니다. */
-export default function LowStockToaster() {
+export default function LowStockToaster({ inline = false }: { inline?: boolean }) {
   const lowStockAlerts = useStockStore((s) => s.lowStockAlerts)
+
+  const items = lowStockAlerts.map((a) => (
+    <LowStockToastItem
+      key={a.id}
+      id={a.id}
+      skuCode={a.skuCode}
+      warehouseName={a.warehouseName}
+      quantity={a.quantity}
+    />
+  ))
+
+  if (inline) return <>{items}</>
 
   return (
     <div
       className="pointer-events-none fixed bottom-4 right-4 z-[100] flex max-h-[calc(100vh-2rem)] flex-col-reverse gap-2 overflow-y-auto"
       aria-live="polite"
     >
-      {lowStockAlerts.map((a) => (
-        <LowStockToastItem
-          key={a.id}
-          id={a.id}
-          skuCode={a.skuCode}
-          warehouseName={a.warehouseName}
-          quantity={a.quantity}
-        />
-      ))}
+      {items}
     </div>
   )
 }

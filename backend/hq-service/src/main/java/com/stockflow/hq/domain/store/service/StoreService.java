@@ -1,10 +1,14 @@
 package com.stockflow.hq.domain.store.service;
 
+import com.stockflow.hq.domain.brand.entity.Brand;
+import com.stockflow.hq.domain.brand.repository.BrandRepository;
 import com.stockflow.hq.domain.store.dto.StoreRequestDto;
 import com.stockflow.hq.domain.store.dto.StoreResponseDto;
 import com.stockflow.hq.domain.store.entity.Store;
 import com.stockflow.hq.domain.store.entity.StoreType;
 import com.stockflow.hq.domain.store.repository.StoreRepository;
+import com.stockflow.hq.domain.warehouse.entity.Warehouse;
+import com.stockflow.hq.domain.warehouse.repository.WarehouseRepository;
 import com.stockflow.hq.global.exception.BusinessException;
 import com.stockflow.hq.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +25,24 @@ import java.util.stream.Collectors;
 public class StoreService {
 
     private final StoreRepository storeRepository;
+    private final BrandRepository brandRepository;
+    private final WarehouseRepository warehouseRepository;
 
     private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 혼동되는 0/O, 1/I 제외
     private static final SecureRandom RANDOM = new SecureRandom();
 
     // 매장 생성
+// 매장 생성
     @Transactional
     public StoreResponseDto create(StoreRequestDto request) {
+        Brand brand = brandRepository.findById(request.getBrandId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.BRAND_NOT_FOUND));
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.WAREHOUSE_NOT_FOUND));
+
         Store store = Store.builder()
+                .brand(brand)
+                .warehouse(warehouse)
                 .name(request.getName())
                 .location(request.getLocation())
                 .storeType(request.getStoreType())
@@ -99,7 +113,11 @@ public class StoreService {
     public StoreResponseDto update(Long id, StoreRequestDto request) {
         Store store = storeRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
-        store.update(request.getName(), request.getLocation(), request.getStoreType(), request.getPhone());
+        Brand brand = brandRepository.findById(request.getBrandId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.BRAND_NOT_FOUND));
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.WAREHOUSE_NOT_FOUND));
+        store.update(request.getName(), request.getLocation(), request.getStoreType(), request.getPhone(), brand, warehouse);
         return StoreResponseDto.from(store);
     }
 

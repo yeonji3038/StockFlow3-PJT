@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 // 주의: FastAPI(Python/Pydantic)는 응답 필드를 snake_case(store_id 등)로 내려주는데
 // Java는 camelCase(storeId) 컨벤션을 쓰므로, @JsonProperty로 명시적 매핑이 반드시 필요함.
-// 이 매핑이 없으면 역직렬화 시 필드값이 전부 null로 들어옴 (실제로 겪었던 이슈).
+// 이 매핑이 없으면 역직렬화 시 필드값이 전부 null로 들어옴
 public class AiDto {
 
     @Getter

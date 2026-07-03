@@ -4,6 +4,7 @@ import { api } from '../lib/api'
 import { allocationStatusLabel } from '../lib/allocationLabels'
 import { getRole, getStoreId, getWarehouseId } from '../lib/auth'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import TablePaginationBar from '../components/ui/TablePaginationBar'
 import Modal from '../components/ui/Modal'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -357,7 +358,7 @@ export default function MovementsPage() {
     [historyCards, selectedHistoryId],
   )
 
-  const sectionTitle = mode === 'allocations' ? '배송/이동 조회' : '입출고 이력 조회'
+  const sectionTitle = mode === 'allocations' ? '배송/이동 조회' : ''
   const searchPlaceholder =
     mode === 'allocations'
       ? '이동 번호, 창고, 매장, SKU, 상품명 검색'
@@ -390,12 +391,9 @@ export default function MovementsPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">입출고 이력</h1>
-      </div>
-
+    <ErpPageFrame title="입출고 이력">
       <SectionCard
+        embedded
         title={sectionTitle}
         headerRight={
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -677,6 +675,6 @@ export default function MovementsPage() {
           </dl>
         ) : null}
       </Modal>
-    </div>
+    </ErpPageFrame>
   )
 }

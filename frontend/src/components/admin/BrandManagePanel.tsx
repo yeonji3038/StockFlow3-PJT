@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { api } from '../../lib/api'
 import SectionCard from '../ui/SectionCard'
 import LoadingSpinner from '../ui/LoadingSpinner'
@@ -9,15 +9,17 @@ import { parseApiErrorMessage, productOptionInputClass } from '../../lib/product
 type BrandRow = {
   id: number
   name: string
+  code: string
   description: string | null
 }
 
 type BrandForm = {
   name: string
+  code: string
   description: string
 }
 
-const emptyForm: BrandForm = { name: '', description: '' }
+const emptyForm: BrandForm = { name: '', code: '', description: '' }
 
 function inputClass() {
   return productOptionInputClass()
@@ -58,7 +60,7 @@ export default function BrandManagePanel() {
     return brands
       .filter((b) => {
         if (!needle) return true
-        const hay = [b.name, b.description ?? ''].join(' ').toLowerCase()
+        const hay = [b.name, b.code, b.description ?? ''].join(' ').toLowerCase()
         return hay.includes(needle)
       })
       .sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'))
@@ -72,17 +74,18 @@ export default function BrandManagePanel() {
 
   const openEdit = (row: BrandRow) => {
     setEditingId(row.id)
-    setForm({ name: row.name, description: row.description ?? '' })
+    setForm({ name: row.name, code: row.code, description: row.description ?? '' })
     setModalOpen(true)
   }
 
   const save = async () => {
-    if (!form.name.trim() || saving) return
+    if (!form.name.trim() || !form.code.trim() || saving) return
     setSaving(true)
     setError(null)
     try {
       const body = {
         name: form.name.trim(),
+        code: form.code.trim().toUpperCase(),
         description: form.description.trim() || undefined,
       }
       if (editingId != null) {
@@ -117,6 +120,7 @@ export default function BrandManagePanel() {
   return (
     <>
       <SectionCard
+        embedded
         title="브랜드 목록"
         headerRight={
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -147,14 +151,17 @@ export default function BrandManagePanel() {
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                     <th className="px-3 py-2.5">브랜드명</th>
+                    <th className="px-3 py-2.5">코드</th>
                     <th className="px-3 py-2.5">설명</th>
-                    <th className="px-3 py-2.5 text-right">관리</th>
+                    <th className="w-10 px-3 py-2.5 text-right">
+                      <span className="sr-only">삭제</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-3 py-10 text-center text-slate-400">
+                      <td colSpan={4} className="px-3 py-10 text-center text-slate-400">
                         등록된 브랜드가 없습니다.
                       </td>
                     </tr>
@@ -162,28 +169,26 @@ export default function BrandManagePanel() {
                     filtered.map((row) => (
                       <tr
                         key={row.id}
-                        className="border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
+                        onClick={() => openEdit(row)}
+                        className="cursor-pointer border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
                       >
                         <td className="px-3 py-2 font-medium text-slate-900">{row.name}</td>
+                        <td className="px-3 py-2 font-mono text-xs text-slate-800">{row.code}</td>
                         <td className="px-3 py-2 text-slate-600">{row.description ?? '—'}</td>
                         <td className="px-3 py-2">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end">
                             <button
                               type="button"
-                              onClick={() => openEdit(row)}
-                              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-                            >
-                              <Pencil className="h-3.5 w-3.5" aria-hidden />
-                              수정
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => void remove(row)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                void remove(row)
+                              }}
                               disabled={deletingId === row.id}
-                              className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 shadow-sm hover:bg-rose-100 disabled:opacity-60"
+                              className="inline-flex items-center justify-center text-rose-600 hover:text-rose-800 disabled:opacity-60"
+                              aria-label={deletingId === row.id ? '삭제 중…' : '삭제'}
+                              title={deletingId === row.id ? '삭제 중…' : '삭제'}
                             >
-                              <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                              삭제
+                              <Trash2 className="h-4 w-4" aria-hidden />
                             </button>
                           </div>
                         </td>
@@ -211,6 +216,16 @@ export default function BrandManagePanel() {
               className={inputClass()}
               placeholder="예: 테스트브랜드"
               maxLength={100}
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">브랜드 코드</span>
+            <input
+              value={form.code}
+              onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
+              className={inputClass()}
+              placeholder="예: LEE"
+              maxLength={20}
             />
           </label>
           <label className="block">

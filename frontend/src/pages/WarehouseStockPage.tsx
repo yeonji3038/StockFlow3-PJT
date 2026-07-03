@@ -3,11 +3,18 @@ import { api } from '../lib/api'
 import { getRole, getWarehouseId } from '../lib/auth'
 import { resolveDefaultWarehouseId } from '../lib/warehouseContext'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import TablePaginationBar from '../components/ui/TablePaginationBar'
 import Modal from '../components/ui/Modal'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useTablePagination } from '../hooks/useTablePagination'
 import type { WarehouseStock, WarehouseSummary } from '../types/models'
+import {
+  isWarehouseLowStock,
+  warehouseAvailableQty,
+  warehouseReservedQty,
+  WAREHOUSE_LOW_STOCK_MAX,
+} from '../lib/warehouseStock'
 
 export default function WarehouseStockPage() {
   const role = getRole()
@@ -99,12 +106,9 @@ export default function WarehouseStockPage() {
   const stockPagination = useTablePagination(filtered)
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">창고 재고</h1>
-      </div>
-
+    <ErpPageFrame title="창고 재고">
       <SectionCard
+        embedded
         title="재고 조회"
         headerRight={
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -191,7 +195,7 @@ export default function WarehouseStockPage() {
           <div>
             <div className="overflow-x-auto rounded-md border border-slate-100">
               <div className="max-h-[min(28rem,calc(100vh-14rem))] overflow-y-auto">
-                <table className="w-full min-w-[640px] border-collapse text-sm">
+                <table className="w-full min-w-[820px] border-collapse text-sm">
                   <thead>
                     <tr className="sticky top-0 z-[1] border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                       <th className="px-3 py-2.5">SKU</th>
@@ -199,17 +203,22 @@ export default function WarehouseStockPage() {
                       <th className="px-3 py-2.5">색상</th>
                       <th className="px-3 py-2.5">사이즈</th>
                       <th className="px-3 py-2.5 text-right">수량</th>
+                      <th className="px-3 py-2.5 text-right">예약중</th>
+                      <th className="px-3 py-2.5 text-right">가용재고</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-3 py-12 text-center text-slate-400">
+                        <td colSpan={7} className="px-3 py-12 text-center text-slate-400">
                           검색/필터 조건에 맞는 데이터가 없습니다.
                         </td>
                       </tr>
                     ) : (
-                      stockPagination.pageItems.map((s) => (
+                      stockPagination.pageItems.map((s) => {
+                        const available = warehouseAvailableQty(s)
+                        const low = isWarehouseLowStock(s)
+                        return (
                         <tr
                           key={s.id}
                           role="button"
@@ -224,11 +233,28 @@ export default function WarehouseStockPage() {
                           <td className="px-3 py-2 text-slate-800">{s.productName}</td>
                           <td className="px-3 py-2 text-slate-700">{s.color}</td>
                           <td className="px-3 py-2 text-slate-700">{s.size}</td>
-                          <td className="px-3 py-2 text-right font-medium tabular-nums text-slate-900">
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-900">
                             {s.quantity}
                           </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-700">
+                            {warehouseReservedQty(s)}
+                          </td>
+                          <td
+                            className={[
+                              'px-3 py-2 text-right font-medium tabular-nums',
+                              low ? 'text-rose-700' : 'text-slate-900',
+                            ].join(' ')}
+                          >
+                            {available}
+                            {low ? (
+                              <span className="ml-1 text-[10px] font-semibold text-rose-600">
+                                저재고
+                              </span>
+                            ) : null}
+                          </td>
                         </tr>
-                      ))
+                        )
+                      })
                     )}
                   </tbody>
                 </table>
@@ -272,12 +298,37 @@ export default function WarehouseStockPage() {
               </div>
               <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
                 <p className="text-xs font-medium uppercase text-slate-500">재고 수량</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">
-                  {selected.quantity}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-[10px] text-slate-500">수량</p>
+                    <p className="text-lg font-semibold tabular-nums text-slate-900">{selected.quantity}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-500">예약중</p>
+                    <p className="text-lg font-semibold tabular-nums text-slate-700">
+                      {warehouseReservedQty(selected)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-500">가용재고</p>
+                    <p
+                      className={[
+                        'text-lg font-semibold tabular-nums',
+                        isWarehouseLowStock(selected) ? 'text-rose-700' : 'text-slate-900',
+                      ].join(' ')}
+                    >
+                      {warehouseAvailableQty(selected)}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
                   창고: {selected.warehouseName} (ID {selected.warehouseId})
                 </p>
+                {isWarehouseLowStock(selected) ? (
+                  <p className="mt-1 text-xs font-medium text-rose-600">
+                    가용재고 {WAREHOUSE_LOW_STOCK_MAX} 이하 — 저재고
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -314,6 +365,6 @@ export default function WarehouseStockPage() {
           </div>
         ) : null}
       </Modal>
-    </div>
+    </ErpPageFrame>
   )
 }

@@ -1,11 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { isAxiosError } from 'axios'
+import { Check, Copy } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../../../lib/api'
 import { PRODUCT_STATUS_OPTIONS, type ProductStatusValue } from '../../../lib/productStatus'
+import { erpInputClass, erpSelectClass } from '../../../lib/erpUi'
+import type { ProductListItem } from '../types'
 import LoadingSpinner from '../../ui/LoadingSpinner'
+import {
+  ErpFooterBar,
+  ErpFooterPrimary,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpStatusBar,
+} from '../../ui/erp/ErpLayout'
 
-type BrandRow = { id: number; name: string }
-type CategoryNode = { id: number; name: string; children?: CategoryNode[] }
+type BrandRow = { id: number; name: string; code?: string }
+type CategoryNode = { id: number; name: string; code?: string; children?: CategoryNode[] }
 type SeasonRow = {
   id: number
   name: string
@@ -15,7 +30,9 @@ type SeasonRow = {
 export type { ProductStatusValue }
 
 type Props = {
-  onRegistered?: (productId: number) => void
+  formId?: string
+  onGoToOptions?: (productId: number) => void
+  defaultBrandId?: number
 }
 
 function flattenCategories(nodes: CategoryNode[], parentLabel = ''): { id: number; label: string }[] {
@@ -30,11 +47,8 @@ function flattenCategories(nodes: CategoryNode[], parentLabel = ''): { id: numbe
   return rows
 }
 
-function inputClass() {
-  return 'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
-}
-
-export default function ProductRegisterForm({ onRegistered }: Props) {
+export default function ProductRegisterForm({ formId = 'product-register-form', onGoToOptions, defaultBrandId }: Props) {
+  const navigate = useNavigate()
   const [brands, setBrands] = useState<BrandRow[]>([])
   const [categories, setCategories] = useState<CategoryNode[]>([])
   const [seasons, setSeasons] = useState<SeasonRow[]>([])
@@ -52,7 +66,8 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
 
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [registered, setRegistered] = useState<ProductListItem | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const categoryOptions = useMemo(() => flattenCategories(categories), [categories])
 
@@ -79,9 +94,15 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
     void loadMeta()
   }, [loadMeta])
 
+  useEffect(() => {
+    if (defaultBrandId != null && defaultBrandId > 0) {
+      setBrandId(String(defaultBrandId))
+    }
+  }, [defaultBrandId])
+
   const resetForm = () => {
     setName('')
-    setBrandId('')
+    setBrandId(defaultBrandId != null && defaultBrandId > 0 ? String(defaultBrandId) : '')
     setCategoryId('')
     setSeasonId('')
     setPrice('')
@@ -93,7 +114,7 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormError(null)
-    setSuccess(null)
+    setRegistered(null)
 
     const b = Number(brandId)
     const cat = Number(categoryId)
@@ -140,10 +161,8 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
       const desc = description.trim()
       if (desc) body.description = desc
 
-      const { data } = await api.post<{ id: number; name: string }>('/api/products', body)
-      setSuccess(`상품이 등록되었습니다. (ID ${data.id}${data.name ? ` · ${data.name}` : ''})`)
-      resetForm()
-      onRegistered?.(data.id)
+      const { data } = await api.post<ProductListItem>('/api/products', body)
+      setRegistered(data)
     } catch (err) {
       if (isAxiosError(err)) {
         const d = err.response?.data as { message?: string } | string | undefined
@@ -158,155 +177,229 @@ export default function ProductRegisterForm({ onRegistered }: Props) {
     }
   }
 
+  const copyProductCode = async () => {
+    if (!registered?.productCode) return
+    try {
+      await navigator.clipboard.writeText(registered.productCode)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setFormError('클립보드 복사에 실패했습니다.')
+    }
+  }
+
+  if (registered) {
+    return (
+      <div className="space-y-4 px-3 py-6">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/80 px-6 py-8 text-center">
+          <p className="text-sm font-medium text-emerald-800">상품이 등록되었습니다</p>
+          <p className="mt-1 text-xs text-emerald-700">{registered.name}</p>
+          {registered.productCode ? (
+            <>
+              <p className="mt-6 text-xs font-medium uppercase tracking-wide text-slate-500">
+                발급된 상품 코드
+              </p>
+              <p className="mt-2 font-mono text-2xl font-bold tracking-wider text-slate-900 sm:text-3xl">
+                {registered.productCode}
+              </p>
+              <button
+                type="button"
+                onClick={() => void copyProductCode()}
+                className="mt-4 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 text-emerald-600" aria-hidden />
+                    복사됨
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" aria-hidden />
+                    코드 복사
+                  </>
+                )}
+              </button>
+            </>
+          ) : null}
+        </div>
+        <ErpFooterBar>
+          <ErpSecondaryButton
+            onClick={() => {
+              resetForm()
+            }}
+          >
+            추가 등록
+          </ErpSecondaryButton>
+          <ErpFooterPrimary>
+            <ErpPrimaryButton
+              onClick={() => {
+                if (onGoToOptions) onGoToOptions(registered.id)
+                else navigate(`/admin/product-options/${registered.id}`)
+              }}
+            >
+              SKU 옵션 등록
+            </ErpPrimaryButton>
+          </ErpFooterPrimary>
+        </ErpFooterBar>
+      </div>
+    )
+  }
+
   if (metaLoading) {
-    return <LoadingSpinner label="선택 목록을 불러오는 중…" />
+    return (
+      <div className="py-12">
+        <LoadingSpinner label="선택 목록을 불러오는 중…" />
+      </div>
+    )
   }
 
   if (metaError) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 px-3 py-8 text-center">
         <p className="text-sm text-rose-600">{metaError}</p>
-        <button
-          type="button"
-          onClick={() => void loadMeta()}
-          className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-        >
-          다시 시도
-        </button>
+        <ErpSecondaryButton onClick={() => void loadMeta()}>다시 시도</ErpSecondaryButton>
       </div>
     )
   }
 
   return (
-    <form className="space-y-4" onSubmit={(e) => void handleSubmit(e)}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-600">상품명</span>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={inputClass()}
-            placeholder="예: 린넨 셔츠"
-            maxLength={200}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">브랜드</span>
-          <select
-            value={brandId}
-            onChange={(e) => setBrandId(e.target.value)}
-            className={inputClass()}
-            required
-          >
-            <option value="">선택</option>
-            {brands.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">카테고리</span>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className={inputClass()}
-            required
-          >
-            <option value="">선택</option>
-            {categoryOptions.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-600">시즌</span>
-          <select
-            value={seasonId}
-            onChange={(e) => setSeasonId(e.target.value)}
-            className={inputClass()}
-            required
-          >
-            <option value="">선택</option>
-            {seasons.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.year != null ? `${s.name} (${s.year})` : s.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">판매가 (원)</span>
-          <input
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className={inputClass()}
-            inputMode="numeric"
-            placeholder="0"
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">원가 (원)</span>
-          <input
-            value={cost}
-            onChange={(e) => setCost(e.target.value)}
-            className={inputClass()}
-            inputMode="numeric"
-            placeholder="0"
-          />
-        </label>
-        <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-600">상태</span>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as ProductStatusValue)}
-            className={inputClass()}
-          >
-            {PRODUCT_STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block sm:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-600">설명 (선택)</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="min-h-[88px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="소재, 핏 등 간단 메모"
-            rows={3}
-          />
-        </label>
-      </div>
+    <form id={formId} onSubmit={(e) => void handleSubmit(e)}>
+      <ErpFormTable>
+        <ErpFormRow>
+          <ErpFormLabel required>상품명</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={erpInputClass()}
+              placeholder="예: 린넨 셔츠"
+              maxLength={200}
+            />
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel required>브랜드</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className={erpSelectClass()}
+              required
+            >
+              <option value="">선택</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+          <ErpFormLabel required>카테고리</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className={erpSelectClass()}
+              required
+            >
+              <option value="">선택</option>
+              {categoryOptions.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel required>시즌</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={seasonId}
+              onChange={(e) => setSeasonId(e.target.value)}
+              className={erpSelectClass()}
+              required
+            >
+              <option value="">선택</option>
+              {seasons.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.year != null ? `${s.name} (${s.year})` : s.name}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+          <ErpFormLabel required>상태</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ProductStatusValue)}
+              className={erpSelectClass()}
+            >
+              {PRODUCT_STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel required>판매가</ErpFormLabel>
+          <ErpFormCell>
+            <input
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className={erpInputClass()}
+              inputMode="numeric"
+              placeholder="원"
+            />
+          </ErpFormCell>
+          <ErpFormLabel required>원가</ErpFormLabel>
+          <ErpFormCell>
+            <input
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              className={erpInputClass()}
+              inputMode="numeric"
+              placeholder="원"
+            />
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>설명</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-[4.5rem] w-full border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500"
+              placeholder="소재, 핏 등 간단 메모 (선택)"
+              rows={3}
+            />
+          </ErpFormCell>
+        </ErpFormRow>
+      </ErpFormTable>
 
-      {formError ? <p className="text-sm text-rose-600">{formError}</p> : null}
-      {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
+      {formError ? (
+        <ErpStatusBar>
+          <span className="text-rose-600">{formError}</span>
+        </ErpStatusBar>
+      ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60"
-        >
-          {submitting ? '등록 중…' : '상품 등록'}
-        </button>
-        <button
+      <ErpFooterBar>
+        <ErpSecondaryButton
           type="button"
           onClick={() => {
             resetForm()
-            setFormError(null)
-            setSuccess(null)
           }}
-          className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
         >
           입력 초기화
-        </button>
-      </div>
+        </ErpSecondaryButton>
+        <ErpFooterPrimary>
+          <ErpPrimaryButton type="submit" disabled={submitting}>
+            {submitting ? '등록 중…' : '상품 등록'}
+          </ErpPrimaryButton>
+        </ErpFooterPrimary>
+      </ErpFooterBar>
     </form>
   )
 }

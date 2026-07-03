@@ -22,6 +22,9 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "product_code", nullable = false, unique = true)
+    private String productCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     private Brand brand;
