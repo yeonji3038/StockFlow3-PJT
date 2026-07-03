@@ -16,10 +16,16 @@ import {
   Building2,
   Plus,
   Tag,
+  AlertTriangle,
+  Container,
+  Truck,
 } from 'lucide-react'
-import { getRole, getStoreId, logout, roleLabel } from '../../lib/auth'
+import { getRole, getStoreId, getUserId, getWarehouseId, logout, roleLabel } from '../../lib/auth'
 import { api } from '../../lib/api'
+import { useUnresolvedAnomalyCount } from '../../hooks/useUnresolvedAnomalyCount'
 import type { StoreListItem } from '../../lib/store'
+import type { WarehouseListItem } from '../../lib/warehouse'
+import { resolveCurrentUserId } from '../../lib/resolveCurrentUserId'
 import LoadingSpinner from '../ui/LoadingSpinner'
 
 const baseNav = [
@@ -36,18 +42,28 @@ export default function Sidebar() {
   const name = localStorage.getItem('name') ?? '사용자'
   const role = getRole()
   const storeId = getStoreId()
+  const warehouseId = getWarehouseId()
   const [storeName, setStoreName] = useState<string | null>(null)
-  const [storeNameLoading, setStoreNameLoading] = useState(storeId != null)
+  const [brandName, setBrandName] = useState<string | null>(null)
+  const [storeProfileLoading, setStoreProfileLoading] = useState(storeId != null)
+  const [warehouseName, setWarehouseName] = useState<string | null>(null)
+  const [warehouseProfileLoading, setWarehouseProfileLoading] = useState(
+    warehouseId != null || role === 'WAREHOUSE_STAFF',
+  )
   const isHq = role === 'HQ_STAFF'
   const isStoreManager = role === 'STORE_MANAGER'
   const isWarehouseStaff = role === 'WAREHOUSE_STAFF'
+  const { count: unresolvedAnomalyCount } = useUnresolvedAnomalyCount(isHq)
 
-  /** HQ만 타 역할 메뉴에 창고 재고. 매장: 발주·매장재고·입출고. 창고: 대시보드·창고재고·입출고 */
+  /** HQ만 타 역할 메뉴에 창고 재고. 매장: 발주·매장재고·입출고. 창고: 대시보드·창고재고·발주출고·입출고 */
   const nav = useMemo(() => {
     if (isWarehouseStaff) {
-      return baseNav.filter((item) =>
-        ['/dashboard', '/warehouse-stock', '/movements'].includes(item.to),
-      )
+      return [
+        { to: '/dashboard', label: '대시보드', icon: LayoutDashboard },
+        { to: '/warehouse-stock', label: '창고 재고', icon: Warehouse },
+        { to: '/warehouse-orders', label: '발주 출고', icon: Truck },
+        { to: '/movements', label: '입출고 이력', icon: History },
+      ] as const
     }
     if (isStoreManager) {
       return baseNav.filter((item) =>
@@ -95,23 +111,39 @@ export default function Sidebar() {
   const [storeFocusInside, setStoreFocusInside] = useState(false)
   const showStoreSub = storeHover || storesNewActive || storeFocusInside || storesDetailActive
 
+  const warehousesNewActive = pathname === '/admin/warehouses/new'
+  const warehousesDetailActive = /^\/admin\/warehouses\/\d+$/.test(pathname)
+  const warehouseSectionActive =
+    pathname === '/admin/warehouses' || warehousesNewActive || warehousesDetailActive
+  const [warehouseHover, setWarehouseHover] = useState(false)
+  const [warehouseFocusInside, setWarehouseFocusInside] = useState(false)
+  const showWarehouseSub =
+    warehouseHover || warehousesNewActive || warehouseFocusInside || warehousesDetailActive
+
   useEffect(() => {
     if (storeId == null) {
       setStoreName(null)
-      setStoreNameLoading(false)
+      setBrandName(null)
+      setStoreProfileLoading(false)
       return
     }
 
     let cancelled = false
-    setStoreNameLoading(true)
+    setStoreProfileLoading(true)
     ;(async () => {
       try {
         const { data } = await api.get<StoreListItem>(`/api/stores/${storeId}`)
-        if (!cancelled) setStoreName(data?.name?.trim() ? data.name.trim() : null)
+        if (!cancelled) {
+          setStoreName(data?.name?.trim() ? data.name.trim() : null)
+          setBrandName(data?.brandName?.trim() ? data.brandName.trim() : null)
+        }
       } catch {
-        if (!cancelled) setStoreName(null)
+        if (!cancelled) {
+          setStoreName(null)
+          setBrandName(null)
+        }
       } finally {
-        if (!cancelled) setStoreNameLoading(false)
+        if (!cancelled) setStoreProfileLoading(false)
       }
     })()
 
@@ -120,12 +152,61 @@ export default function Sidebar() {
     }
   }, [storeId])
 
+  useEffect(() => {
+    if (role !== 'WAREHOUSE_STAFF' && warehouseId == null) {
+      setWarehouseName(null)
+      setWarehouseProfileLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setWarehouseProfileLoading(true)
+    ;(async () => {
+      try {
+        if (warehouseId != null) {
+          const { data } = await api.get<WarehouseListItem>(`/api/warehouses/${warehouseId}`)
+          if (!cancelled) {
+            setWarehouseName(data?.name?.trim() ? data.name.trim() : null)
+          }
+          return
+        }
+
+        const userId = getUserId() ?? (await resolveCurrentUserId())
+        if (userId == null) {
+          if (!cancelled) setWarehouseName(null)
+          return
+        }
+        const { data } = await api.get<WarehouseListItem[]>('/api/warehouses')
+        const assigned = (data ?? []).find((w) => w.managerId === userId)
+        if (!cancelled) {
+          setWarehouseName(assigned?.name?.trim() ? assigned.name.trim() : null)
+        }
+      } catch {
+        if (!cancelled) setWarehouseName(null)
+      } finally {
+        if (!cancelled) setWarehouseProfileLoading(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [warehouseId, role])
+
   const storeAffiliationLabel = useMemo(() => {
     if (storeId == null) return null
-    if (storeNameLoading) return null
+    if (storeProfileLoading) return null
     if (storeName) return storeName
     return `매장 ID ${storeId}`
-  }, [storeId, storeName, storeNameLoading])
+  }, [storeId, storeName, storeProfileLoading])
+
+  const warehouseAffiliationLabel = useMemo(() => {
+    if (role !== 'WAREHOUSE_STAFF' && warehouseId == null) return null
+    if (warehouseProfileLoading) return null
+    if (warehouseName) return warehouseName
+    if (warehouseId != null) return `창고 ID ${warehouseId}`
+    return '담당 창고 미지정'
+  }, [role, warehouseId, warehouseName, warehouseProfileLoading])
 
   const handleLogout = async () => {
     await logout()
@@ -164,6 +245,30 @@ export default function Sidebar() {
             {label}
           </NavLink>
         ))}
+
+        {isHq ? (
+          <NavLink
+            to="/anomaly-alerts"
+            className={({ isActive }) =>
+              [
+                'flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-white text-rose-700 shadow-sm ring-1 ring-slate-200/80'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+              ].join(' ')
+            }
+          >
+            <span className="flex min-w-0 items-center gap-3">
+              <AlertTriangle className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              이상탐지
+            </span>
+            {unresolvedAnomalyCount > 0 ? (
+              <span className="inline-flex min-w-[1.125rem] shrink-0 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-bold leading-none text-white">
+                {unresolvedAnomalyCount > 99 ? '99+' : unresolvedAnomalyCount}
+              </span>
+            ) : null}
+          </NavLink>
+        ) : null}
 
         {isHq ? (
           <div
@@ -358,6 +463,54 @@ export default function Sidebar() {
                 </div>
               ) : null}
             </div>
+            <div
+              className={[
+                'rounded-lg transition-colors',
+                warehouseSectionActive ? 'bg-white shadow-sm ring-1 ring-slate-200/80' : '',
+              ].join(' ')}
+              onMouseEnter={() => setWarehouseHover(true)}
+              onMouseLeave={() => setWarehouseHover(false)}
+              onFocusCapture={() => setWarehouseFocusInside(true)}
+              onBlurCapture={(e) => {
+                const next = e.relatedTarget as Node | null
+                if (!e.currentTarget.contains(next)) setWarehouseFocusInside(false)
+              }}
+            >
+              <NavLink
+                to="/admin/warehouses"
+                className={({ isActive }) =>
+                  [
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive || warehousesNewActive || warehousesDetailActive
+                      ? 'text-blue-700'
+                      : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                  ].join(' ')
+                }
+              >
+                <Container className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                창고 관리
+              </NavLink>
+              {showWarehouseSub ? (
+                <div className="space-y-0.5 pb-1 pl-3">
+                  <div className="ml-3 border-l border-slate-200 pl-2">
+                    <NavLink
+                      to="/admin/warehouses/new"
+                      className={({ isActive }) =>
+                        [
+                          'flex items-center gap-3 rounded-lg py-2 pl-2 pr-3 text-sm font-medium transition-colors',
+                          isActive
+                            ? 'bg-slate-50 text-blue-700 ring-1 ring-slate-200/80'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                        ].join(' ')
+                      }
+                    >
+                      <Plus className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                      창고 등록
+                    </NavLink>
+                  </div>
+                </div>
+              ) : null}
+            </div>
             <NavLink
               to="/admin/users"
               className={({ isActive }) =>
@@ -380,12 +533,31 @@ export default function Sidebar() {
         <div className="mb-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
           <p className="truncate text-sm font-medium text-slate-900">{name}</p>
           {storeId != null ? (
-            storeNameLoading ? (
+            storeProfileLoading ? (
               <div className="mt-1">
                 <LoadingSpinner compact hideLabel />
               </div>
-            ) : storeAffiliationLabel ? (
-              <p className="mt-0.5 truncate text-xs font-medium text-blue-700">{storeAffiliationLabel}</p>
+            ) : (
+              <>
+                {brandName ? (
+                  <p className="mt-0.5 truncate text-xs font-medium text-slate-600">{brandName}</p>
+                ) : null}
+                {storeAffiliationLabel ? (
+                  <p className="mt-0.5 truncate text-xs font-medium text-blue-700">
+                    {storeAffiliationLabel}
+                  </p>
+                ) : null}
+              </>
+            )
+          ) : role === 'WAREHOUSE_STAFF' ? (
+            warehouseProfileLoading ? (
+              <div className="mt-1">
+                <LoadingSpinner compact hideLabel />
+              </div>
+            ) : warehouseAffiliationLabel ? (
+              <p className="mt-0.5 truncate text-xs font-medium text-blue-700">
+                {warehouseAffiliationLabel}
+              </p>
             ) : null
           ) : null}
           <p className="mt-0.5 text-xs text-slate-500">

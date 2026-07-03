@@ -6,6 +6,7 @@ import { allocationStatusLabel } from '../lib/allocationLabels'
 import { getOrResolveApprovedByUserId } from '../lib/resolveCurrentUserId'
 import { getRole, getStoreId, getWarehouseId } from '../lib/auth'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import type { Allocation } from '../types/models'
 
@@ -137,18 +138,28 @@ export default function AllocationDetailPage() {
   const isWarehouse = role === 'WAREHOUSE_STAFF'
   const isStore = role === 'STORE_MANAGER'
 
+  const listLink = (
+    <Link
+      to="/allocations"
+      className="inline-flex h-7 items-center border border-slate-300 bg-white px-2 text-xs text-slate-700 hover:bg-slate-100"
+    >
+      ← 배분 목록
+    </Link>
+  )
+
   if (loading) {
-    return <LoadingSpinner />
+    return (
+      <ErpPageFrame title="배분" actions={listLink}>
+        <LoadingSpinner />
+      </ErpPageFrame>
+    )
   }
 
   if (error || !allocation) {
     return (
-      <div className="space-y-4">
-        <Link to="/allocations" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          ← 배분 목록
-        </Link>
-        <p className="text-sm text-rose-600">{error ?? '데이터가 없습니다.'}</p>
-      </div>
+      <ErpPageFrame title="배분" actions={listLink}>
+        <p className="px-3 py-4 text-sm text-rose-600">{error ?? '데이터가 없습니다.'}</p>
+      </ErpPageFrame>
     )
   }
 
@@ -158,26 +169,20 @@ export default function AllocationDetailPage() {
   if (isStore) {
     if (myStoreId == null) {
       return (
-        <div className="space-y-4">
-          <Link to="/allocations" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-            ← 배분 목록
-          </Link>
-          <p className="text-sm text-rose-600">
+        <ErpPageFrame title="배분" actions={listLink}>
+          <p className="px-3 py-4 text-sm text-rose-600">
             매장 정보가 없어 배분을 조회할 수 없습니다. 다시 로그인해 주세요.
           </p>
-        </div>
+        </ErpPageFrame>
       )
     }
     if (allocation.storeId !== myStoreId) {
       return (
-        <div className="space-y-4">
-          <Link to="/allocations" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-            ← 배분 목록
-          </Link>
-          <p className="text-sm text-rose-600">
+        <ErpPageFrame title="배분" actions={listLink}>
+          <p className="px-3 py-4 text-sm text-rose-600">
             소속 매장으로 배정된 배분만 조회할 수 있습니다.
           </p>
-        </div>
+        </ErpPageFrame>
       )
     }
   }
@@ -199,26 +204,20 @@ export default function AllocationDetailPage() {
   const storeName = allocation.storeName ?? '해당 매장'
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link to="/allocations" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-            ← 배분 목록
-          </Link>
-          <h1 className="mt-2 text-lg font-semibold text-slate-900">
-            배분 <span className="font-mono text-slate-600">#{allocation.id}</span>
-          </h1>
-        </div>
-        <span className="rounded-md bg-slate-100 px-3 py-1 text-sm font-medium text-slate-800 ring-1 ring-slate-200">
+    <ErpPageFrame title={`배분 #${allocation.id}`} actions={listLink}>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-300 px-3 py-1 text-[11px] text-slate-500">
+        <span>{allocation.warehouseName} → {allocation.storeName}</span>
+        <span className="rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-800 ring-1 ring-slate-200">
           {allocationStatusLabel(st)}
         </span>
       </div>
 
       {actionError && (
-        <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{actionError}</p>
+        <p className="border-b border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{actionError}</p>
       )}
 
-      <section className="rounded-xl border border-slate-200 bg-white px-2 py-5 shadow-sm sm:px-4 sm:py-6">
+      <SectionCard embedded title="진행 상태">
+        <div className="px-2 py-4 sm:px-4 sm:py-5">
         {st === 'CANCELLED' ? (
           <p className="text-center text-sm font-medium text-rose-700">취소된 배분입니다.</p>
         ) : (
@@ -275,9 +274,10 @@ export default function AllocationDetailPage() {
             </div>
           </>
         )}
-      </section>
+        </div>
+      </SectionCard>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <SectionCard embedded title="배분 정보">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-slate-500">창고</dt>
@@ -312,10 +312,10 @@ export default function AllocationDetailPage() {
             </dd>
           </div>
         </dl>
-      </section>
+      </SectionCard>
 
       {showHqApproveReject && (
-        <SectionCard title="처리">
+        <SectionCard embedded title="처리">
           <p className="mb-4 text-sm text-slate-600">요청된 배분에 대해 승인 또는 반려(취소)할 수 있습니다.</p>
           <div className="flex flex-wrap gap-3">
             <button
@@ -339,7 +339,7 @@ export default function AllocationDetailPage() {
       )}
 
       {showWarehouseShip && (
-        <SectionCard title="출고">
+        <SectionCard embedded title="출고">
           <p className="mb-4 text-sm text-slate-600">승인된 배분을 창고에서 출고 처리합니다.</p>
           <button
             type="button"
@@ -353,15 +353,15 @@ export default function AllocationDetailPage() {
       )}
 
       {isWarehouse && st === 'REQUESTED' && (
-        <p className="text-sm text-slate-500">본사 승인 후 출고 처리 버튼이 활성화됩니다.</p>
+        <p className="border-b border-slate-300 px-3 py-2 text-sm text-slate-500">본사 승인 후 출고 처리 버튼이 활성화됩니다.</p>
       )}
 
       {isWarehouse && st === 'APPROVED' && !showWarehouseShip && (
-        <p className="text-sm text-slate-500">이 배분은 다른 창고 건입니다. 담당 창고 배분만 출고할 수 있습니다.</p>
+        <p className="border-b border-slate-300 px-3 py-2 text-sm text-slate-500">이 배분은 다른 창고 건입니다. 담당 창고 배분만 출고할 수 있습니다.</p>
       )}
 
       {showStoreReceive && (
-        <SectionCard title="매장 입고">
+        <SectionCard embedded title="매장 입고">
           <p className="mb-4 text-sm text-slate-600">
             물품을 받으셨다면 입고 완료로 상태를 갱신해 주세요.
           </p>
@@ -376,7 +376,7 @@ export default function AllocationDetailPage() {
         </SectionCard>
       )}
 
-      <SectionCard title="품목">
+      <SectionCard embedded title="품목">
         {(allocation.items ?? []).length === 0 ? (
           <p className="text-sm text-slate-500">등록된 품목이 없습니다.</p>
         ) : (
@@ -406,6 +406,6 @@ export default function AllocationDetailPage() {
           </div>
         )}
       </SectionCard>
-    </div>
+    </ErpPageFrame>
   )
 }

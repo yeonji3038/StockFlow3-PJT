@@ -18,10 +18,12 @@ import com.stockflow.hq.domain.store.repository.StoreRepository;
 import com.stockflow.hq.domain.store.repository.StoreStockRepository;
 import com.stockflow.hq.domain.user.entity.User;
 import com.stockflow.hq.domain.user.repository.UserRepository;
+import com.stockflow.hq.domain.warehouse.entity.Warehouse;
 import com.stockflow.hq.domain.warehouse.entity.WarehouseStock;
 import com.stockflow.hq.domain.warehouse.repository.WarehouseStockRepository;
 import com.stockflow.hq.global.exception.BusinessException;
 import com.stockflow.hq.global.exception.ErrorCode;
+import com.stockflow.hq.global.websocket.StockWebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +44,7 @@ public class OrderService {
     private final WarehouseStockRepository warehouseStockRepository;
     private final StoreStockRepository storeStockRepository;
     private final StockHistoryService stockHistoryService;
-
+    private final StockWebSocketService stockWebSocketService;
     // 발주 요청
     @Transactional
     public OrderResponseDto create(OrderRequestDto request, String email) {
@@ -75,8 +77,13 @@ public class OrderService {
             orderItemRepository.save(item);
         }
 
+        // 본사 대시보드 + 발주 목록 화면이 새로고침 없이 즉시 갱신되도록 알림
+        stockWebSocketService.sendDashboardUpdate();
+        stockWebSocketService.sendOrderUpdate(saved.getId(), OrderStatus.REQUESTED.name());
+
         return OrderResponseDto.from(saved, orderItemRepository.findByOrderId(saved.getId()));
     }
+
 
     // 발주 전체 조회
     public List<OrderResponseDto> findAll() {
@@ -93,7 +100,7 @@ public class OrderService {
         return OrderResponseDto.from(order, orderItemRepository.findByOrderId(id));
     }
 
-    // 발주 승인
+    // 발주 승인 → 지정 창고 재고를 예약(reserve)만 해두고, 실물재고는 출고(ship) 시점에 차감
     @Transactional
     public OrderResponseDto approve(Long id, Long approvedById) {
         Order order = orderRepository.findById(id)
@@ -106,9 +113,43 @@ public class OrderService {
         User approvedBy = userRepository.findById(approvedById)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        Warehouse warehouse = order.getStore().getWarehouse();
+        if (warehouse == null) {
+            throw new BusinessException(ErrorCode.STORE_WAREHOUSE_NOT_ASSIGNED);
+        }
+
+        List<OrderItem> items = orderItemRepository.findByOrderId(id);
+
+        // 가용재고(실물재고 - 이미 예약된 수량) 기준으로 확인.
+        // 다른 매장의 승인된 발주가 이미 예약해둔 물량은 이중으로 배정되지 않도록 함.
+        for (OrderItem item : items) {
+            WarehouseStock warehouseStock = warehouseStockRepository
+                    .findByWarehouseIdAndProductOptionId(warehouse.getId(), item.getProductOption().getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.WAREHOUSE_STOCK_NOT_FOUND));
+
+            if (warehouseStock.getAvailableQuantity() < item.getQuantity()) {
+                throw new BusinessException(ErrorCode.WAREHOUSE_STOCK_INSUFFICIENT);
+            }
+        }
+
+        // 검증 통과 → 실물재고는 그대로 두고 예약 수량만 걸어둠 (아직 창고에서 안 나간 상태)
+        for (OrderItem item : items) {
+            WarehouseStock warehouseStock = warehouseStockRepository
+                    .findByWarehouseIdAndProductOptionId(warehouse.getId(), item.getProductOption().getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.WAREHOUSE_STOCK_NOT_FOUND));
+
+            warehouseStock.reserve(item.getQuantity());
+        }
+
+        // 매장 쪽엔 "출고 준비중"으로 보이지만, 실제 데이터는 APPROVED 그대로
         order.updateStatus(OrderStatus.APPROVED, approvedBy);
-        return OrderResponseDto.from(order, orderItemRepository.findByOrderId(id));
+
+        stockWebSocketService.sendDashboardUpdate();
+        stockWebSocketService.sendOrderUpdate(id, OrderStatus.APPROVED.name());
+
+        return OrderResponseDto.from(order, items);
     }
+
 
     // 발주 반려
     @Transactional
@@ -124,6 +165,7 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         order.updateStatus(OrderStatus.REJECTED, approvedBy);
+        stockWebSocketService.sendOrderUpdate(id, OrderStatus.REJECTED.name());
         return OrderResponseDto.from(order, orderItemRepository.findByOrderId(id));
     }
 
@@ -137,27 +179,35 @@ public class OrderService {
             throw new BusinessException(ErrorCode.ORDER_INVALID_STATUS);
         }
 
+        Warehouse warehouse = order.getStore().getWarehouse();
+        if (warehouse == null) {
+            throw new BusinessException(ErrorCode.STORE_WAREHOUSE_NOT_ASSIGNED);
+        }
+
         List<OrderItem> items = orderItemRepository.findByOrderId(id);
 
         for (OrderItem item : items) {
-            List<WarehouseStock> warehouseStocks = warehouseStockRepository
-                    .findByProductOptionId(item.getProductOption().getId());
+            WarehouseStock warehouseStock = warehouseStockRepository
+                    .findByWarehouseIdAndProductOptionId(warehouse.getId(), item.getProductOption().getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.WAREHOUSE_STOCK_NOT_FOUND));
 
-            if (warehouseStocks.isEmpty()) {
-                throw new BusinessException(ErrorCode.WAREHOUSE_STOCK_NOT_FOUND);
+            // 실물재고 차감 + 예약 해제를 동시에 처리
+            warehouseStock.confirmShipment(item.getQuantity());
+            int updatedQty = warehouseStock.getQuantity();
+
+            // 출고 후 남은 실물재고가 10개 이하면 본사에 저재고 알림
+            if (updatedQty <= 10) {
+                stockWebSocketService.sendLowStockAlert(
+                        warehouse.getId(),
+                        warehouse.getName(),
+                        item.getProductOption().getSkuCode(),
+                        updatedQty
+                );
             }
-
-            WarehouseStock warehouseStock = warehouseStocks.get(0);
-
-            if (warehouseStock.getQuantity() < item.getQuantity()) {
-                throw new BusinessException(ErrorCode.WAREHOUSE_STOCK_INSUFFICIENT);
-            }
-
-            warehouseStock.updateQuantity(warehouseStock.getQuantity() - item.getQuantity());
 
             stockHistoryService.record(
                     null,
-                    warehouseStock.getWarehouse(),
+                    warehouse,
                     item.getProductOption(),
                     StockHistoryType.OUT,
                     StockHistoryReason.ORDER,
@@ -167,6 +217,10 @@ public class OrderService {
         }
 
         order.updateStatus(OrderStatus.SHIPPED, order.getApprovedBy());
+
+        stockWebSocketService.sendDashboardUpdate();
+        stockWebSocketService.sendOrderUpdate(id, OrderStatus.SHIPPED.name());
+
         return OrderResponseDto.from(order, items);
     }
 
@@ -208,6 +262,7 @@ public class OrderService {
         }
 
         order.updateStatus(OrderStatus.RECEIVED, order.getApprovedBy());
+        stockWebSocketService.sendOrderUpdate(id, OrderStatus.RECEIVED.name());
         return OrderResponseDto.from(order, items);
     }
 }

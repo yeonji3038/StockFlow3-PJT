@@ -20,4 +20,7 @@ public class StockChangeEvent {
     private int currentStock;     // 변동 후 현재 재고량
     private String changeType;    // 변동 유형: "INCREASE"(입고) | "DECREASE"(출고)
     private LocalDateTime timestamp; // 이벤트 발생 시각
+    private Long storeId;
+    private Long productOptionId;
+    private String reason;
 }

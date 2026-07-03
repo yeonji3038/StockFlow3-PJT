@@ -114,6 +114,9 @@ public class StoreStockService {
                             .currentStock(newQty)
                             .changeType(diff > 0 ? "INCREASE" : "DECREASE")
                             .timestamp(LocalDateTime.now())
+                            .storeId(storeStock.getStore().getId())
+                            .productOptionId(storeStock.getProductOption().getId())
+                            .reason(reason.name())
                             .build()
             );
         }

@@ -1,3 +1,5 @@
+import { erpToolbarBtnClass } from '../../lib/erpUi'
+
 type Props = {
   page: number
   pageCount: number
@@ -18,7 +20,7 @@ export default function TablePaginationBar({
   if (total === 0) return null
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2 text-xs text-slate-600">
+    <div className="flex flex-wrap items-center justify-end gap-2 text-[11px] text-slate-600">
       <p className="tabular-nums">
         <span className="font-medium text-slate-800">
           {fromIdx}–{toIdx}
@@ -31,7 +33,7 @@ export default function TablePaginationBar({
           type="button"
           disabled={page <= 1}
           onClick={() => setPage(page - 1)}
-          className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className={[erpToolbarBtnClass(), 'disabled:cursor-not-allowed disabled:opacity-40'].join(' ')}
         >
           이전
         </button>
@@ -42,7 +44,7 @@ export default function TablePaginationBar({
           type="button"
           disabled={page >= pageCount}
           onClick={() => setPage(page + 1)}
-          className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className={[erpToolbarBtnClass(), 'disabled:cursor-not-allowed disabled:opacity-40'].join(' ')}
         >
           다음
         </button>

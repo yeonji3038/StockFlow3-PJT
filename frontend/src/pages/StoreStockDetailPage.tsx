@@ -5,6 +5,7 @@ import { api } from '../lib/api'
 import { getRole, getStoreId } from '../lib/auth'
 import { STOCK_EDIT_REASONS, canEditStoreStock } from '../lib/storeStockEdit'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import type { StoreStock } from '../types/models'
 
@@ -106,50 +107,38 @@ export default function StoreStockDetailPage() {
     }
   }
 
+  const listLink = (
+    <Link
+      to="/store-stock"
+      className="inline-flex h-7 items-center border border-slate-300 bg-white px-2 text-xs text-slate-700 hover:bg-slate-100"
+    >
+      ← 매장 재고 목록
+    </Link>
+  )
+
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/store-stock"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 매장 재고 목록
-        </Link>
+      <ErpPageFrame title="매장 재고" actions={listLink}>
         <LoadingSpinner />
-      </div>
+      </ErpPageFrame>
     )
   }
 
   if (error || !row) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/store-stock"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 매장 재고 목록
-        </Link>
-        <p className="text-sm text-rose-600">{error ?? '재고를 찾을 수 없습니다.'}</p>
-      </div>
+      <ErpPageFrame title="매장 재고" actions={listLink}>
+        <p className="px-3 py-4 text-sm text-rose-600">{error ?? '재고를 찾을 수 없습니다.'}</p>
+      </ErpPageFrame>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Link
-          to="/store-stock"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 매장 재고 목록
-        </Link>
-        <h1 className="mt-2 text-lg font-semibold text-slate-900">{row.productName}</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {row.storeName} · SKU {row.skuCode}
-        </p>
+    <ErpPageFrame title={row.productName} actions={listLink}>
+      <div className="border-b border-slate-300 px-3 py-1 text-[11px] text-slate-500">
+        {row.storeName} · SKU {row.skuCode}
       </div>
 
-      <SectionCard title="상품 정보">
+      <SectionCard embedded title="상품 정보">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div className="sm:col-span-2">
             <dt className="text-xs font-medium text-slate-500">상품명</dt>
@@ -175,7 +164,7 @@ export default function StoreStockDetailPage() {
       </SectionCard>
 
       {canEdit ? (
-        <SectionCard title="수량 수정">
+        <SectionCard embedded title="수량 수정">
           <div className="space-y-4">
             <div>
               <span className="mb-1 block text-xs font-medium text-slate-600">새 수량</span>
@@ -269,13 +258,13 @@ export default function StoreStockDetailPage() {
           </div>
         </SectionCard>
       ) : (
-        <SectionCard title="수량">
+        <SectionCard embedded title="수량">
           <p className="text-sm text-slate-600">
             이 매장 재고는 조회만 가능합니다. 수량 수정은 본사(HQ) 또는 해당 매장 관리자만 할 수 있습니다.
           </p>
           <p className="mt-2 text-lg font-semibold tabular-nums text-slate-900">{row.quantity}</p>
         </SectionCard>
       )}
-    </div>
+    </ErpPageFrame>
   )
 }

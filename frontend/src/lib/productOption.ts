@@ -1,19 +1,10 @@
 import { isAxiosError } from 'axios'
+import type { ProductOptionItem, ProductOptionStatus, Size } from '../types/models'
+import { erpInputClass } from './erpUi'
 
-export type ProductOptionSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
-export type ProductOptionStatus = 'ON_SALE' | 'DISCONTINUED'
+export type ProductOption = ProductOptionItem
 
-export type ProductOption = {
-  id: number
-  productId: number
-  productName: string
-  color: string
-  size: ProductOptionSize
-  skuCode: string
-  status: ProductOptionStatus
-}
-
-export const OPTION_SIZES: ProductOptionSize[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+export type { ProductOptionStatus, Size }
 
 export const OPTION_STATUS_OPTIONS: { value: ProductOptionStatus; label: string }[] = [
   { value: 'ON_SALE', label: '판매중' },
@@ -33,8 +24,46 @@ export function parseApiErrorMessage(err: unknown, fallback: string): string {
   return fallback
 }
 
-function inputClass() {
-  return 'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+export function productOptionInputClass(invalid = false) {
+  return erpInputClass(invalid)
 }
 
-export { inputClass as productOptionInputClass }
+export type OptionFormState = {
+  color: string
+  colorCode: string
+  sizeId: string
+  status: ProductOptionStatus
+}
+
+export const emptyOptionForm = (): OptionFormState => ({
+  color: '',
+  colorCode: '',
+  sizeId: '',
+  status: 'ON_SALE',
+})
+
+export function validateOptionForm(form: OptionFormState): string | null {
+  if (!form.color.trim()) return '색상을 입력하세요.'
+  if (!form.colorCode.trim()) return '색상 코드를 입력하세요.'
+  const sizeId = Number(form.sizeId)
+  if (!Number.isFinite(sizeId) || sizeId < 1) return '사이즈를 선택하세요.'
+  return null
+}
+
+export function optionFormFromItem(option: ProductOption): OptionFormState {
+  return {
+    color: option.color,
+    colorCode: option.colorCode,
+    sizeId: String(option.sizeId),
+    status: option.status,
+  }
+}
+
+export function optionRequestBody(form: OptionFormState) {
+  return {
+    color: form.color.trim(),
+    colorCode: form.colorCode.trim(),
+    sizeId: Number(form.sizeId),
+    status: form.status,
+  }
+}

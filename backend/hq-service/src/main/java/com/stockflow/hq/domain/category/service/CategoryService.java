@@ -30,6 +30,7 @@ public class CategoryService {
 
         Category category = Category.builder()
                 .name(request.getName())
+                .code(request.getCode())
                 .parent(parent)
                 .build();
 
@@ -84,7 +85,7 @@ public class CategoryService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
         }
 
-        category.update(request.getName(), parent);
+        category.update(request.getName(), request.getCode(), parent);
         return CategoryResponseDto.from(category);
     }
 

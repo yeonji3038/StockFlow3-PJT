@@ -36,6 +36,16 @@ public class StockWebSocketService {
         messagingTemplate.convertAndSend("/topic/low-stock", payload);
     }
 
+    // 발주 상태 변경 알림 → /topic/orders 구독자에게 전송
+    public void sendOrderUpdate(Long orderId, String status) {
+        Map<String, Object> payload = Map.of(
+                "orderId", orderId,
+                "status", status
+        );
+        log.info("WebSocket 발주 상태 변경 알림: id={}, status={}", orderId, status);
+        messagingTemplate.convertAndSend("/topic/orders", payload);
+    }
+
     // 대시보드 갱신 트리거 → /topic/dashboard 구독자에게 전송
     public void sendDashboardUpdate() {
         Map<String, Object> payload = Map.of(

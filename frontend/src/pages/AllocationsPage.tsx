@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { allocationStatusLabel } from '../lib/allocationLabels'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import TablePaginationBar from '../components/ui/TablePaginationBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useTablePagination } from '../hooks/useTablePagination'
@@ -174,25 +175,23 @@ export default function AllocationsPage() {
   const isHq = role === 'HQ_STAFF'
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-lg font-semibold text-slate-900">
-          배분 관리
-          {isWarehouseStaff ? (
-            <span className="ml-2 text-sm font-normal text-slate-500">(출고 대기 · 승인됨)</span>
-          ) : null}
-        </h1>
-        {isHq ? (
+    <ErpPageFrame
+      title={
+        isWarehouseStaff ? '배분 관리 (출고 대기 · 승인됨)' : '배분 관리'
+      }
+      actions={
+        isHq ? (
           <Link
             to="/allocations/new"
-            className="inline-flex h-9 items-center rounded-md bg-blue-600 px-3 text-sm font-medium text-white shadow hover:bg-blue-700"
+            className="ml-auto inline-flex h-9 items-center rounded-md bg-blue-600 px-3 text-sm font-medium text-white shadow hover:bg-blue-700"
           >
             배분 생성
           </Link>
-        ) : null}
-      </div>
-
+        ) : null
+      }
+    >
       <SectionCard
+        embedded
         title={isWarehouseStaff ? '출고 대기 배분' : '배분 목록'}
         headerRight={
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -401,6 +400,6 @@ export default function AllocationsPage() {
           </div>
         )}
       </SectionCard>
-    </div>
+    </ErpPageFrame>
   )
 }

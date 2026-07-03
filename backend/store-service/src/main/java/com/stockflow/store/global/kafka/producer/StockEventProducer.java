@@ -1,10 +1,10 @@
 package com.stockflow.store.global.kafka.producer;
 
-import com.stockflow.common.kafka.dto.StockChangeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import com.stockflow.common.kafka.dto.StockChangeEvent;
 
 @Slf4j
 @Service

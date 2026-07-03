@@ -35,7 +35,12 @@ public class WarehouseService {
                 .manager(manager)
                 .build();
 
-        return WarehouseResponseDto.from(warehouseRepository.save(warehouse));
+        Warehouse saved = warehouseRepository.save(warehouse);
+
+        // 담당자로 지정된 사용자 쪽에도 소속 창고를 반영 (로그인/대시보드에서 이 값을 참조함)
+        manager.assignWarehouse(saved);
+
+        return WarehouseResponseDto.from(saved);
     }
 
     // 창고 전체 조회
@@ -58,10 +63,19 @@ public class WarehouseService {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAREHOUSE_NOT_FOUND));
 
-        User manager = userRepository.findById(request.getManagerId())
+        User newManager = userRepository.findById(request.getManagerId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        warehouse.update(request.getName(), request.getLocation(), manager);
+        User previousManager = warehouse.getManager();
+
+        warehouse.update(request.getName(), request.getLocation(), newManager);
+        newManager.assignWarehouse(warehouse);
+
+        // 담당자가 다른 사람으로 교체된 경우, 이전 담당자는 이 창고 소속에서 해제
+        if (previousManager != null && !previousManager.getId().equals(newManager.getId())) {
+            previousManager.assignWarehouse(null);
+        }
+
         return WarehouseResponseDto.from(warehouse);
     }
 

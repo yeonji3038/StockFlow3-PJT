@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { getRole, getStoreId } from '../lib/auth'
 import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import TablePaginationBar from '../components/ui/TablePaginationBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useTablePagination } from '../hooks/useTablePagination'
@@ -149,12 +150,9 @@ export default function StoreStockPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">매장 재고</h1>
-      </div>
-
+    <ErpPageFrame title="매장 재고">
       <SectionCard
+        embedded
         title="재고 조회"
         headerRight={
           stores.length > 0 ? (
@@ -338,6 +336,6 @@ export default function StoreStockPage() {
           </>
         )}
       </SectionCard>
-    </div>
+    </ErpPageFrame>
   )
 }

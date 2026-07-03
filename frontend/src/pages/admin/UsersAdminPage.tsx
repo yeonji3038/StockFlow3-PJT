@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Trash2, Pencil } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { api } from '../../lib/api'
 import { getRole } from '../../lib/auth'
 import SectionCard from '../../components/ui/SectionCard'
+import ErpPageFrame, { ErpAccessDenied } from '../../components/ui/ErpPageFrame'
+import { erpInputClass, erpSelectClass } from '../../lib/erpUi'
 import TablePaginationBar from '../../components/ui/TablePaginationBar'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import Modal from '../../components/ui/Modal'
 import { useTablePagination } from '../../hooks/useTablePagination'
-import type { StoreSummary, UserSummary } from '../../types/models'
+import type { StoreSummary, UserSummary, WarehouseSummary } from '../../types/models'
 
 type Editable = {
   id: number
@@ -21,12 +23,14 @@ export default function UsersAdminPage() {
   const role = getRole()
   const [users, setUsers] = useState<UserSummary[]>([])
   const [stores, setStores] = useState<StoreSummary[]>([])
+  const [warehouses, setWarehouses] = useState<WarehouseSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const [q, setQ] = useState('')
   const [roleFilter, setRoleFilter] = useState<'ALL' | Editable['role']>('ALL')
   const [storeFilter, setStoreFilter] = useState<number | 'ALL'>('ALL')
+  const [warehouseFilter, setWarehouseFilter] = useState<number | 'ALL'>('ALL')
 
   const [editing, setEditing] = useState<Editable | null>(null)
   const [saving, setSaving] = useState(false)
@@ -37,13 +41,15 @@ export default function UsersAdminPage() {
       setLoading(true)
       setError(null)
       try {
-        const [u, s] = await Promise.all([
+        const [u, s, w] = await Promise.all([
           api.get<UserSummary[]>('/api/users'),
           api.get<StoreSummary[]>('/api/stores').catch(() => ({ data: [] as StoreSummary[] })),
+          api.get<WarehouseSummary[]>('/api/warehouses').catch(() => ({ data: [] as WarehouseSummary[] })),
         ])
         if (cancelled) return
         setUsers(u.data ?? [])
         setStores(s.data ?? [])
+        setWarehouses(w.data ?? [])
       } catch {
         if (!cancelled) setError('사용자 목록을 불러오지 못했습니다.')
       } finally {
@@ -64,18 +70,34 @@ export default function UsersAdminPage() {
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1], 'ko-KR'))
   }, [stores, users])
 
+  const warehouseOptions = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const w of warehouses) map.set(w.id, w.name)
+    for (const u of users) {
+      if (u.warehouseId != null && u.warehouseName) map.set(u.warehouseId, u.warehouseName)
+    }
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1], 'ko-KR'))
+  }, [warehouses, users])
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     return users
       .filter((u) => {
         if (roleFilter !== 'ALL' && u.role !== roleFilter) return false
         if (storeFilter !== 'ALL' && u.storeId !== storeFilter) return false
+        if (warehouseFilter !== 'ALL' && u.warehouseId !== warehouseFilter) return false
         if (!needle) return true
-        const hay = [u.email, u.name, u.role, u.storeName ?? ''].join(' ').toLowerCase()
+        const hay = [u.email, u.name, u.role, u.storeName ?? '', u.warehouseName ?? '']
+          .join(' ')
+          .toLowerCase()
         return hay.includes(needle)
       })
-      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-  }, [users, q, roleFilter, storeFilter])
+      .sort((a, b) => {
+        const aTime = a.createdAt ? Date.parse(a.createdAt) : 0
+        const bTime = b.createdAt ? Date.parse(b.createdAt) : 0
+        return bTime - aTime
+      })
+  }, [users, q, roleFilter, storeFilter, warehouseFilter])
 
   const userPagination = useTablePagination(filtered)
 
@@ -129,37 +151,29 @@ export default function UsersAdminPage() {
 
   if (role !== 'HQ_STAFF') {
     return (
-      <div className="space-y-4">
-        <h1 className="text-lg font-semibold text-slate-900">사용자 관리</h1>
-        <p className="text-sm text-slate-500">본사(HQ) 권한에서만 접근할 수 있습니다.</p>
-      </div>
+      <ErpAccessDenied title="사용자 관리" message="본사(HQ) 권한에서만 접근할 수 있습니다." />
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">사용자 관리</h1>
-        <p className="mt-1 text-sm text-slate-500">매장 관리자/창고 담당자 정보를 조회·수정·삭제합니다.</p>
-      </div>
-
+    <ErpPageFrame title="사용자 관리">
       <SectionCard
+        embedded
         title="사용자 목록"
-        description="검색/필터 후 사용자를 선택해 수정하세요."
         headerRight={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="이름/이메일/역할/매장 검색"
-              className="h-9 w-64 rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="이름/이메일/역할/매장/창고 검색"
+              className={[erpInputClass(), 'w-64'].join(' ')}
             />
             <label className="flex items-center gap-2 text-sm">
               <span className="text-slate-500">역할</span>
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as typeof roleFilter)}
-                className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={erpSelectClass()}
               >
                 <option value="ALL">전체</option>
                 <option value="STORE_MANAGER">매장 관리자</option>
@@ -176,10 +190,28 @@ export default function UsersAdminPage() {
                   const v = e.target.value
                   setStoreFilter(v === 'ALL' ? 'ALL' : Number(v))
                 }}
-                className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className={erpSelectClass()}
               >
                 <option value="ALL">전체</option>
                 {storeOptions.map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <span className="text-slate-500">창고</span>
+              <select
+                value={warehouseFilter === 'ALL' ? 'ALL' : String(warehouseFilter)}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setWarehouseFilter(v === 'ALL' ? 'ALL' : Number(v))
+                }}
+                className={erpSelectClass()}
+              >
+                <option value="ALL">전체</option>
+                {warehouseOptions.map(([id, name]) => (
                   <option key={id} value={id}>
                     {name}
                   </option>
@@ -192,6 +224,7 @@ export default function UsersAdminPage() {
                 setQ('')
                 setRoleFilter('ALL')
                 setStoreFilter('ALL')
+                setWarehouseFilter('ALL')
               }}
               className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
             >
@@ -208,7 +241,7 @@ export default function UsersAdminPage() {
           <div>
             <div className="overflow-x-auto rounded-md border border-slate-100">
               <div className="max-h-[min(28rem,calc(100vh-14rem))] overflow-y-auto">
-                <table className="w-full min-w-[980px] border-collapse text-sm">
+                <table className="w-full min-w-[1080px] border-collapse text-sm">
                   <thead>
                     <tr className="sticky top-0 z-[1] border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                       <th className="px-3 py-2.5">ID</th>
@@ -216,14 +249,17 @@ export default function UsersAdminPage() {
                       <th className="px-3 py-2.5">이름</th>
                       <th className="px-3 py-2.5">역할</th>
                       <th className="px-3 py-2.5">매장</th>
+                      <th className="px-3 py-2.5">창고</th>
                       <th className="px-3 py-2.5">가입일</th>
-                      <th className="px-3 py-2.5 text-right">관리</th>
+                      <th className="w-10 px-3 py-2.5 text-right">
+                        <span className="sr-only">삭제</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-3 py-12 text-center text-slate-400">
+                        <td colSpan={8} className="px-3 py-12 text-center text-slate-400">
                           조건에 맞는 사용자가 없습니다.
                         </td>
                       </tr>
@@ -231,33 +267,35 @@ export default function UsersAdminPage() {
                       userPagination.pageItems.map((u) => (
                         <tr
                           key={u.id}
-                          className="border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
+                          onClick={() => openEdit(u)}
+                          className="cursor-pointer border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
                         >
                           <td className="px-3 py-2 font-mono text-xs text-slate-600">{u.id}</td>
                           <td className="px-3 py-2 text-slate-800">{u.email}</td>
                           <td className="px-3 py-2 text-slate-800">{u.name}</td>
                           <td className="px-3 py-2 text-slate-700">{u.role}</td>
-                          <td className="px-3 py-2 text-slate-700">{u.storeName ?? '—'}</td>
+                          <td className="px-3 py-2 text-slate-700">
+                            {u.role === 'STORE_MANAGER' ? u.storeName ?? '—' : '—'}
+                          </td>
+                          <td className="px-3 py-2 text-slate-700">
+                            {u.role === 'WAREHOUSE_STAFF' ? u.warehouseName ?? '—' : '—'}
+                          </td>
                           <td className="px-3 py-2 text-xs text-slate-500">
                             {u.createdAt ? new Date(u.createdAt).toLocaleString('ko-KR') : '—'}
                           </td>
                           <td className="px-3 py-2">
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end">
                               <button
                                 type="button"
-                                onClick={() => openEdit(u)}
-                                className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  void deleteUser(u.id)
+                                }}
+                                className="inline-flex items-center justify-center text-rose-600 hover:text-rose-800"
+                                aria-label="삭제"
+                                title="삭제"
                               >
-                                <Pencil className="h-3.5 w-3.5" aria-hidden />
-                                수정
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => deleteUser(u.id)}
-                                className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 shadow-sm hover:bg-rose-100"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                                삭제
+                                <Trash2 className="h-4 w-4" aria-hidden />
                               </button>
                             </div>
                           </td>
@@ -357,7 +395,7 @@ export default function UsersAdminPage() {
           </div>
         ) : null}
       </Modal>
-    </div>
+    </ErpPageFrame>
   )
 }
 

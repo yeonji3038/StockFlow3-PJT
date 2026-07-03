@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../../../lib/api'
 import { getRole } from '../../../lib/auth'
 import LoadingSpinner from '../../../components/ui/LoadingSpinner'
+import ErpPageFrame, { ErpAccessDenied } from '../../../components/ui/ErpPageFrame'
 import ProductOptionManagePanel from '../../../components/product/options/ProductOptionManagePanel'
 import type { ProductListItem } from '../../../components/product/types'
 
@@ -40,55 +41,42 @@ export default function ProductOptionDetailPage() {
 
   if (!isHq) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-lg font-semibold text-slate-900">상품 옵션 관리</h1>
-        <p className="text-sm text-slate-500">본사(HQ) 권한에서만 접근할 수 있습니다.</p>
-      </div>
+      <ErpAccessDenied title="상품 옵션 관리" message="본사(HQ) 권한에서만 접근할 수 있습니다." />
     )
   }
 
+  const listLink = (
+    <Link
+      to="/admin/product-options"
+      className="inline-flex h-7 items-center border border-slate-300 bg-white px-2 text-xs text-slate-700 hover:bg-slate-100"
+    >
+      ← 옵션 목록
+    </Link>
+  )
+
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/admin/product-options"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 옵션 목록
-        </Link>
+      <ErpPageFrame title="상품 옵션 관리" actions={listLink}>
         <LoadingSpinner />
-      </div>
+      </ErpPageFrame>
     )
   }
 
   if (error || !product) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/admin/product-options"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 옵션 목록
-        </Link>
-        <p className="text-sm text-rose-600">{error ?? '상품을 찾을 수 없습니다.'}</p>
-      </div>
+      <ErpPageFrame title="상품 옵션 관리" actions={listLink}>
+        <p className="px-3 py-4 text-sm text-rose-600">{error ?? '상품을 찾을 수 없습니다.'}</p>
+      </ErpPageFrame>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Link
-          to="/admin/product-options"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 옵션 목록
-        </Link>
-        <h1 className="mt-2 text-lg font-semibold text-slate-900">{product.name} — 옵션 관리</h1>
-        <p className="mt-1 text-sm text-slate-500">색상 · 사이즈 · 상품코드 옵션만 관리합니다.</p>
+    <ErpPageFrame title={`옵션 · ${product.name}`} actions={listLink}>
+      <div className="border-b border-slate-300 px-3 py-1 text-[11px] text-slate-500">
+        색상 · 사이즈 · 상품코드 옵션만 관리합니다.
       </div>
 
       <ProductOptionManagePanel productId={productId} canMutate={isHq} />
-    </div>
+    </ErpPageFrame>
   )
 }

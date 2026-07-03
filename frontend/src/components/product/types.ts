@@ -4,6 +4,7 @@ import type { ProductStatusValue } from '../../lib/productStatus'
 export type ProductListItem = {
   id: number
   name: string
+  productCode?: string | null
   brandId: number
   brandName: string
   categoryId: number

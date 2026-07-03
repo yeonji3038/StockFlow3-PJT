@@ -24,7 +24,9 @@ public class WarehouseStockResponseDto implements Serializable {
     private String productName;
     private String color;
     private String size;
-    private int quantity;
+    private int quantity;          // 실물재고
+    private int reservedQuantity;  // 예약재고 (승인됐지만 아직 출고 안 된 수량)
+    private int availableQuantity; // 가용재고 (= quantity - reservedQuantity)
 
     public static WarehouseStockResponseDto from(WarehouseStock warehouseStock) {
         return WarehouseStockResponseDto.builder()
@@ -35,8 +37,10 @@ public class WarehouseStockResponseDto implements Serializable {
                 .skuCode(warehouseStock.getProductOption().getSkuCode())
                 .productName(warehouseStock.getProductOption().getProduct().getName())
                 .color(warehouseStock.getProductOption().getColor())
-                .size(warehouseStock.getProductOption().getSize().name())
+                .size(warehouseStock.getProductOption().getSize().getName())
                 .quantity(warehouseStock.getQuantity())
+                .reservedQuantity(warehouseStock.getReservedQuantity())
+                .availableQuantity(warehouseStock.getAvailableQuantity())
                 .build();
     }
 }

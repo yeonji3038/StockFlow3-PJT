@@ -20,6 +20,7 @@ public class ProductResponseDto implements Serializable {
 
     private Long id;
     private String name;
+    private String productCode;
     private Long brandId;
     private String brandName;
     private Long categoryId;
@@ -36,6 +37,7 @@ public class ProductResponseDto implements Serializable {
         return ProductResponseDto.builder()
                 .id(product.getId())
                 .name(product.getName())
+                .productCode(product.getProductCode())
                 .brandId(product.getBrand().getId())
                 .brandName(product.getBrand().getName())
                 .categoryId(product.getCategory().getId())

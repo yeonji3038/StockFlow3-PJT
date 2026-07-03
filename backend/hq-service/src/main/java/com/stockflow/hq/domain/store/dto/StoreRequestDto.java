@@ -12,13 +12,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StoreRequestDto {
 
+    @NotNull(message = "브랜드는 필수입니다.")
+    private Long brandId;
+
     @NotBlank(message = "매장명은 필수입니다.")
     private String name;
 
+    @NotBlank(message = "매장 위치는 필수입니다.")
     private String location;
 
     @NotNull(message = "매장 유형은 필수입니다.")
     private StoreType storeType;
 
     private String phone;
+
+    @NotNull(message = "담당 창고는 필수입니다.")
+    private Long warehouseId;
 }

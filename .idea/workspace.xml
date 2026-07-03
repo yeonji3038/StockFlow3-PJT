@@ -5,44 +5,115 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3035d891-f1c3-45fc-a22c-284c931bade9" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/ai/data/generate_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/consumer/StockEventConsumer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/dto/StockChangeEvent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/stockflow.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/stockflow.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/ai/dto/DemandForecastResponseDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/anomaly/controller/AnomalyAlertController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/anomaly/dto/AnomalyAlertResponseDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/anomaly/entity/AnomalyAlert.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/anomaly/repository/AnomalyAlertRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/anomaly/service/AnomalyAlertService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/size/controller/SizeController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/size/dto/SizeRequestDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/size/dto/SizeResponseDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/size/entity/Size.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/size/repository/SizeRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/size/service/SizeService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/controller/StoreController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/controller/StoreController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/common/src/main/java/com/stockflow/common/kafka/dto/StockChangeEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/common/src/main/java/com/stockflow/common/kafka/dto/StockChangeEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/common/src/main/java/com/stockflow/common/kafka/producer/StockEventProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/common/src/main/java/com/stockflow/common/kafka/producer/StockEventProducer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/HqApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/HqApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/ai/controller/AiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/ai/controller/AiController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/ai/dto/AiDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/ai/dto/AiDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/allocation/dto/AllocationResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/allocation/dto/AllocationResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/dto/BrandRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/dto/BrandRequestDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/dto/BrandResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/dto/BrandResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/entity/Brand.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/entity/Brand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/service/BrandService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/brand/service/BrandService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/dto/CategoryRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/dto/CategoryRequestDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/dto/CategoryResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/dto/CategoryResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/entity/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/entity/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/service/CategoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/category/service/CategoryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/order/dto/OrderResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/order/dto/OrderResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/order/service/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/order/service/OrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/dto/ProductOptionRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/dto/ProductOptionRequestDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/dto/ProductOptionResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/dto/ProductOptionResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/dto/ProductResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/dto/ProductResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/entity/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/entity/ProductOption.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/entity/ProductOption.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/entity/ProductSize.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/repository/ProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/service/ProductOptionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/service/ProductOptionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/product/service/ProductService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/stockhistory/dto/StockHistoryResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/stockhistory/dto/StockHistoryResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreRequestDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreStockResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/dto/StoreStockResponseDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/entity/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/entity/Store.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/repository/StoreRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/repository/StoreRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/service/StoreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/service/StoreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/dto/UserRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/dto/UserRequestDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/service/StoreStockService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/store/service/StoreStockService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/user/entity/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/warehouse/dto/WarehouseStockResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/warehouse/dto/WarehouseStockResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/warehouse/entity/WarehouseStock.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/warehouse/entity/WarehouseStock.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/warehouse/service/WarehouseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/domain/warehouse/service/WarehouseService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/exception/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/exception/ErrorCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/controller/StoreController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/controller/StoreController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/kafka/consumer/StockEventConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/kafka/consumer/StockEventConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/websocket/StockWebSocketService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/hq-service/src/main/java/com/stockflow/hq/global/websocket/StockWebSocketService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/StoreApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/StoreApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/dto/StoreRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/dto/StoreRequestDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/dto/StoreResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/dto/StoreResponseDto.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/entity/Store.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/entity/Store.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/repository/StoreRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/repository/StoreRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/service/StoreService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/service/StoreService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/dto/UserRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/dto/UserRequestDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/user/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/exception/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/exception/ErrorCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/service/StoreStockService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/store/service/StoreStockService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/warehouse/service/WarehouseStockService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/domain/warehouse/service/WarehouseStockService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/consumer/StockEventConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/consumer/StockEventConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/dto/StockChangeEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/producer/StockEventProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/store-service/src/main/java/com/stockflow/store/global/kafka/producer/StockEventProducer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/admin/BrandManagePanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/admin/BrandManagePanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/global/LowStockToaster.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/global/LowStockToaster.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/layout/AppShell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/layout/AppShell.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/layout/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/layout/Sidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/list/ProductListPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/list/ProductListPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/options/CategoryManagePanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/options/CategoryManagePanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/options/ProductOptionListPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/options/ProductOptionListPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/options/ProductOptionManagePanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/options/ProductOptionManagePanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/options/SeasonManagePanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/options/SeasonManagePanel.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/product/register/ProductRegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/register/ProductRegisterForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ui/LoadingSpinner.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ui/LoadingSpinner.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/product/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/product/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/store/list/StoreListPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/store/list/StoreListPanel.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/store/register/StoreRegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/store/register/StoreRegisterForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ui/SectionCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ui/SectionCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ui/StatCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ui/StatCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ui/TablePaginationBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ui/TablePaginationBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/lib/orderLabels.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/lib/orderLabels.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/lib/productOption.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/lib/productOption.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/lib/store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/lib/store.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/lib/websocket.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/lib/websocket.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AllocationDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AllocationDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AllocationNewPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AllocationNewPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AllocationsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AllocationsPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MovementsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MovementsPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/OrderDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/OrderDetailPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/OrderNewPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/OrderNewPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SignupPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SignupPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/OrdersPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/OrdersPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/StoreStockDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/StoreStockDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/StoreStockPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/StoreStockPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/WarehouseStockPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/WarehouseStockPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/BrandsAdminPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/BrandsAdminPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/UsersAdminPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/UsersAdminPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductListPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductListPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductOptionDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductOptionDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductOptionsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductOptionsPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductRegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/products/ProductRegisterPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/stores/StoreDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/stores/StoreDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/stores/StoreListPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/stores/StoreListPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/stores/StoreRegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/stores/StoreRegisterPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dashboard/HQDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dashboard/HQDashboard.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/dashboard/StoreManagerDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dashboard/StoreManagerDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dashboard/WarehouseStaffDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dashboard/WarehouseStaffDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/stores/stockStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/stores/stockStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/types/models.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/types/models.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,29 +169,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.backend 빌드.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.anomaly_detection.executor&quot;: &quot;Run&quot;,
-    &quot;Python.baseline_anomaly.executor&quot;: &quot;Run&quot;,
-    &quot;Python.baseline_demand.executor&quot;: &quot;Run&quot;,
-    &quot;Python.demand_forecast.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_data.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Spring Boot.HqApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/infra/httponly&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/yeonji/Developer/stockflow&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;/Users/yeonji/Developer/stockflow/ai/src/Main.java&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;모듈&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.backend 빌드.executor": "Run",
+    "Gradle.소스 다운로드.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.anomaly_detection.executor": "Run",
+    "Python.baseline_anomaly.executor": "Run",
+    "Python.baseline_demand.executor": "Run",
+    "Python.demand_forecast.executor": "Run",
+    "Python.generate_data.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.HqApplication.executor": "Run",
+    "git-widget-placeholder": "feature/ai-integration",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/yeonji/Developer/stockflow",
+    "onboarding.tips.debug.path": "/Users/yeonji/Developer/stockflow/ai/src/Main.java",
+    "project.structure.last.edited": "모듈",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/ai/data" />
