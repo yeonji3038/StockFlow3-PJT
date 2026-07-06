@@ -46,6 +46,12 @@ public class StockWebSocketService {
         messagingTemplate.convertAndSend("/topic/orders", payload);
     }
 
+    // 이상탐지 알림 → /topic/anomaly-alerts 구독자에게 전송
+    public void sendAnomalyAlert(Object alertPayload) {
+        log.info("WebSocket 이상탐지 알림 전송: {}", alertPayload);
+        messagingTemplate.convertAndSend("/topic/anomaly-alerts", alertPayload);
+    }
+
     // 대시보드 갱신 트리거 → /topic/dashboard 구독자에게 전송
     public void sendDashboardUpdate() {
         Map<String, Object> payload = Map.of(
