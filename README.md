@@ -234,3 +234,14 @@ store-service (재고 변동 발생)
 
 ## 서비스 화면
 
+### 이상탐지 (Anomaly Detection)
+
+Kafka 이벤트 스트림 기반 실시간 재고 이상탐지. Isolation Forest(비지도학습)로 
+매장별 재고 변동 패턴을 학습하고, 평소 범위를 벗어난 변동을 실시간으로 감지해 
+본사 대시보드에 WebSocket으로 즉시 알림을 전송합니다.
+
+**흐름**: 매장 재고 변동 → Kafka 이벤트 발행 → FastAPI(Isolation Forest) 
+이상탐지 → 본사 실시간 알림(WebSocket)
+<img width="800" height="468" alt="이상탐지_데모" src="https://github.com/user-attachments/assets/1297a0fa-429b-401a-8a17-3f050995261a" />
+
+
