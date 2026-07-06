@@ -39,6 +39,10 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;
 
+    public void assignWarehouse(Warehouse warehouse) {
+        this.warehouse = warehouse;
+    }
+
     public void update(String name, UserRole role, Store store, Warehouse warehouse) {
         this.name = name;
         this.role = role;

@@ -1,0 +1,3 @@
+﻿model,precision,recall,f1
+3-sigma rule (베이스라인),71.2,38.7,50.1
+Isolation Forest,65.6,65.6,65.6

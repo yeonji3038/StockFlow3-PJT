@@ -45,7 +45,12 @@
 
 
 ### ✔️Infra
-<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=Kubernetes&logoColor=white"> <img src="https://img.shields.io/badge/k3s-FFC61C?style=for-the-badge&logo=k3s&logoColor=black"> <img src="https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=Helm&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=Amazon%20EC2&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20ECR-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=GitHub%20Actions&logoColor=white"> <img src="https://img.shields.io/badge/ArgoCD-EF7B4D?style=for-the-badge&logo=Argo&logoColor=white"> <img src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20VPC-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20RDS-527FFF?style=for-the-badge&logo=Amazon%20RDS&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20ALB-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"> <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white">
+<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=Kubernetes&logoColor=white"> <img src="https://img.shields.io/badge/k3s-FFC61C?style=for-the-badge&logo=k3s&logoColor=black"> <img src="https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=Helm&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=Amazon%20EC2&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20ECR-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=GitHub%20Actions&logoColor=white"> <img src="https://img.shields.io/badge/ArgoCD-EF7B4D?style=for-the-badge&logo=Argo&logoColor=white"> <img src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=Terraform&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20VPC-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20RDS-527FFF?style=for-the-badge&logo=Amazon%20RDS&logoColor=white"> <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white"> <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=Grafana&logoColor=white"> <img src="https://img.shields.io/badge/AWS%20Security%20Hub-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white"> <img src="https://img.shields.io/badge/AWS%20CloudTrail-FF9900?style=for-the-badge&logo=Amazon%20AWS&logoColor=white">
+
+
+
+### ✔️AI
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white"> <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white"> <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white"> <img src="https://img.shields.io/badge/Prophet-000000?style=for-the-badge"> <img src="https://img.shields.io/badge/LightGBM-9ACD32?style=for-the-badge">
 
 
 ### ✔️ Tools
@@ -64,11 +69,17 @@
 | **역할 기반 인증 및 접근 제어** | Spring Security + JWT로 매장 직원 / 본사 관리자 역할을 분리하여 API 및 화면 접근 권한 제어 |
 | **Kubernetes(k3s) 배포** | Helm Chart로 환경별 배포 설정 관리, HPA 자동 스케일링으로 트래픽 급증 대응 |
 | **GitOps 자동 배포 파이프라인** | GitHub Actions로 코드 푸시 시 Docker 이미지 빌드·ECR 푸시 자동화, ArgoCD가 Git 상태를 감지하여 k3s 클러스터에 무중단 롤링 배포 |
-
+| **AI 기반 수요예측·이상탐지** | Kafka 재고 변동 이벤트를 FastAPI(Prophet/LightGBM, Isolation Forest)로 전달해 실시간 이상탐지 및 발주 신청 화면에 AI 추천 발주량 제공, 베이스라인 대비 이상탐지 F1-score 30% 개선 |
+| **발주-창고 자동화 (예약재고 시스템)** | 발주 승인 시 재고를 예약(reserve)만 걸어두고 실제 출고 완료 시점에 물리적 재고를 차감하는 2단계 구조로, 동시 승인 시 재고 이중 배정을 사전 방지 |
 
 <br/>
 
+## ERD
+<img width="4691" height="2242" alt="StockFlow 3차 (2)" src="https://github.com/user-attachments/assets/4f54631d-fba5-446d-9ee7-f5a6badfdb59" />
+
+
 ## 시스템 아키텍쳐
+<img width="1621" height="1092" alt="stockflow_아카텍처" src="https://github.com/user-attachments/assets/771cc974-9b97-49d7-b4e5-7b271e6fc6f3" />
 
 ### MSA 서비스 구조 (Gradle 멀티모듈)
 
@@ -222,4 +233,15 @@ store-service (재고 변동 발생)
 ---
 
 ## 서비스 화면
+
+### 이상탐지 (Anomaly Detection)
+
+Kafka 이벤트 스트림 기반 실시간 재고 이상탐지. Isolation Forest(비지도학습)로 
+매장별 재고 변동 패턴을 학습하고, 평소 범위를 벗어난 변동을 실시간으로 감지해 
+본사 대시보드에 WebSocket으로 즉시 알림을 전송합니다.
+
+**흐름**: 매장 재고 변동 → Kafka 이벤트 발행 → FastAPI(Isolation Forest) 
+이상탐지 → 본사 실시간 알림(WebSocket)
+<img width="800" height="468" alt="이상탐지_데모" src="https://github.com/user-attachments/assets/1297a0fa-429b-401a-8a17-3f050995261a" />
+
 

@@ -1,11 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { isAxiosError } from 'axios'
 import { api } from '../lib/api'
 import { getRole, getStoreId } from '../lib/auth'
 import { STOCK_EDIT_REASONS, canEditStoreStock } from '../lib/storeStockEdit'
-import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame from '../components/ui/ErpPageFrame'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import {
+  ErpChevronBack,
+  ErpFooterPrimary,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpToolbar,
+} from '../components/ui/erp/ErpLayout'
+import { erpInputClass, erpSelectClass, erpToolbarBtnClass } from '../lib/erpUi'
 import type { StoreStock } from '../types/models'
 
 function buildReasonPayload(preset: string, other: string): string | undefined {
@@ -18,6 +30,7 @@ function buildReasonPayload(preset: string, other: string): string | undefined {
 }
 
 export default function StoreStockDetailPage() {
+  const navigate = useNavigate()
   const { storeId: storeIdParam, stockId: stockIdParam } = useParams()
   const role = getRole()
   const myStoreId = getStoreId()
@@ -106,176 +119,187 @@ export default function StoreStockDetailPage() {
     }
   }
 
+  const backLink = <ErpChevronBack to="/store-stock" label="매장 재고" />
+
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/store-stock"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 매장 재고 목록
-        </Link>
-        <LoadingSpinner />
-      </div>
+      <ErpPageFrame title="매장 재고" actions={backLink}>
+        <div className="px-3 py-12">
+          <LoadingSpinner />
+        </div>
+      </ErpPageFrame>
     )
   }
 
   if (error || !row) {
     return (
-      <div className="space-y-4">
-        <Link
-          to="/store-stock"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 매장 재고 목록
-        </Link>
-        <p className="text-sm text-rose-600">{error ?? '재고를 찾을 수 없습니다.'}</p>
-      </div>
+      <ErpPageFrame title="매장 재고" actions={backLink}>
+        <div className="px-3 py-8 text-center text-sm text-rose-600">{error ?? '재고를 찾을 수 없습니다.'}</div>
+      </ErpPageFrame>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Link
-          to="/store-stock"
-          className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          ← 매장 재고 목록
-        </Link>
-        <h1 className="mt-2 text-lg font-semibold text-slate-900">{row.productName}</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {row.storeName} · SKU {row.skuCode}
-        </p>
+    <ErpPageFrame
+      title={row.productName}
+      actions={backLink}
+      footer={
+        canEdit ? (
+          <>
+            {saveError ? <span className="mr-auto text-xs text-rose-600">{saveError}</span> : null}
+            <ErpSecondaryButton type="button" onClick={() => navigate('/store-stock')}>
+              취소
+            </ErpSecondaryButton>
+            <ErpFooterPrimary>
+              <ErpPrimaryButton type="button" disabled={saving} onClick={() => void save()}>
+                {saving ? '저장 중…' : '저장'}
+              </ErpPrimaryButton>
+            </ErpFooterPrimary>
+          </>
+        ) : undefined
+      }
+    >
+      <div className="border-b border-slate-300 px-3 py-1 text-[11px] text-slate-500">
+        {row.storeName} · SKU {row.skuCode}
       </div>
 
-      <SectionCard title="상품 정보">
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <dt className="text-xs font-medium text-slate-500">상품명</dt>
-            <dd className="mt-0.5 font-medium text-slate-900">{row.productName}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">SKU</dt>
-            <dd className="mt-0.5 font-mono text-xs text-slate-800">{row.skuCode}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">색상</dt>
-            <dd className="mt-0.5 text-slate-800">{row.color}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">사이즈</dt>
-            <dd className="mt-0.5 text-slate-800">{row.size}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium text-slate-500">현재 수량</dt>
-            <dd className="mt-0.5 tabular-nums text-slate-900">{row.quantity}</dd>
-          </div>
-        </dl>
-      </SectionCard>
+      <ErpToolbar>
+        <span className="text-xs font-semibold text-slate-700">상품 정보</span>
+      </ErpToolbar>
+
+      <ErpFormTable>
+        <ErpFormRow>
+          <ErpFormLabel>상품명</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <span className="px-1 text-xs font-medium text-slate-900">{row.productName}</span>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>SKU</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 font-mono text-xs text-slate-800">{row.skuCode}</span>
+          </ErpFormCell>
+          <ErpFormLabel>색상</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 text-xs text-slate-800">{row.color}</span>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>사이즈</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 text-xs text-slate-800">{row.size}</span>
+          </ErpFormCell>
+          <ErpFormLabel>현재 수량</ErpFormLabel>
+          <ErpFormCell>
+            <span className="px-1 text-xs font-medium tabular-nums text-slate-900">{row.quantity}</span>
+          </ErpFormCell>
+        </ErpFormRow>
+      </ErpFormTable>
 
       {canEdit ? (
-        <SectionCard title="수량 수정">
-          <div className="space-y-4">
-            <div>
-              <span className="mb-1 block text-xs font-medium text-slate-600">새 수량</span>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => bumpQty(-1)}
-                  disabled={saving}
-                  className="h-10 w-10 shrink-0 rounded-md border border-slate-200 bg-white text-lg font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={editQty}
+        <>
+          <ErpToolbar>
+            <span className="text-xs font-semibold text-slate-700">수량 수정</span>
+          </ErpToolbar>
+
+          <ErpFormTable>
+            <ErpFormRow>
+              <ErpFormLabel required>새 수량</ErpFormLabel>
+              <ErpFormCell>
+                <div className="flex items-center gap-1 px-1">
+                  <button
+                    type="button"
+                    onClick={() => bumpQty(-1)}
+                    disabled={saving}
+                    className={[erpToolbarBtnClass(), 'w-7 px-0 text-base'].join(' ')}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={editQty}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      if (v === '') {
+                        setEditQty(0)
+                        return
+                      }
+                      const n = Number.parseInt(v, 10)
+                      setEditQty(Number.isFinite(n) && n >= 0 ? n : 0)
+                    }}
+                    disabled={saving}
+                    className={[erpInputClass(), 'w-20 text-center tabular-nums'].join(' ')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => bumpQty(1)}
+                    disabled={saving}
+                    className={[erpToolbarBtnClass(), 'w-7 px-0 text-base'].join(' ')}
+                  >
+                    +
+                  </button>
+                </div>
+              </ErpFormCell>
+              <ErpFormLabel>수정 사유</ErpFormLabel>
+              <ErpFormCell>
+                <select
+                  value={reasonPreset}
                   onChange={(e) => {
-                    const v = e.target.value
-                    if (v === '') {
-                      setEditQty(0)
-                      return
-                    }
-                    const n = Number.parseInt(v, 10)
-                    setEditQty(Number.isFinite(n) && n >= 0 ? n : 0)
+                    setReasonPreset(e.target.value)
+                    if (e.target.value !== '기타') setReasonOther('')
                   }}
                   disabled={saving}
-                  className="h-10 w-28 rounded-md border border-slate-200 bg-white px-3 text-center text-sm font-medium tabular-nums shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                />
-                <button
-                  type="button"
-                  onClick={() => bumpQty(1)}
-                  disabled={saving}
-                  className="h-10 w-10 shrink-0 rounded-md border border-slate-200 bg-white text-lg font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                  className={erpSelectClass()}
                 >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-slate-600">수정 사유 (선택)</span>
-              <select
-                value={reasonPreset}
-                onChange={(e) => {
-                  setReasonPreset(e.target.value)
-                  if (e.target.value !== '기타') setReasonOther('')
-                }}
-                disabled={saving}
-                className="h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {STOCK_EDIT_REASONS.map((o) => (
-                  <option key={o.value === '' ? '_none' : o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
+                  {STOCK_EDIT_REASONS.map((o) => (
+                    <option key={o.value === '' ? '_none' : o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </ErpFormCell>
+            </ErpFormRow>
             {reasonPreset === '기타' ? (
-              <label className="block max-w-md">
-                <span className="mb-1 block text-xs font-medium text-slate-600">기타 사유</span>
-                <input
-                  value={reasonOther}
-                  onChange={(e) => setReasonOther(e.target.value)}
-                  disabled={saving}
-                  placeholder="사유를 입력하세요"
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                />
-              </label>
+              <ErpFormRow>
+                <ErpFormLabel>기타 사유</ErpFormLabel>
+                <ErpFormCell colSpan={3}>
+                  <input
+                    value={reasonOther}
+                    onChange={(e) => setReasonOther(e.target.value)}
+                    disabled={saving}
+                    placeholder="사유를 입력하세요"
+                    className={erpInputClass()}
+                  />
+                </ErpFormCell>
+              </ErpFormRow>
             ) : null}
-
-            {saveError ? <p className="text-sm text-rose-600">{saveError}</p> : null}
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Link
-                to="/store-stock"
-                className="inline-flex h-10 items-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-              >
-                취소
-              </Link>
-              <button
-                type="button"
-                onClick={() => void save()}
-                disabled={saving}
-                className="h-10 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-300"
-              >
-                {saving ? '저장 중…' : '저장'}
-              </button>
-            </div>
-          </div>
-        </SectionCard>
+          </ErpFormTable>
+        </>
       ) : (
-        <SectionCard title="수량">
-          <p className="text-sm text-slate-600">
-            이 매장 재고는 조회만 가능합니다. 수량 수정은 본사(HQ) 또는 해당 매장 관리자만 할 수 있습니다.
-          </p>
-          <p className="mt-2 text-lg font-semibold tabular-nums text-slate-900">{row.quantity}</p>
-        </SectionCard>
+        <>
+          <ErpToolbar>
+            <span className="text-xs font-semibold text-slate-700">수량</span>
+          </ErpToolbar>
+          <ErpFormTable>
+            <ErpFormRow>
+              <ErpFormLabel>안내</ErpFormLabel>
+              <ErpFormCell colSpan={3}>
+                <span className="px-1 text-xs text-slate-600">
+                  이 매장 재고는 조회만 가능합니다. 수량 수정은 본사(HQ) 또는 해당 매장 관리자만 할 수 있습니다.
+                </span>
+              </ErpFormCell>
+            </ErpFormRow>
+            <ErpFormRow>
+              <ErpFormLabel>수량</ErpFormLabel>
+              <ErpFormCell colSpan={3}>
+                <span className="px-1 text-xs font-semibold tabular-nums text-slate-900">{row.quantity}</span>
+              </ErpFormCell>
+            </ErpFormRow>
+          </ErpFormTable>
+        </>
       )}
-    </div>
+    </ErpPageFrame>
   )
 }

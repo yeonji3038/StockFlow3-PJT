@@ -1,5 +1,6 @@
 package com.stockflow.store.domain.store.service;
 
+import com.stockflow.common.kafka.dto.StockChangeEvent;
 import com.stockflow.store.domain.product.entity.ProductOption;
 import com.stockflow.store.domain.product.repository.ProductOptionRepository;
 import com.stockflow.store.domain.stockhistory.entity.StockHistoryReason;
@@ -15,7 +16,6 @@ import com.stockflow.store.domain.user.entity.User;
 import com.stockflow.store.domain.user.repository.UserRepository;
 import com.stockflow.store.global.exception.BusinessException;
 import com.stockflow.store.global.exception.ErrorCode;
-import com.stockflow.common.kafka.dto.StockChangeEvent;
 import com.stockflow.store.global.kafka.producer.StockEventProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -114,6 +114,9 @@ public class StoreStockService {
                             .currentStock(newQty)
                             .changeType(diff > 0 ? "INCREASE" : "DECREASE")
                             .timestamp(LocalDateTime.now())
+                            .storeId(storeStock.getStore().getId())          // ← 추가
+                            .productOptionId(storeStock.getProductOption().getId())  // ← 추가
+                            .reason(reason.name())                            // ← 추가
                             .build()
             );
         }

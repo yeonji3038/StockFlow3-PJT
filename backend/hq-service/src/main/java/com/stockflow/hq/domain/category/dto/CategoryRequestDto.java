@@ -11,5 +11,8 @@ public class CategoryRequestDto {
     @NotBlank(message = "카테고리명은 필수입니다.")
     private String name;
 
+    @NotBlank(message = "카테고리 코드는 필수입니다.")
+    private String code;
+
     private Long parentId; // 대분류면 null, 소분류면 상위 카테고리 ID
 }

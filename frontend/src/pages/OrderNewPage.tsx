@@ -1,9 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 import { api } from '../lib/api'
 import { getRole, getStoreId } from '../lib/auth'
-import SectionCard from '../components/ui/SectionCard'
+import ErpPageFrame, { ErpAccessDenied } from '../components/ui/ErpPageFrame'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import {
+  ErpChevronBack,
+  ErpDataTable,
+  ErpFooterBar,
+  ErpFooterPrimary,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpGridWrap,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpToolbar,
+} from '../components/ui/erp/ErpLayout'
+import { erpGridCellClass, erpGridHeadClass, erpInputClass, erpSelectClass } from '../lib/erpUi'
 import type { Order } from '../types/models'
 import type { ProductListItem } from '../components/product/types'
 import type { ProductStatusValue } from '../lib/productStatus'
@@ -13,7 +29,8 @@ type ApiProductOption = {
   productId: number
   productName: string
   color: string
-  size: unknown
+  sizeName?: string | null
+  size?: unknown
   skuCode: string
   status: string
 }
@@ -88,6 +105,16 @@ export default function OrderNewPage() {
   const [searchQ, setSearchQ] = useState('')
 
   const [pickQty, setPickQty] = useState<Record<number, number>>({})
+
+  // AI 추천 발주량: productOptionId -> 추천 수량('loading'/'error' 상태 포함)
+  const [aiRecommend, setAiRecommend] = useState<Record<number, number | 'loading' | 'error'>>({})
+
+  // 발주는 보통 다음날 입고를 기준으로 하므로 내일 날짜로 예측 요청
+  const tomorrow = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().slice(0, 10)
+  }, [])
 
   const loadProducts = useCallback(async () => {
     setProductsLoading(true)
@@ -168,7 +195,7 @@ export default function OrderNewPage() {
                   brandName: p.brandName,
                   skuCode: o.skuCode ?? '',
                   color: o.color ?? '',
-                  sizeLabel: formatSize(o.size),
+                  sizeLabel: (o.sizeName ?? formatSize(o.size)) || '',
                 }),
               )
           }),
@@ -241,6 +268,32 @@ export default function OrderNewPage() {
       return hay.includes(needle)
     })
   }, [afterDropdowns, searchQ])
+
+  useEffect(() => {
+    if (storeId == null || displayedOptions.length === 0) return
+
+    const targets = displayedOptions.filter((o) => aiRecommend[o.productOptionId] == null)
+    if (targets.length === 0) return
+
+    targets.forEach((o) => {
+      setAiRecommend((prev) => ({ ...prev, [o.productOptionId]: 'loading' }))
+      api
+        .get('/api/ai/demand-forecast', {
+          params: { storeId, productOptionId: o.productOptionId, targetDate: tomorrow },
+        })
+        .then(({ data }) => {
+          const recommended = (data as { recommendedOrderQuantity?: number })?.recommendedOrderQuantity
+          setAiRecommend((prev) => ({
+            ...prev,
+            [o.productOptionId]: typeof recommended === 'number' ? recommended : 'error',
+          }))
+        })
+        .catch(() => {
+          setAiRecommend((prev) => ({ ...prev, [o.productOptionId]: 'error' }))
+        })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedOptions, storeId, tomorrow])
 
   const productChoices = useMemo(() => {
     const s = new Set<string>()
@@ -321,25 +374,23 @@ export default function OrderNewPage() {
 
   if (role !== 'STORE_MANAGER') {
     return (
-      <div className="space-y-4">
-        <Link to="/orders" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          ← 발주 목록
-        </Link>
-        <p className="text-sm text-slate-600">발주 요청은 매장 관리자(STORE_MANAGER) 계정으로만 등록할 수 있습니다.</p>
-      </div>
+      <ErpAccessDenied
+        title="발주 요청"
+        message="발주 요청은 매장 관리자(STORE_MANAGER) 계정으로만 등록할 수 있습니다."
+      />
     )
   }
 
   if (storeId == null) {
     return (
-      <div className="space-y-4">
-        <Link to="/orders" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          ← 발주 목록
-        </Link>
-        <p className="text-sm text-amber-800">
+      <ErpPageFrame
+        title="발주 요청"
+        actions={<ErpChevronBack to="/orders" label="발주 목록" />}
+      >
+        <p className="px-3 py-4 text-sm text-amber-800">
           로그인 정보에 매장이 없습니다. 본사에 문의한 뒤 다시 로그인해 주세요.
         </p>
-      </div>
+      </ErpPageFrame>
     )
   }
 
@@ -379,39 +430,38 @@ export default function OrderNewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <Link to="/orders" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-          ← 발주 목록
-        </Link>
-        <h1 className="mt-2 text-lg font-semibold text-slate-900">발주 요청</h1>
-      </div>
+    <ErpPageFrame title="발주 요청" actions={<ErpChevronBack to="/orders" label="발주 목록" />}>
+      <ErpToolbar>
+        <span className="text-xs font-semibold text-slate-700">상품·옵션 찾기</span>
+      </ErpToolbar>
 
-      <SectionCard title="상품·옵션 찾기">
-        {productsLoading ? (
+      {productsLoading ? (
+        <div className="py-12">
           <LoadingSpinner />
-        ) : productsError ? (
-          <p className="text-sm text-rose-600">{productsError}</p>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-end gap-3">
-              <label className="block text-sm font-medium text-slate-700">
-                카테고리
+        </div>
+      ) : productsError ? (
+        <div className="px-3 py-4 text-sm text-rose-600">{productsError}</div>
+      ) : (
+        <>
+          <ErpFormTable>
+            <ErpFormRow>
+              <ErpFormLabel required>카테고리</ErpFormLabel>
+              <ErpFormCell>
                 <select
                   value={categoryName}
                   onChange={(e) => setCategoryName(e.target.value)}
-                  className="mt-1 h-10 min-w-[11rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={erpSelectClass()}
                 >
-                  <option value="">카테고리 선택</option>
+                  <option value="">선택</option>
                   {categoryNames.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="block min-w-[9rem] flex-1 text-sm font-medium text-slate-700">
-                상품명
+              </ErpFormCell>
+              <ErpFormLabel>상품명</ErpFormLabel>
+              <ErpFormCell>
                 <select
                   value={filterProductName}
                   onChange={(e) => {
@@ -421,7 +471,7 @@ export default function OrderNewPage() {
                     setFilterSku('ALL')
                   }}
                   disabled={!categoryName || poolLoading}
-                  className="mt-1 h-10 w-full min-w-[9rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50"
+                  className={erpSelectClass()}
                 >
                   <option value="ALL">전체</option>
                   {productChoices.map((n) => (
@@ -430,9 +480,11 @@ export default function OrderNewPage() {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="block min-w-[8rem] text-sm font-medium text-slate-700">
-                색상
+              </ErpFormCell>
+            </ErpFormRow>
+            <ErpFormRow>
+              <ErpFormLabel>색상</ErpFormLabel>
+              <ErpFormCell>
                 <select
                   value={filterColor}
                   onChange={(e) => {
@@ -441,7 +493,7 @@ export default function OrderNewPage() {
                     setFilterSku('ALL')
                   }}
                   disabled={!categoryName || poolLoading}
-                  className="mt-1 h-10 w-full min-w-[8rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50"
+                  className={erpSelectClass()}
                 >
                   <option value="ALL">전체</option>
                   {colorChoices.map((c) => (
@@ -450,9 +502,9 @@ export default function OrderNewPage() {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="block min-w-[8rem] text-sm font-medium text-slate-700">
-                사이즈
+              </ErpFormCell>
+              <ErpFormLabel>사이즈</ErpFormLabel>
+              <ErpFormCell>
                 <select
                   value={filterSize}
                   onChange={(e) => {
@@ -460,7 +512,7 @@ export default function OrderNewPage() {
                     setFilterSku('ALL')
                   }}
                   disabled={!categoryName || poolLoading}
-                  className="mt-1 h-10 w-full min-w-[8rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50"
+                  className={erpSelectClass()}
                 >
                   <option value="ALL">전체</option>
                   {sizeChoices.map((s) => (
@@ -469,14 +521,16 @@ export default function OrderNewPage() {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="block min-w-[9rem] flex-1 text-sm font-medium text-slate-700">
-                SKU
+              </ErpFormCell>
+            </ErpFormRow>
+            <ErpFormRow>
+              <ErpFormLabel>SKU</ErpFormLabel>
+              <ErpFormCell>
                 <select
                   value={filterSku}
                   onChange={(e) => setFilterSku(e.target.value)}
                   disabled={!categoryName || poolLoading}
-                  className="mt-1 h-10 w-full min-w-[9rem] rounded-md border border-slate-200 bg-white px-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50"
+                  className={[erpSelectClass(), 'font-mono'].join(' ')}
                 >
                   <option value="ALL">전체</option>
                   {skuChoices.map((sku) => (
@@ -485,112 +539,62 @@ export default function OrderNewPage() {
                     </option>
                   ))}
                 </select>
-              </label>
-            </div>
+              </ErpFormCell>
+              <ErpFormLabel>검색</ErpFormLabel>
+              <ErpFormCell>
+                <input
+                  type="search"
+                  value={searchQ}
+                  onChange={(e) => setSearchQ(e.target.value)}
+                  disabled={!categoryName || poolLoading}
+                  placeholder="상품명, SKU, 색상, 사이즈…"
+                  className={erpInputClass()}
+                />
+              </ErpFormCell>
+            </ErpFormRow>
+          </ErpFormTable>
 
-            <label className="block text-sm font-medium text-slate-700">
-              검색
-              <input
-                type="search"
-                value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
-                disabled={!categoryName || poolLoading}
-                placeholder="상품명, SKU, 색상, 사이즈…"
-                className="mt-1 h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-50"
-              />
-            </label>
+          {poolMessage ? (
+            <div className="border-b border-slate-300 px-2 py-1.5 text-xs text-amber-800">{poolMessage}</div>
+          ) : null}
 
-            {poolMessage ? <p className="text-sm text-amber-800">{poolMessage}</p> : null}
-            {!categoryName ? null : poolLoading ? (
+          {!categoryName ? (
+            <div className="px-3 py-10 text-center text-xs text-slate-400">카테고리를 선택하세요.</div>
+          ) : poolLoading ? (
+            <div className="py-10">
               <LoadingSpinner />
-            ) : displayedOptions.length > 0 ? (
-              <div className="overflow-x-auto rounded-md border border-slate-100">
-                <table className="w-full min-w-[720px] border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                      <th className="px-3 py-2.5">카테고리</th>
-                      <th className="px-3 py-2.5">SKU</th>
-                      <th className="px-3 py-2.5">상품명</th>
-                      <th className="px-3 py-2.5">색 / 사이즈</th>
-                      <th className="px-3 py-2.5">수량</th>
-                      <th className="px-3 py-2.5 text-right">담기</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayedOptions.map((o) => (
-                      <tr key={o.productOptionId} className="border-b border-slate-100 even:bg-slate-50/40">
-                        <td className="px-3 py-2 text-slate-700">{o.categoryName}</td>
-                        <td className="px-3 py-2 font-mono text-xs text-slate-800">{o.skuCode || '—'}</td>
-                        <td className="px-3 py-2 text-slate-900">{o.productName}</td>
-                        <td className="px-3 py-2 text-slate-700">{appearanceLabel(o)}</td>
-                        <td className="px-3 py-2">
-                          <select
-                            value={pickQty[o.productOptionId] ?? 1}
-                            onChange={(e) =>
-                              setPickQty((p) => ({
-                                ...p,
-                                [o.productOptionId]: Number(e.target.value),
-                              }))
-                            }
-                            className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                          >
-                            {QTY_OPTIONS.map((n) => (
-                              <option key={n} value={n}>
-                                {n}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-3 py-2 text-right">
-                          <button
-                            type="button"
-                            onClick={() => addToCart(o)}
-                            className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900"
-                          >
-                            담기
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : optionPool.length > 0 ? (
-              <p className="text-sm text-slate-500">
-                {searchQ.trim()
-                  ? '검색어·드롭다운 조건에 맞는 옵션이 없습니다.'
-                  : '선택한 조건에 맞는 옵션이 없습니다.'}
-              </p>
-            ) : null}
-          </div>
-        )}
-      </SectionCard>
-
-      <SectionCard title="담은 품목">
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-          {error && <p className="text-sm text-rose-600">{error}</p>}
-
-          {cart.length === 0 ? null : (
-            <div className="overflow-x-auto rounded-md border border-slate-100">
-              <table className="w-full min-w-[640px] border-collapse text-sm">
+            </div>
+          ) : displayedOptions.length > 0 ? (
+            <ErpGridWrap maxHeight="max-h-[min(20rem,calc(100vh-24rem))]">
+              <ErpDataTable minWidth="720px">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                    <th className="px-3 py-2.5">옵션</th>
-                    <th className="px-3 py-2.5">수량</th>
-                    <th className="px-3 py-2.5 text-right">삭제</th>
+                  <tr>
+                    <th className={erpGridHeadClass()}>카테고리</th>
+                    <th className={erpGridHeadClass()}>SKU</th>
+                    <th className={erpGridHeadClass()}>상품명</th>
+                    <th className={erpGridHeadClass()}>색 / 사이즈</th>
+                    <th className={erpGridHeadClass()}>수량</th>
+                    <th className={erpGridHeadClass()}>AI 추천</th>
+                    <th className={[erpGridHeadClass(), 'text-right'].join(' ')}>담기</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {cart.map((line) => (
-                    <tr key={line.productOptionId} className="border-b border-slate-100 even:bg-slate-50/40">
-                      <td className="px-3 py-2 text-slate-800">{optionRowLabel(line)}</td>
-                      <td className="px-3 py-2">
+                  {displayedOptions.map((o) => (
+                    <tr key={o.productOptionId}>
+                      <td className={erpGridCellClass()}>{o.categoryName}</td>
+                      <td className={erpGridCellClass('font-mono text-[11px]')}>{o.skuCode || '—'}</td>
+                      <td className={erpGridCellClass()}>{o.productName}</td>
+                      <td className={erpGridCellClass()}>{appearanceLabel(o)}</td>
+                      <td className={erpGridCellClass()}>
                         <select
-                          value={line.quantity}
+                          value={pickQty[o.productOptionId] ?? 1}
                           onChange={(e) =>
-                            setCartLineQty(line.productOptionId, Number(e.target.value))
+                            setPickQty((p) => ({
+                              ...p,
+                              [o.productOptionId]: Number(e.target.value),
+                            }))
                           }
-                          className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className={erpSelectClass()}
                         >
                           {QTY_OPTIONS.map((n) => (
                             <option key={n} value={n}>
@@ -599,49 +603,142 @@ export default function OrderNewPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-3 py-2 text-right">
-                        <button
+                      <td className={erpGridCellClass()}>
+                        {(() => {
+                          const rec = aiRecommend[o.productOptionId]
+                          if (rec === 'loading') {
+                            return <LoadingSpinner compact hideLabel />
+                          }
+                          if (rec === 'error' || rec == null) {
+                            return <span className="text-slate-300">—</span>
+                          }
+                          return (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPickQty((p) => ({ ...p, [o.productOptionId]: rec }))
+                              }
+                              title="AI가 예측한 수요 기반 추천 발주량입니다. 클릭하면 수량에 적용됩니다."
+                              className="border border-blue-300 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700 hover:bg-blue-100"
+                            >
+                              {rec}개 적용
+                            </button>
+                          )
+                        })()}
+                      </td>
+                      <td className={erpGridCellClass('text-right')}>
+                        <ErpPrimaryButton
                           type="button"
-                          onClick={() => removeCartLine(line.productOptionId)}
-                          className="text-xs font-medium text-rose-600 hover:underline"
+                          onClick={() => addToCart(o)}
+                          className="h-7 min-w-0 px-2"
                         >
-                          삭제
-                        </button>
+                          담기
+                        </ErpPrimaryButton>
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </ErpDataTable>
+            </ErpGridWrap>
+          ) : optionPool.length > 0 ? (
+            <div className="px-3 py-8 text-center text-xs text-slate-500">
+              {searchQ.trim()
+                ? '검색어·드롭다운 조건에 맞는 옵션이 없습니다.'
+                : '선택한 조건에 맞는 옵션이 없습니다.'}
             </div>
-          )}
+          ) : null}
+        </>
+      )}
 
-          <label className="block text-sm font-medium text-slate-700">
-            메모 (선택)
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </label>
+      <ErpToolbar>
+        <span className="text-xs font-semibold text-slate-700">담은 품목</span>
+        {cart.length > 0 ? (
+          <span className="ml-auto text-[11px] text-slate-500">{cart.length}건</span>
+        ) : null}
+      </ErpToolbar>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={submitting || cart.length === 0}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 disabled:opacity-50"
-            >
-              요청하기
-            </button>
-            <Link
-              to="/orders"
-              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              취소
-            </Link>
-          </div>
-        </form>
-      </SectionCard>
-    </div>
+      <form onSubmit={(e) => void handleSubmit(e)}>
+        {error ? (
+          <div className="border-b border-slate-300 px-2 py-1.5 text-xs text-rose-600">{error}</div>
+        ) : null}
+
+        {cart.length === 0 ? (
+          <div className="px-3 py-8 text-center text-xs text-slate-400">담은 품목이 없습니다.</div>
+        ) : (
+          <ErpGridWrap>
+            <ErpDataTable minWidth="640px">
+              <thead>
+                <tr>
+                  <th className={erpGridHeadClass()}>옵션</th>
+                  <th className={erpGridHeadClass()}>수량</th>
+                  <th className={[erpGridHeadClass(), 'w-10 text-center'].join(' ')}>
+                    <span className="sr-only">삭제</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {cart.map((line) => (
+                  <tr key={line.productOptionId}>
+                    <td className={erpGridCellClass()}>{optionRowLabel(line)}</td>
+                    <td className={erpGridCellClass()}>
+                      <select
+                        value={line.quantity}
+                        onChange={(e) =>
+                          setCartLineQty(line.productOptionId, Number(e.target.value))
+                        }
+                        className={erpSelectClass()}
+                      >
+                        {QTY_OPTIONS.map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className={erpGridCellClass('text-center')}>
+                      <button
+                        type="button"
+                        onClick={() => removeCartLine(line.productOptionId)}
+                        className="inline-flex items-center justify-center text-rose-600 hover:text-rose-800"
+                        aria-label="삭제"
+                        title="삭제"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </ErpDataTable>
+          </ErpGridWrap>
+        )}
+
+        <ErpFormTable>
+          <ErpFormRow>
+            <ErpFormLabel>메모</ErpFormLabel>
+            <ErpFormCell colSpan={3}>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                placeholder="선택"
+                className="min-h-[3rem] w-full border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500"
+              />
+            </ErpFormCell>
+          </ErpFormRow>
+        </ErpFormTable>
+
+        <ErpFooterBar>
+          <ErpSecondaryButton type="button" onClick={() => navigate('/orders')}>
+            취소
+          </ErpSecondaryButton>
+          <ErpFooterPrimary>
+            <ErpPrimaryButton type="submit" disabled={submitting || cart.length === 0}>
+              {submitting ? '요청 중…' : '요청하기'}
+            </ErpPrimaryButton>
+          </ErpFooterPrimary>
+        </ErpFooterBar>
+      </form>
+    </ErpPageFrame>
   )
 }

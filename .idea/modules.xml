@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/infra/infra.iml" filepath="$PROJECT_DIR$/infra/infra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/stockflow.iml" filepath="$PROJECT_DIR$/.idea/stockflow.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/stockflow-backend.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/stockflow-backend.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hq-service/stockflow-backend.hq-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/hq-service/stockflow-backend.hq-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/store-service/stockflow-backend.store-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/store-service/stockflow-backend.store-service.main.iml" />
+    </modules>
+  </component>
+</project>

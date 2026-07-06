@@ -10,7 +10,6 @@ import com.stockflow.store.domain.warehouse.repository.WarehouseRepository;
 import com.stockflow.store.domain.warehouse.repository.WarehouseStockRepository;
 import com.stockflow.store.global.exception.BusinessException;
 import com.stockflow.store.global.exception.ErrorCode;
-import com.stockflow.common.kafka.dto.StockChangeEvent;
 import com.stockflow.store.global.kafka.producer.StockEventProducer;
 import com.stockflow.store.global.websocket.StockWebSocketService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.stockflow.common.kafka.dto.StockChangeEvent;
 
 import java.time.LocalDateTime;
 import java.util.List;

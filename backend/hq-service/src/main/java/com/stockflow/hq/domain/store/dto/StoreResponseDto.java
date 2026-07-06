@@ -12,19 +12,25 @@ import java.time.LocalDateTime;
 public class StoreResponseDto {
 
     private Long id;
+    private Long brandId;
+    private String brandName;
     private String name;
     private String location;
     private StoreType storeType;
     private String phone;
+    private String storeCode;
     private LocalDateTime createdAt;
 
     public static StoreResponseDto from(Store store) {
         return StoreResponseDto.builder()
                 .id(store.getId())
+                .brandId(store.getBrand() != null ? store.getBrand().getId() : null)
+                .brandName(store.getBrand() != null ? store.getBrand().getName() : null)
                 .name(store.getName())
                 .location(store.getLocation())
                 .storeType(store.getStoreType())
                 .phone(store.getPhone())
+                .storeCode(store.getStoreCode())
                 .createdAt(store.getCreatedAt())
                 .build();
     }

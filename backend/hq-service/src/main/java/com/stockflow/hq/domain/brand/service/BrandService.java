@@ -25,6 +25,7 @@ public class BrandService {
     public BrandResponseDto create(BrandRequestDto request) {
         Brand brand = Brand.builder()
                 .name(request.getName())
+                .code(request.getCode())
                 .description(request.getDescription())
                 .build();
         return BrandResponseDto.from(brandRepository.save(brand));
@@ -49,7 +50,7 @@ public class BrandService {
     public BrandResponseDto update(Long id, BrandRequestDto request) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.BRAND_NOT_FOUND));
-        brand.update(request.getName(), request.getDescription());
+        brand.update(request.getName(), request.getCode(), request.getDescription());
         return BrandResponseDto.from(brand);
     }
 

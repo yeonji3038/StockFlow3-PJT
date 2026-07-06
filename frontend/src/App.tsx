@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import WebSocketBridge from './components/global/WebSocketBridge'
-import LowStockToaster from './components/global/LowStockToaster'
+import NotificationStack from './components/global/NotificationStack'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage.tsx'
 import AuthLayout from './components/layout/AuthLayout'
@@ -16,15 +16,27 @@ import StoreStockPage from './pages/StoreStockPage'
 import StoreStockDetailPage from './pages/StoreStockDetailPage'
 import MovementsPage from './pages/MovementsPage'
 import UsersAdminPage from './pages/admin/UsersAdminPage'
+import BrandsAdminPage from './pages/admin/BrandsAdminPage'
+import StoreListPage from './pages/admin/stores/StoreListPage'
+import StoreRegisterPage from './pages/admin/stores/StoreRegisterPage'
+import StoreDetailPage from './pages/admin/stores/StoreDetailPage'
+import WarehouseListPage from './pages/admin/warehouses/WarehouseListPage'
+import WarehouseRegisterPage from './pages/admin/warehouses/WarehouseRegisterPage'
+import WarehouseDetailPage from './pages/admin/warehouses/WarehouseDetailPage'
 import ProductListPage from './pages/admin/products/ProductListPage'
 import ProductRegisterPage from './pages/admin/products/ProductRegisterPage'
 import ProductDetailPage from './pages/admin/products/ProductDetailPage'
+import ProductOptionsPage from './pages/admin/products/ProductOptionsPage'
+import ProductOptionDetailPage from './pages/admin/products/ProductOptionDetailPage'
+import AnomalyAlertsPage from './pages/AnomalyAlertsPage'
+import AnomalyAlertDetailPage from './pages/AnomalyAlertDetailPage'
+import WarehouseOrdersPage from './pages/WarehouseOrdersPage'
 
 function App() {
   return (
     <BrowserRouter>
       <WebSocketBridge />
-      <LowStockToaster />
+      <NotificationStack />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -38,12 +50,24 @@ function App() {
           <Route path="/orders/new" element={<OrderNewPage />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/warehouse-stock" element={<WarehouseStockPage />} />
+          <Route path="/warehouse-orders" element={<WarehouseOrdersPage />} />
           <Route path="/store-stock/:storeId/:stockId" element={<StoreStockDetailPage />} />
           <Route path="/store-stock" element={<StoreStockPage />} />
           <Route path="/movements" element={<MovementsPage />} />
+          <Route path="/anomaly-alerts" element={<AnomalyAlertsPage />} />
+          <Route path="/anomaly-alerts/:id" element={<AnomalyAlertDetailPage />} />
           <Route path="/admin/users" element={<UsersAdminPage />} />
+          <Route path="/admin/brands" element={<BrandsAdminPage />} />
+          <Route path="/admin/stores" element={<StoreListPage />} />
+          <Route path="/admin/stores/new" element={<StoreRegisterPage />} />
+          <Route path="/admin/stores/:id" element={<StoreDetailPage />} />
+          <Route path="/admin/warehouses" element={<WarehouseListPage />} />
+          <Route path="/admin/warehouses/new" element={<WarehouseRegisterPage />} />
+          <Route path="/admin/warehouses/:id" element={<WarehouseDetailPage />} />
           <Route path="/admin/products" element={<ProductListPage />} />
           <Route path="/admin/products/new" element={<ProductRegisterPage />} />
+          <Route path="/admin/product-options" element={<ProductOptionsPage />} />
+          <Route path="/admin/product-options/:productId" element={<ProductOptionDetailPage />} />
           <Route path="/admin/products/:id" element={<ProductDetailPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

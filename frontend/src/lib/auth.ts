@@ -1,44 +1,19 @@
-import axios from 'axios'
-import { API_BASE_URL } from './apiBase'
+import { api } from './api'
 
 export type UserRole = 'HQ_STAFF' | 'STORE_MANAGER' | 'WAREHOUSE_STAFF'
 
-const REFRESH_KEY = 'refreshToken'
-
-export function getToken(): string | null {
-  return localStorage.getItem('token')
+/** 로컬에 저장된 사용자 프로필로 세션 여부 추정 (실제 인증은 HttpOnly 쿠키) */
+export function hasUserSession(): boolean {
+  return getRole() != null
 }
 
-export function getRefreshToken(): string | null {
-  return localStorage.getItem(REFRESH_KEY)
-}
-
-export function setRefreshToken(token: string | null): void {
-  if (token) {
-    localStorage.setItem(REFRESH_KEY, token)
-  } else {
-    localStorage.removeItem(REFRESH_KEY)
-  }
-}
-
-/** 리프레시 토큰으로 액세스 토큰만 재발급 (성공 시 localStorage.token 갱신) */
+/** 쿠키 기반 세션 갱신 */
 export async function trySilentRefresh(): Promise<boolean> {
-  const refresh = getRefreshToken()
-  if (!refresh) return false
   try {
-    const { data } = await axios.post<{ accessToken: string }>(
-      `${API_BASE_URL}/api/auth/refresh`,
-      {},
-      { headers: { 'Refresh-Token': refresh } },
-    )
-    if (data?.accessToken) {
-      localStorage.setItem('token', data.accessToken)
-      return true
-    }
-    return false
+    await api.post('/api/auth/refresh')
+    return true
   } catch {
-    localStorage.removeItem('token')
-    setRefreshToken(null)
+    clearUserSession()
     return false
   }
 }
@@ -91,15 +66,22 @@ export function getUserId(): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-export function logout(): void {
-  localStorage.removeItem('token')
-  setRefreshToken(null)
+function clearUserSession(): void {
   localStorage.removeItem('role')
   localStorage.removeItem('name')
   localStorage.removeItem('userEmail')
   localStorage.removeItem('userId')
   localStorage.removeItem('storeId')
   localStorage.removeItem('warehouseId')
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await api.post('/api/auth/logout')
+  } catch {
+    // ignore
+  }
+  clearUserSession()
 }
 
 export function roleLabel(role: UserRole): string {

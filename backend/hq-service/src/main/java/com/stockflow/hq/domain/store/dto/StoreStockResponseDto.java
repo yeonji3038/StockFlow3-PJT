@@ -35,7 +35,7 @@ public class StoreStockResponseDto implements Serializable {
                 .skuCode(storeStock.getProductOption().getSkuCode())
                 .productName(storeStock.getProductOption().getProduct().getName())
                 .color(storeStock.getProductOption().getColor())
-                .size(storeStock.getProductOption().getSize().name())
+                .size(storeStock.getProductOption().getSize().getName())
                 .quantity(storeStock.getQuantity())
                 .build();
     }

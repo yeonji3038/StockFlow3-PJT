@@ -1,10 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { isAxiosError } from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { getRole } from '../../../lib/auth'
 import { api } from '../../../lib/api'
-import SectionCard from '../../ui/SectionCard'
+import type { BrandListItem } from '../../../lib/store'
 import LoadingSpinner from '../../ui/LoadingSpinner'
 import TablePaginationBar from '../../ui/TablePaginationBar'
+import {
+  ErpDataTable,
+  ErpFooterBar,
+  ErpFooterPrimary,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpGridWrap,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpStatusBar,
+  ErpToolbar,
+  ErpToolbarButton,
+  ErpWorkScreen,
+} from '../../ui/erp/ErpLayout'
+import { erpGridCellClass, erpGridHeadClass, erpInputClass, erpSelectClass } from '../../../lib/erpUi'
 import { useTablePagination } from '../../../hooks/useTablePagination'
 import { PRODUCT_STATUS_OPTIONS, productStatusLabel, type ProductStatusValue } from '../../../lib/productStatus'
 import type { ProductListItem } from '../types'
@@ -15,21 +33,41 @@ function formatWon(n: number) {
 
 type Props = {
   canMutate: boolean
-  /** 라우트 `location.key` 등 변경 시 목록을 다시 불러옵니다. */
   refreshKey?: number | string
 }
 
 export default function ProductListPanel({ canMutate, refreshKey = 0 }: Props) {
   const navigate = useNavigate()
+  const [brands, setBrands] = useState<BrandListItem[]>([])
+  const [brandsLoading, setBrandsLoading] = useState(true)
+  const [brandId, setBrandId] = useState<number | ''>('')
+  const [brandTouched, setBrandTouched] = useState(false)
+
   const [rows, setRows] = useState<ProductListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [statusFilter, setStatusFilter] = useState<'ALL' | ProductStatusValue>('ALL')
-  const [brandFilter, setBrandFilter] = useState<number | 'ALL'>('ALL')
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL')
   const [seasonFilter, setSeasonFilter] = useState<string>('ALL')
   const [statusSavingId, setStatusSavingId] = useState<number | null>(null)
+
+  const selectedBrand = useMemo(
+    () => (brandId === '' ? null : brands.find((b) => b.id === brandId) ?? null),
+    [brands, brandId],
+  )
+
+  const loadBrands = useCallback(async () => {
+    setBrandsLoading(true)
+    try {
+      const { data } = await api.get<BrandListItem[]>('/api/brands')
+      setBrands(data ?? [])
+    } catch {
+      setBrands([])
+    } finally {
+      setBrandsLoading(false)
+    }
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -45,43 +83,47 @@ export default function ProductListPanel({ canMutate, refreshKey = 0 }: Props) {
   }, [])
 
   useEffect(() => {
+    void loadBrands()
     void load()
-  }, [load, refreshKey])
+  }, [loadBrands, load, refreshKey])
 
-  const brandOptions = useMemo(() => {
-    const m = new Map<number, string>()
-    for (const r of rows) m.set(r.brandId, r.brandName)
-    return [...m.entries()]
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'))
-  }, [rows])
+  useEffect(() => {
+    setQ('')
+    setStatusFilter('ALL')
+    setCategoryFilter('ALL')
+    setSeasonFilter('ALL')
+  }, [brandId])
+
+  const brandRows = useMemo(
+    () => (brandId === '' ? [] : rows.filter((r) => r.brandId === brandId)),
+    [rows, brandId],
+  )
 
   const categoryOptions = useMemo(() => {
     const s = new Set<string>()
-    for (const r of rows) s.add(r.categoryName)
+    for (const r of brandRows) s.add(r.categoryName)
     return [...s].sort((a, b) => a.localeCompare(b, 'ko-KR'))
-  }, [rows])
+  }, [brandRows])
 
   const seasonOptions = useMemo(() => {
     const s = new Set<string>()
-    for (const r of rows) s.add(r.seasonName)
+    for (const r of brandRows) s.add(r.seasonName)
     return [...s].sort((a, b) => a.localeCompare(b, 'ko-KR'))
-  }, [rows])
+  }, [brandRows])
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    return rows
+    return brandRows
       .filter((r) => {
         if (statusFilter !== 'ALL' && r.status !== statusFilter) return false
-        if (brandFilter !== 'ALL' && r.brandId !== brandFilter) return false
         if (categoryFilter !== 'ALL' && r.categoryName !== categoryFilter) return false
         if (seasonFilter !== 'ALL' && r.seasonName !== seasonFilter) return false
         if (!needle) return true
-        const hay = [r.name, r.brandName, r.categoryName, r.seasonName].join(' ').toLowerCase()
+        const hay = [r.name, r.categoryName, r.seasonName].join(' ').toLowerCase()
         return hay.includes(needle)
       })
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-  }, [rows, q, statusFilter, brandFilter, categoryFilter, seasonFilter])
+  }, [brandRows, q, statusFilter, categoryFilter, seasonFilter])
 
   const pagination = useTablePagination(filtered)
 
@@ -119,41 +161,70 @@ export default function ProductListPanel({ canMutate, refreshKey = 0 }: Props) {
     }
   }
 
+  const resetFilters = () => {
+    setQ('')
+    setStatusFilter('ALL')
+    setCategoryFilter('ALL')
+    setSeasonFilter('ALL')
+  }
+
+  const brandInvalid = brandTouched && brandId === ''
+
   return (
-    <SectionCard
-      title="상품 목록"
-      headerRight={
-        <div className="flex max-w-full flex-1 flex-wrap items-center justify-end gap-2">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="상품명 · 브랜드 · 카테고리 · 시즌"
-            className="h-9 min-w-[12rem] flex-1 rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:max-w-xs"
-          />
-          <label className="flex items-center gap-2 text-sm">
-            <span className="shrink-0 text-slate-500">브랜드</span>
-            <select
-              value={brandFilter === 'ALL' ? 'ALL' : String(brandFilter)}
-              onChange={(e) => {
-                const v = e.target.value
-                setBrandFilter(v === 'ALL' ? 'ALL' : Number(v))
-              }}
-              className="h-9 max-w-[10rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="ALL">전체</option>
-              {brandOptions.map(({ id, name }) => (
-                <option key={id} value={id}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="shrink-0 text-slate-500">카테고리</span>
+    <ErpWorkScreen title="상품 목록">
+      <ErpFormTable>
+        <ErpFormRow>
+          <ErpFormLabel required>브랜드</ErpFormLabel>
+          <ErpFormCell className="w-[220px]">
+            {brandsLoading ? (
+              <div className="px-1 py-1">
+                <LoadingSpinner compact hideLabel />
+              </div>
+            ) : (
+              <select
+                value={brandId === '' ? '' : String(brandId)}
+                onChange={(e) => {
+                  setBrandTouched(true)
+                  const v = e.target.value
+                  setBrandId(v === '' ? '' : Number(v))
+                }}
+                onBlur={() => setBrandTouched(true)}
+                className={erpSelectClass(brandInvalid)}
+              >
+                <option value="">브랜드 선택</option>
+                {brands.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </ErpFormCell>
+          <ErpFormLabel>조회건수</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <span className="px-1 text-xs text-slate-600">
+              {brandId === '' ? '—' : `${filtered.length.toLocaleString('ko-KR')}건`}
+            </span>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>검색</ErpFormLabel>
+          <ErpFormCell>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="상품명 · 카테고리 · 시즌"
+              disabled={brandId === ''}
+              className={erpInputClass()}
+            />
+          </ErpFormCell>
+          <ErpFormLabel>카테고리</ErpFormLabel>
+          <ErpFormCell>
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-9 max-w-[10rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              disabled={brandId === ''}
+              className={erpSelectClass()}
             >
               <option value="ALL">전체</option>
               {categoryOptions.map((name) => (
@@ -162,13 +233,14 @@ export default function ProductListPanel({ canMutate, refreshKey = 0 }: Props) {
                 </option>
               ))}
             </select>
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="shrink-0 text-slate-500">시즌</span>
+          </ErpFormCell>
+          <ErpFormLabel>시즌</ErpFormLabel>
+          <ErpFormCell>
             <select
               value={seasonFilter}
               onChange={(e) => setSeasonFilter(e.target.value)}
-              className="h-9 max-w-[10rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              disabled={brandId === ''}
+              className={erpSelectClass()}
             >
               <option value="ALL">전체</option>
               {seasonOptions.map((name) => (
@@ -177,13 +249,14 @@ export default function ProductListPanel({ canMutate, refreshKey = 0 }: Props) {
                 </option>
               ))}
             </select>
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="shrink-0 text-slate-500">상태</span>
+          </ErpFormCell>
+          <ErpFormLabel>상태</ErpFormLabel>
+          <ErpFormCell>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-              className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              disabled={brandId === ''}
+              className={erpSelectClass()}
             >
               <option value="ALL">전체</option>
               {PRODUCT_STATUS_OPTIONS.map((o) => (
@@ -192,120 +265,146 @@ export default function ProductListPanel({ canMutate, refreshKey = 0 }: Props) {
                 </option>
               ))}
             </select>
-          </label>
-          <button
-            type="button"
-            onClick={() => {
-              setQ('')
-              setStatusFilter('ALL')
-              setBrandFilter('ALL')
-              setCategoryFilter('ALL')
-              setSeasonFilter('ALL')
-            }}
-            className="h-9 shrink-0 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-          >
-            초기화
-          </button>
-        </div>
-      }
-    >
+          </ErpFormCell>
+        </ErpFormRow>
+      </ErpFormTable>
+
+      <ErpToolbar>
+        <ErpToolbarButton onClick={resetFilters} disabled={brandId === ''}>
+          초기화
+        </ErpToolbarButton>
+        <ErpToolbarButton onClick={() => void load()}>새로고침</ErpToolbarButton>
+      </ErpToolbar>
+
+      {error ? (
+        <div className="border-b border-slate-300 px-2 py-1.5 text-xs text-rose-600">{error}</div>
+      ) : null}
+
       {loading ? (
-        <LoadingSpinner />
-      ) : error ? (
-        <div className="space-y-2">
-          <p className="text-sm text-rose-600">{error}</p>
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-          >
-            다시 시도
-          </button>
+        <div className="py-8">
+          <LoadingSpinner />
+        </div>
+      ) : brandId === '' ? (
+        <div className="border-b border-slate-300 px-3 py-16 text-center text-xs text-slate-400">
+          브랜드를 선택하면 상품 목록이 표시됩니다.
         </div>
       ) : (
-        <div>
-          <div className="overflow-x-auto rounded-md border border-slate-100">
-            <div className="max-h-[min(28rem,calc(100vh-14rem))] overflow-y-auto">
-              <table className="w-full min-w-[960px] border-collapse text-sm">
-                <thead>
-                  <tr className="sticky top-0 z-[1] border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                    <th className="px-3 py-2.5">상품명</th>
-                    <th className="px-3 py-2.5">브랜드</th>
-                    <th className="px-3 py-2.5">카테고리</th>
-                    <th className="px-3 py-2.5">시즌</th>
-                    <th className="px-3 py-2.5 text-right">판매가</th>
-                    <th className="px-3 py-2.5 text-right">원가</th>
-                    <th className="px-3 py-2.5">상태</th>
-                    <th className="px-3 py-2.5">등록일</th>
+        <>
+          <ErpGridWrap maxHeight="max-h-[min(28rem,calc(100vh-18rem))]">
+            <ErpDataTable minWidth="860px">
+              <thead>
+                <tr>
+                  <th className={erpGridHeadClass()}>상품명</th>
+                  <th className={erpGridHeadClass()}>카테고리</th>
+                  <th className={erpGridHeadClass()}>시즌</th>
+                  <th className={[erpGridHeadClass(), 'text-right'].join(' ')}>판매가</th>
+                  <th className={[erpGridHeadClass(), 'text-right'].join(' ')}>원가</th>
+                  <th className={erpGridHeadClass()}>상태</th>
+                  <th className={erpGridHeadClass()}>등록일</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className={erpGridCellClass('py-12 text-center text-slate-400')}>
+                      {brandRows.length === 0
+                        ? '이 브랜드에 등록된 상품이 없습니다.'
+                        : '조건에 맞는 상품이 없습니다.'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="px-3 py-12 text-center text-slate-400">
-                        조건에 맞는 상품이 없습니다.
+                ) : (
+                  pagination.pageItems.map((r) => (
+                    <tr
+                      key={r.id}
+                      onClick={() => navigate(`/admin/products/${r.id}`)}
+                      className="cursor-pointer hover:bg-blue-50/60"
+                    >
+                      <td className={erpGridCellClass('font-medium')}>{r.name}</td>
+                      <td className={erpGridCellClass()}>{r.categoryName}</td>
+                      <td className={erpGridCellClass()}>{r.seasonName}</td>
+                      <td className={erpGridCellClass('text-right tabular-nums')}>{formatWon(r.price)}</td>
+                      <td className={erpGridCellClass('text-right tabular-nums')}>{formatWon(r.cost)}</td>
+                      <td className={erpGridCellClass()} onClick={(e) => e.stopPropagation()}>
+                        {canMutate ? (
+                          <select
+                            value={r.status}
+                            disabled={statusSavingId === r.id}
+                            onChange={(e) =>
+                              void handleStatusChange(r, e.target.value as ProductStatusValue)
+                            }
+                            className={erpSelectClass()}
+                          >
+                            {PRODUCT_STATUS_OPTIONS.map((o) => (
+                              <option key={o.value} value={o.value}>
+                                {o.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          productStatusLabel(r.status)
+                        )}
+                      </td>
+                      <td className={erpGridCellClass('text-[11px] text-slate-500')}>
+                        {r.createdAt ? new Date(r.createdAt).toLocaleString('ko-KR') : '—'}
                       </td>
                     </tr>
-                  ) : (
-                    pagination.pageItems.map((r) => (
-                      <tr
-                        key={r.id}
-                        onClick={() => navigate(`/admin/products/${r.id}`)}
-                        className="cursor-pointer border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
-                      >
-                        <td className="px-3 py-2 font-medium text-slate-800">{r.name}</td>
-                        <td className="px-3 py-2 text-slate-700">{r.brandName}</td>
-                        <td className="px-3 py-2 text-slate-700">{r.categoryName}</td>
-                        <td className="px-3 py-2 text-slate-700">{r.seasonName}</td>
-                        <td className="px-3 py-2 text-right tabular-nums text-slate-800">
-                          {formatWon(r.price)}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-slate-700">
-                          {formatWon(r.cost)}
-                        </td>
-                        <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
-                          {canMutate ? (
-                            <select
-                              value={r.status}
-                              disabled={statusSavingId === r.id}
-                              onChange={(e) =>
-                                void handleStatusChange(r, e.target.value as ProductStatusValue)
-                              }
-                              className="h-8 max-w-[7.5rem] rounded-md border border-slate-200 bg-white px-1.5 text-xs shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
-                            >
-                              {PRODUCT_STATUS_OPTIONS.map((o) => (
-                                <option key={o.value} value={o.value}>
-                                  {o.label}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className="text-slate-700">{productStatusLabel(r.status)}</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-xs text-slate-500">
-                          {r.createdAt ? new Date(r.createdAt).toLocaleString('ko-KR') : '—'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                  ))
+                )}
+              </tbody>
+            </ErpDataTable>
+          </ErpGridWrap>
 
-          <div className="mt-3 flex justify-end">
-            <TablePaginationBar
-              page={pagination.page}
-              pageCount={pagination.pageCount}
-              total={pagination.total}
-              setPage={pagination.setPage}
-              fromIdx={pagination.fromIdx}
-              toIdx={pagination.toIdx}
-            />
-          </div>
-        </div>
+          <ErpStatusBar>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                {selectedBrand ? `${selectedBrand.name} · ` : ''}
+                {pagination.total > 0
+                  ? `${pagination.fromIdx}-${pagination.toIdx} / ${pagination.total}건`
+                  : '0건'}
+              </span>
+              <TablePaginationBar
+                page={pagination.page}
+                pageCount={pagination.pageCount}
+                total={pagination.total}
+                setPage={pagination.setPage}
+                fromIdx={pagination.fromIdx}
+                toIdx={pagination.toIdx}
+              />
+            </div>
+          </ErpStatusBar>
+        </>
       )}
-    </SectionCard>
+
+      <ErpFooterBar>
+        <ErpSecondaryButton onClick={() => navigate('/admin/product-options')}>옵션 관리</ErpSecondaryButton>
+        <ErpSecondaryButton onClick={() => void load()}>조회</ErpSecondaryButton>
+        {canMutate ? (
+          <ErpFooterPrimary>
+            <ErpPrimaryButton
+              onClick={() =>
+                navigate(brandId === '' ? '/admin/products/new' : `/admin/products/new?brandId=${brandId}`)
+              }
+            >
+              상품 등록
+            </ErpPrimaryButton>
+          </ErpFooterPrimary>
+        ) : null}
+      </ErpFooterBar>
+    </ErpWorkScreen>
   )
+}
+
+export function ProductListPageContent() {
+  const { key } = useLocation()
+  const isHq = getRole() === 'HQ_STAFF'
+
+  if (!isHq) {
+    return (
+      <div className="border border-slate-300 bg-white px-4 py-8 text-center shadow-sm">
+        <p className="text-sm text-slate-500">본사(HQ) 권한에서만 접근할 수 있습니다.</p>
+      </div>
+    )
+  }
+
+  return <ProductListPanel canMutate={isHq} refreshKey={key} />
 }
