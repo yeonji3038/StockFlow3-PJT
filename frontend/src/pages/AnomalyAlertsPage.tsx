@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { getRole } from '../lib/auth'
 import { anomalyReasonLabel } from '../lib/anomalyLabels'
@@ -13,35 +14,50 @@ import {
 } from '../components/ui/erp/ErpLayout'
 import { erpGridCellClass, erpGridHeadClass } from '../lib/erpUi'
 import { useUnresolvedAnomalyCount } from '../hooks/useUnresolvedAnomalyCount'
+import { useAnomalyAlertStore } from '../stores/anomalyAlertStore'
 import type { AnomalyAlert } from '../types/models'
 
 export default function AnomalyAlertsPage() {
+  const navigate = useNavigate()
   const role = getRole()
   const isHq = role === 'HQ_STAFF'
   const { refresh: refreshBadgeCount } = useUnresolvedAnomalyCount(isHq)
+  const anomalyRefreshTrigger = useAnomalyAlertStore((s) => s.anomalyRefreshTrigger)
+  const hasFetchedOnce = useRef(false)
 
   const [alerts, setAlerts] = useState<AnomalyAlert[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [resolvingId, setResolvingId] = useState<number | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  const load = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true)
+      setError(null)
+    }
     try {
       const { data } = await api.get<AnomalyAlert[]>('/api/anomaly-alerts')
       setAlerts(Array.isArray(data) ? data : [])
     } catch {
-      setError('이상탐지 알림을 불러오지 못했습니다.')
-      setAlerts([])
+      if (!silent) {
+        setError('이상탐지 알림을 불러오지 못했습니다.')
+        setAlerts([])
+      }
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
+      hasFetchedOnce.current = true
     }
   }, [])
 
   useEffect(() => {
-    if (isHq) void load()
+    if (isHq) void load(false)
   }, [isHq, load])
+
+  useEffect(() => {
+    if (!isHq || anomalyRefreshTrigger === 0 || !hasFetchedOnce.current) return
+    void load(true)
+    void refreshBadgeCount()
+  }, [anomalyRefreshTrigger, isHq, load, refreshBadgeCount])
 
   const unresolvedCount = useMemo(() => alerts.filter((a) => !a.resolved).length, [alerts])
 
@@ -68,7 +84,7 @@ export default function AnomalyAlertsPage() {
     <ErpPageFrame
       title="이상탐지 알림"
       actions={
-        <ErpSecondaryButton className="ml-auto" onClick={() => void load()}>
+        <ErpSecondaryButton className="ml-auto" onClick={() => void load(false)}>
           조회
         </ErpSecondaryButton>
       }
@@ -113,7 +129,19 @@ export default function AnomalyAlertsPage() {
                   alerts.map((a) => (
                     <tr
                       key={a.id}
-                      className={a.resolved ? 'text-slate-500' : 'hover:bg-rose-50/40'}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/anomaly-alerts/${a.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          navigate(`/anomaly-alerts/${a.id}`)
+                        }
+                      }}
+                      className={[
+                        'cursor-pointer',
+                        a.resolved ? 'text-slate-500' : 'hover:bg-rose-50/40',
+                      ].join(' ')}
                     >
                       <td className={erpGridCellClass()}>{a.storeName ?? `매장 #${a.storeId}`}</td>
                       <td className={erpGridCellClass('font-mono text-[11px]')}>{a.skuCode ?? '—'}</td>
@@ -142,7 +170,10 @@ export default function AnomalyAlertsPage() {
                         {!a.resolved ? (
                           <button
                             type="button"
-                            onClick={() => void handleResolve(a.id)}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              void handleResolve(a.id)
+                            }}
                             disabled={resolvingId === a.id}
                             className="text-[11px] font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50"
                           >

@@ -2,10 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { getRole, getStoreId } from '../lib/auth'
-import SectionCard from '../components/ui/SectionCard'
 import ErpPageFrame from '../components/ui/ErpPageFrame'
 import TablePaginationBar from '../components/ui/TablePaginationBar'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import {
+  ErpDataTable,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpGridWrap,
+  ErpStatusBar,
+  ErpToolbarButton,
+} from '../components/ui/erp/ErpLayout'
+import { erpGridCellClass, erpGridHeadClass, erpInputClass, erpSelectClass } from '../lib/erpUi'
 import { useTablePagination } from '../hooks/useTablePagination'
 import type { StoreStock, StoreSummary } from '../types/models'
 
@@ -16,7 +26,6 @@ export default function StoreStockPage() {
   const [stores, setStores] = useState<StoreSummary[]>([])
   const [selectedId, setSelectedId] = useState<number | ''>('')
   const [stocks, setStocks] = useState<StoreStock[]>([])
-  /** 매장명(행)·SKU·상품명 부분 검색 */
   const [itemQ, setItemQ] = useState('')
   const [sku, setSku] = useState<string>('ALL')
   const [productName, setProductName] = useState<string>('ALL')
@@ -144,27 +153,49 @@ export default function StoreStockPage() {
 
   const storeStockPagination = useTablePagination(filteredStocks)
 
+  const resetFilters = () => {
+    setItemQ('')
+    setSku('ALL')
+    setProductName('ALL')
+    setColor('ALL')
+    setSize('ALL')
+  }
+
   const goDetail = (s: StoreStock) => {
     if (selectedId === '') return
     navigate(`/store-stock/${selectedId}/${s.id}`)
   }
 
+  const filtersDisabled = selectedId === '' || loading
+
   return (
-    <ErpPageFrame title="매장 재고">
-      <SectionCard
-        embedded
-        title="재고 조회"
-        headerRight={
-          stores.length > 0 ? (
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-slate-500">매장</span>
+    <ErpPageFrame
+      title="매장 재고"
+      actions={
+        <ErpToolbarButton className="ml-auto" onClick={resetFilters} disabled={filtersDisabled}>
+          초기화
+        </ErpToolbarButton>
+      }
+    >
+      <ErpFormTable>
+        <ErpFormRow>
+          <ErpFormLabel>매장</ErpFormLabel>
+          <ErpFormCell className="w-[220px]">
+            {loading && stores.length === 0 ? (
+              <div className="px-1 py-1">
+                <LoadingSpinner compact hideLabel />
+              </div>
+            ) : stores.length === 0 ? (
+              <span className="px-1 text-xs text-slate-500">매장 없음</span>
+            ) : (
               <select
                 value={selectedId === '' ? '' : String(selectedId)}
                 onChange={(e) => {
                   const v = e.target.value
                   setSelectedId(v === '' ? '' : Number(v))
                 }}
-                className="min-w-[10rem] rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={role === 'STORE_MANAGER' && stores.length <= 1}
+                className={erpSelectClass()}
               >
                 {stores.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -172,157 +203,177 @@ export default function StoreStockPage() {
                   </option>
                 ))}
               </select>
-            </label>
-          ) : null
-        }
-      >
-        {loading ? (
-          <LoadingSpinner />
-        ) : error ? (
-          <p className="text-sm text-rose-600">{error}</p>
-        ) : selectedId === '' ? (
-          <p className="text-sm text-slate-500">매장을 선택할 수 없습니다.</p>
-        ) : (
-          <>
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              <input
-                type="search"
-                value={itemQ}
-                onChange={(e) => setItemQ(e.target.value)}
-                placeholder="매장명·SKU·상품명 검색"
-                className="h-9 w-56 rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <label className="flex items-center gap-2 text-sm">
-                <span className="text-slate-500">SKU</span>
-                <select
-                  value={sku}
-                  onChange={(e) => setSku(e.target.value)}
-                  className="h-9 max-w-[11rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="ALL">전체</option>
-                  {stockFilterOptions.skus.map((code) => (
-                    <option key={code} value={code}>
-                      {code}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <span className="text-slate-500">상품명</span>
-                <select
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  className="h-9 max-w-[14rem] rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="ALL">전체</option>
-                  {stockFilterOptions.productNames.map((n, i) => (
-                    <option key={`${n}-${i}`} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <span className="text-slate-500">색상</span>
-                <select
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="ALL">전체</option>
-                  {stockFilterOptions.colors.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <span className="text-slate-500">사이즈</span>
-                <select
-                  value={size}
-                  onChange={(e) => setSize(e.target.value)}
-                  className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                >
-                  <option value="ALL">전체</option>
-                  {stockFilterOptions.sizes.map((sz) => (
-                    <option key={sz} value={sz}>
-                      {sz}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setItemQ('')
-                  setSku('ALL')
-                  setProductName('ALL')
-                  setColor('ALL')
-                  setSize('ALL')
-                }}
-                className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-              >
-                초기화
-              </button>
-            </div>
-            <div className="overflow-x-auto rounded-md border border-slate-100">
-              <div className="max-h-[min(28rem,calc(100vh-14rem))] overflow-y-auto">
-                <table className="w-full min-w-[640px] border-collapse text-sm">
-                  <thead>
-                    <tr className="sticky top-0 z-[1] border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                      <th className="px-3 py-2.5">SKU</th>
-                      <th className="px-3 py-2.5">상품명</th>
-                      <th className="px-3 py-2.5">색상</th>
-                      <th className="px-3 py-2.5">사이즈</th>
-                      <th className="px-3 py-2.5 text-right">수량</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stocks.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="px-3 py-12 text-center text-slate-400">
-                          재고 데이터가 없습니다.
-                        </td>
-                      </tr>
-                    ) : filteredStocks.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="px-3 py-12 text-center text-slate-400">
-                          필터 조건에 맞는 재고가 없습니다.
-                        </td>
-                      </tr>
-                    ) : (
-                      storeStockPagination.pageItems.map((s) => (
-                        <tr
-                          key={s.id}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => goDetail(s)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault()
-                              goDetail(s)
-                            }
-                          }}
-                          className="cursor-pointer border-b border-slate-100 even:bg-slate-50/40 hover:bg-blue-50/50"
-                        >
-                          <td className="px-3 py-2 font-mono text-xs text-slate-600">{s.skuCode}</td>
-                          <td className="px-3 py-2 text-slate-800">{s.productName}</td>
-                          <td className="px-3 py-2 text-slate-700">{s.color}</td>
-                          <td className="px-3 py-2 text-slate-700">{s.size}</td>
-                          <td className="px-3 py-2 text-right font-medium tabular-nums text-slate-900">
-                            {s.quantity}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            )}
+          </ErpFormCell>
+          <ErpFormLabel>조회건수</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <span className="px-1 text-xs text-slate-600">
+              {selectedId === '' ? '—' : `${filteredStocks.length.toLocaleString('ko-KR')}건`}
+            </span>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>검색</ErpFormLabel>
+          <ErpFormCell>
+            <input
+              type="search"
+              value={itemQ}
+              onChange={(e) => setItemQ(e.target.value)}
+              placeholder="매장명 · SKU · 상품명"
+              disabled={filtersDisabled}
+              className={erpInputClass()}
+            />
+          </ErpFormCell>
+          <ErpFormLabel>SKU</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              disabled={filtersDisabled}
+              className={erpSelectClass()}
+            >
+              <option value="ALL">전체</option>
+              {stockFilterOptions.skus.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+          <ErpFormLabel>상품명</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              disabled={filtersDisabled}
+              className={erpSelectClass()}
+            >
+              <option value="ALL">전체</option>
+              {stockFilterOptions.productNames.map((n, i) => (
+                <option key={`${n}-${i}`} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+        </ErpFormRow>
+        <ErpFormRow>
+          <ErpFormLabel>색상</ErpFormLabel>
+          <ErpFormCell>
+            <select
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              disabled={filtersDisabled}
+              className={erpSelectClass()}
+            >
+              <option value="ALL">전체</option>
+              {stockFilterOptions.colors.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+          <ErpFormLabel>사이즈</ErpFormLabel>
+          <ErpFormCell colSpan={3}>
+            <select
+              value={size}
+              onChange={(e) => setSize(e.target.value)}
+              disabled={filtersDisabled}
+              className={erpSelectClass()}
+            >
+              <option value="ALL">전체</option>
+              {stockFilterOptions.sizes.map((sz) => (
+                <option key={sz} value={sz}>
+                  {sz}
+                </option>
+              ))}
+            </select>
+          </ErpFormCell>
+        </ErpFormRow>
+      </ErpFormTable>
 
-            {filteredStocks.length > 0 ? (
-              <div className="mt-3 flex justify-end">
+      {error ? (
+        <div className="border-b border-slate-300 px-2 py-1.5 text-xs text-rose-600">{error}</div>
+      ) : null}
+
+      {loading ? (
+        <div className="py-8">
+          <LoadingSpinner />
+        </div>
+      ) : selectedId === '' ? (
+        <div className="border-b border-slate-300 px-3 py-16 text-center text-xs text-slate-400">
+          매장을 선택할 수 없습니다.
+        </div>
+      ) : (
+        <>
+          <ErpGridWrap maxHeight="max-h-[min(28rem,calc(100vh-18rem))]">
+            <ErpDataTable minWidth="640px">
+              <thead>
+                <tr>
+                  <th className={erpGridHeadClass()}>SKU</th>
+                  <th className={erpGridHeadClass()}>상품명</th>
+                  <th className={erpGridHeadClass()}>색상</th>
+                  <th className={erpGridHeadClass()}>사이즈</th>
+                  <th className={[erpGridHeadClass(), 'text-right'].join(' ')}>수량</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stocks.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className={erpGridCellClass('py-12 text-center text-slate-400')}>
+                      재고 데이터가 없습니다.
+                    </td>
+                  </tr>
+                ) : filteredStocks.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className={erpGridCellClass('py-12 text-center text-slate-400')}>
+                      조건에 맞는 재고가 없습니다.
+                    </td>
+                  </tr>
+                ) : (
+                  storeStockPagination.pageItems.map((s) => (
+                    <tr
+                      key={s.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => goDetail(s)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          goDetail(s)
+                        }
+                      }}
+                      className="cursor-pointer hover:bg-blue-50/50"
+                    >
+                      <td className={erpGridCellClass('font-mono text-[11px]')}>{s.skuCode}</td>
+                      <td className={erpGridCellClass()}>{s.productName}</td>
+                      <td className={erpGridCellClass()}>{s.color}</td>
+                      <td className={erpGridCellClass()}>{s.size}</td>
+                      <td className={erpGridCellClass('text-right font-medium tabular-nums')}>
+                        {s.quantity}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </ErpDataTable>
+          </ErpGridWrap>
+
+          <ErpStatusBar>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+              <span>
+                전체{' '}
+                <span className="font-semibold tabular-nums text-slate-700">
+                  {stocks.length.toLocaleString('ko-KR')}
+                </span>
+                건 · 결과{' '}
+                <span className="font-semibold tabular-nums text-slate-700">
+                  {filteredStocks.length.toLocaleString('ko-KR')}
+                </span>
+                건
+              </span>
+              {filteredStocks.length > 0 ? (
                 <TablePaginationBar
                   page={storeStockPagination.page}
                   pageCount={storeStockPagination.pageCount}
@@ -331,11 +382,11 @@ export default function StoreStockPage() {
                   fromIdx={storeStockPagination.fromIdx}
                   toIdx={storeStockPagination.toIdx}
                 />
-              </div>
-            ) : null}
-          </>
-        )}
-      </SectionCard>
+              ) : null}
+            </div>
+          </ErpStatusBar>
+        </>
+      )}
     </ErpPageFrame>
   )
 }

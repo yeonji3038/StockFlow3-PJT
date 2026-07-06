@@ -29,6 +29,7 @@ import ProductDetailPage from './pages/admin/products/ProductDetailPage'
 import ProductOptionsPage from './pages/admin/products/ProductOptionsPage'
 import ProductOptionDetailPage from './pages/admin/products/ProductOptionDetailPage'
 import AnomalyAlertsPage from './pages/AnomalyAlertsPage'
+import AnomalyAlertDetailPage from './pages/AnomalyAlertDetailPage'
 import WarehouseOrdersPage from './pages/WarehouseOrdersPage'
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="/store-stock" element={<StoreStockPage />} />
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/anomaly-alerts" element={<AnomalyAlertsPage />} />
+          <Route path="/anomaly-alerts/:id" element={<AnomalyAlertDetailPage />} />
           <Route path="/admin/users" element={<UsersAdminPage />} />
           <Route path="/admin/brands" element={<BrandsAdminPage />} />
           <Route path="/admin/stores" element={<StoreListPage />} />

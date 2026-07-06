@@ -12,6 +12,7 @@ import com.stockflow.hq.domain.store.entity.Store;
 import com.stockflow.hq.domain.store.repository.StoreRepository;
 import com.stockflow.hq.global.exception.BusinessException;
 import com.stockflow.hq.global.exception.ErrorCode;
+import com.stockflow.hq.global.websocket.StockWebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class AnomalyAlertService {
     private final AnomalyAlertRepository anomalyAlertRepository;
     private final StoreRepository storeRepository;
     private final ProductOptionRepository productOptionRepository;
+    private final StockWebSocketService stockWebSocketService;
 
     @Transactional
     public void checkAndSave(StockChangeEvent event) {
@@ -76,7 +78,9 @@ public class AnomalyAlertService {
                 .resolved(false)
                 .build();
 
-        anomalyAlertRepository.save(alert);
+        AnomalyAlert saved = anomalyAlertRepository.save(alert);
+
+        stockWebSocketService.sendAnomalyAlert(AnomalyAlertResponseDto.from(saved));
     }
 
     public List<AnomalyAlertResponseDto> findAll() {
