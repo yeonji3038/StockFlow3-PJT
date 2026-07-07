@@ -13,53 +13,58 @@ spec:
         app: stockflow-hq
     spec:
       imagePullSecrets:
-      - name: ecr-secret
+        - name: ecr-secret
       containers:
-      - name: stockflow-hq
-        image: 836533914314.dkr.ecr.ap-northeast-2.amazonaws.com/stockflow-hq:latest
-        ports:
-        - containerPort: 8082
-        env:
-        - name: DB_URL
-          valueFrom:
-            secretKeyRef:
-              name: stockflow-secret
-              key: DB_URL
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: stockflow-secret
-              key: DB_USERNAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: stockflow-secret
-              key: DB_PASSWORD
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: stockflow-secret
-              key: JWT_SECRET
-        - name: JWT_EXPIRATION
-          valueFrom:
-            secretKeyRef:
-              name: stockflow-secret
-              key: JWT_EXPIRATION
-        - name: JWT_REFRESH_EXPIRATION
-          valueFrom:
-            secretKeyRef:
-              name: stockflow-secret
-              key: JWT_REFRESH_EXPIRATION
-        - name: KAFKA_BOOTSTRAP_SERVERS
-          valueFrom:
-            configMapKeyRef:
-              name: stockflow-config
-              key: KAFKA_BOOTSTRAP_SERVERS
-        - name: REDIS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: stockflow-config
-              key: REDIS_HOST
+        - name: stockflow-hq
+          image: 836533914314.dkr.ecr.ap-northeast-2.amazonaws.com/stockflow-hq:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: stockflow-secret
+                  key: DB_URL
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: stockflow-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: stockflow-secret
+                  key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: stockflow-secret
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  name: stockflow-secret
+                  key: JWT_EXPIRATION
+            - name: JWT_REFRESH_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  name: stockflow-secret
+                  key: JWT_REFRESH_EXPIRATION
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: stockflow-config
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: stockflow-config
+                  key: REDIS_HOST
+            - name: AI_SERVICE_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: stockflow-config
+                  key: AI_SERVICE_BASE_URL
 ---
 apiVersion: v1
 kind: Service

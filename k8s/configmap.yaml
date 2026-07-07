@@ -4,3 +4,5 @@ metadata:
   name: stockflow-config
 data:
   KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  REDIS_HOST: "redis-service"
+  AI_SERVICE_BASE_URL: "http://ai-service:8000"

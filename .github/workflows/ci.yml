@@ -62,3 +62,11 @@ jobs:
         docker push $ECR_REGISTRY/stockflow-hq:${{ github.sha }}
         docker tag $ECR_REGISTRY/stockflow-hq:${{ github.sha }} $ECR_REGISTRY/stockflow-hq:latest
         docker push $ECR_REGISTRY/stockflow-hq:latest
+
+    - name: Build and push ai-service
+      working-directory: ai
+      run: |
+        docker build -t $ECR_REGISTRY/stockflow-ai:${{ github.sha }} .
+        docker push $ECR_REGISTRY/stockflow-ai:${{ github.sha }}
+        docker tag $ECR_REGISTRY/stockflow-ai:${{ github.sha }} $ECR_REGISTRY/stockflow-ai:latest
+        docker push $ECR_REGISTRY/stockflow-ai:latest
