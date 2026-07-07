@@ -69,6 +69,7 @@ spec:
   selector:
     app: stockflow-hq
   type: NodePort
-  ports:
+ports:
   - port: 8082
-    targ    targ    targ    tPort: 30082
+    targetPort: 8082
+    nodePort: 30082
