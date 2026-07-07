@@ -20,6 +20,7 @@ repositories {
 
 // 루트 src 임시 의존성 (코드 이동 전까지만 사용)
 dependencies {
+    implementation project(':common')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
