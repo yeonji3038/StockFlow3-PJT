@@ -85,10 +85,22 @@ services:
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
       REDIS_HOST: redis
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      AI_SERVICE_BASE_URL: http://ai-service:8000
     depends_on:
       - postgres
       - redis
       - kafka
+      - ai-service
+    networks:
+      - stockflow-network
+
+  ai-service:
+    build:
+      context: ../ai
+      dockerfile: Dockerfile
+    container_name: stockflow-ai
+    ports:
+      - "8000:8000"
     networks:
       - stockflow-network
 
