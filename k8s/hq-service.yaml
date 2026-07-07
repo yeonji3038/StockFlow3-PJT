@@ -69,7 +69,7 @@ spec:
   selector:
     app: stockflow-hq
   type: NodePort
-ports:
-  - port: 8082
-    targetPort: 8082
-    nodePort: 30082
+  ports:
+    - port: 8082
+      targetPort: 8082
+      nodePort: 30082
