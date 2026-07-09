@@ -31,6 +31,7 @@ import ProductOptionDetailPage from './pages/admin/products/ProductOptionDetailP
 import AnomalyAlertsPage from './pages/AnomalyAlertsPage'
 import AnomalyAlertDetailPage from './pages/AnomalyAlertDetailPage'
 import WarehouseOrdersPage from './pages/WarehouseOrdersPage'
+import WeeklyReportsPage from './pages/WeeklyReportsPage'
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
           <Route path="/movements" element={<MovementsPage />} />
           <Route path="/anomaly-alerts" element={<AnomalyAlertsPage />} />
           <Route path="/anomaly-alerts/:id" element={<AnomalyAlertDetailPage />} />
+          <Route path="/reports/weekly" element={<WeeklyReportsPage />} />
           <Route path="/admin/users" element={<UsersAdminPage />} />
           <Route path="/admin/brands" element={<BrandsAdminPage />} />
           <Route path="/admin/stores" element={<StoreListPage />} />

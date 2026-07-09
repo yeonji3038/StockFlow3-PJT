@@ -29,6 +29,22 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.stockflow.common.*"
+  batch:
+    jdbc:
+      initialize-schema: never
+    job:
+      enabled: false
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   port: 8082
 
@@ -52,3 +68,9 @@ app:
 ai:
   service:
     base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
+
+report:
+  mail:
+    to: ${REPORT_MAIL_TO}
+  schedule:
+    cron: ${REPORT_CRON:0 0 8 * * MON}
