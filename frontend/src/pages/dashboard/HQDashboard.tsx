@@ -329,6 +329,7 @@ export default function HQDashboard() {
         <div className="flex w-full flex-wrap items-center gap-1">
           <ErpSecondaryButton onClick={() => navigate('/allocations')}>배분 관리</ErpSecondaryButton>
           <ErpSecondaryButton onClick={() => navigate('/orders')}>발주 관리</ErpSecondaryButton>
+          <ErpSecondaryButton onClick={() => navigate('/reports/weekly')}>주간 리포트</ErpSecondaryButton>
           <ErpSecondaryButton className="ml-auto" onClick={() => navigate('/warehouse-stock')}>
             창고 재고
           </ErpSecondaryButton>

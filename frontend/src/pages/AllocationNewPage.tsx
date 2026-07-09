@@ -1,11 +1,23 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { api } from '../lib/api'
 import { getRole } from '../lib/auth'
-import SectionCard from '../components/ui/SectionCard'
 import ErpPageFrame, { ErpAccessDenied } from '../components/ui/ErpPageFrame'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import {
+  ErpChevronBack,
+  ErpFooterBar,
+  ErpFooterPrimary,
+  ErpFormCell,
+  ErpFormLabel,
+  ErpFormRow,
+  ErpFormTable,
+  ErpPrimaryButton,
+  ErpSecondaryButton,
+  ErpToolbar,
+} from '../components/ui/erp/ErpLayout'
+import { erpSelectClass } from '../lib/erpUi'
 import type { Allocation, StoreSummary, WarehouseStock, WarehouseSummary } from '../types/models'
 import { warehouseAvailableQty } from '../lib/warehouseStock'
 
@@ -510,103 +522,104 @@ export default function AllocationNewPage() {
   return (
     <ErpPageFrame
       title="배분 생성"
-      actions={
-        <Link
-          to="/allocations"
-          className="inline-flex h-7 items-center border border-slate-300 bg-white px-2 text-xs text-slate-700 hover:bg-slate-100"
-        >
-          ← 배분 목록
-        </Link>
-      }
+      actions={<ErpChevronBack to="/allocations" label="배분 목록" />}
     >
       <div className="border-b border-slate-300 px-3 py-1 text-[11px] text-slate-500">
         창고에서 매장으로 보낼 재고를 등록합니다.
       </div>
 
-      <SectionCard embedded title="요청서">
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-          {error && <p className="text-sm text-rose-600">{error}</p>}
+      <ErpToolbar>
+        <span className="text-xs font-semibold text-slate-700">요청서</span>
+      </ErpToolbar>
 
-          {(warehousesLoading || storesLoading) ? (
+      <form onSubmit={(e) => void handleSubmit(e)}>
+        {error ? (
+          <div className="border-b border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">{error}</div>
+        ) : null}
+
+        {(warehousesLoading || storesLoading) ? (
+          <div className="py-8">
             <LoadingSpinner />
-          ) : (
-            <>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">창고</label>
-            <select
-              value={warehouseId}
-              disabled={warehouses.length === 0}
-              onChange={(e) => handleWarehouseChange(e.target.value)}
-              className="h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
-            >
-              <option value="">
-                {warehousesError
-                  ? '창고 목록을 불러올 수 없음'
-                  : warehouses.length === 0
-                    ? '등록된 창고가 없습니다'
-                    : '창고를 선택하세요'}
-              </option>
-              {warehouses.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.name}
-                </option>
-              ))}
-            </select>
-            {warehousesError ? (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <p className="text-xs text-rose-600">{warehousesError}</p>
-                <button
-                  type="button"
-                  onClick={() => void loadWarehouseAndStoreLists()}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-800"
-                >
-                  다시 시도
-                </button>
-              </div>
-            ) : null}
           </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">매장</label>
-            <select
-              value={storeId}
-              disabled={stores.length === 0}
-              onChange={(e) => {
-                setStoreId(e.target.value)
-                setError(null)
-              }}
-              className="h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
-            >
-              <option value="">
-                {storesError
-                  ? '매장 목록을 불러올 수 없음'
-                  : stores.length === 0
-                    ? '등록된 매장이 없습니다'
-                    : '매장을 선택하세요'}
-              </option>
-              {stores.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {storeOptionLabel(s)}
-                </option>
-              ))}
-            </select>
-            {storesError ? (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <p className="text-xs text-rose-600">{storesError}</p>
-                <button
-                  type="button"
-                  onClick={() => void loadWarehouseAndStoreLists()}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-800"
+        ) : (
+          <ErpFormTable>
+            <ErpFormRow>
+              <ErpFormLabel required>창고</ErpFormLabel>
+              <ErpFormCell>
+                <select
+                  value={warehouseId}
+                  disabled={warehouses.length === 0}
+                  onChange={(e) => handleWarehouseChange(e.target.value)}
+                  className={erpSelectClass()}
                 >
-                  다시 시도
-                </button>
-              </div>
-            ) : null}
-          </div>
-            </>
-          )}
+                  <option value="">
+                    {warehousesError
+                      ? '창고 목록을 불러올 수 없음'
+                      : warehouses.length === 0
+                        ? '등록된 창고가 없습니다'
+                        : '창고를 선택하세요'}
+                  </option>
+                  {warehouses.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+                {warehousesError ? (
+                  <div className="mt-1 flex flex-wrap items-center gap-2 px-1">
+                    <p className="text-[11px] text-rose-600">{warehousesError}</p>
+                    <button
+                      type="button"
+                      onClick={() => void loadWarehouseAndStoreLists()}
+                      className="text-[11px] font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      다시 시도
+                    </button>
+                  </div>
+                ) : null}
+              </ErpFormCell>
+              <ErpFormLabel required>매장</ErpFormLabel>
+              <ErpFormCell>
+                <select
+                  value={storeId}
+                  disabled={stores.length === 0}
+                  onChange={(e) => {
+                    setStoreId(e.target.value)
+                    setError(null)
+                  }}
+                  className={erpSelectClass()}
+                >
+                  <option value="">
+                    {storesError
+                      ? '매장 목록을 불러올 수 없음'
+                      : stores.length === 0
+                        ? '등록된 매장이 없습니다'
+                        : '매장을 선택하세요'}
+                  </option>
+                  {stores.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {storeOptionLabel(s)}
+                    </option>
+                  ))}
+                </select>
+                {storesError ? (
+                  <div className="mt-1 flex flex-wrap items-center gap-2 px-1">
+                    <p className="text-[11px] text-rose-600">{storesError}</p>
+                    <button
+                      type="button"
+                      onClick={() => void loadWarehouseAndStoreLists()}
+                      className="text-[11px] font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      다시 시도
+                    </button>
+                  </div>
+                ) : null}
+              </ErpFormCell>
+            </ErpFormRow>
+          </ErpFormTable>
+        )}
 
-          <div className="space-y-4">
+        <div className="space-y-4 border-t border-slate-300 px-3 py-3">
             <span className="text-sm font-medium text-slate-700">품목</span>
             {stocksLoading && warehouseId ? (
               <LoadingSpinner label="재고 불러오는 중…" />
@@ -626,7 +639,7 @@ export default function AllocationNewPage() {
                     value={itemQuery}
                     onChange={(e) => setItemQuery(e.target.value)}
                     placeholder="상품명 또는 코드로 실시간 검색"
-                    className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="mt-1 h-7 w-full border border-slate-300 bg-white px-2 text-xs text-slate-800 outline-none focus:border-blue-500"
                   />
                 </label>
                 <p className="text-[11px] text-slate-500">
@@ -892,30 +905,27 @@ export default function AllocationNewPage() {
             ) : null}
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Link
-              to="/allocations"
-              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-            >
+          <ErpFooterBar>
+            <ErpSecondaryButton type="button" onClick={() => navigate('/allocations')}>
               취소
-            </Link>
-            <button
-              type="submit"
-              disabled={
-                submitting ||
-                stocksLoading ||
-                warehousesLoading ||
-                storesLoading ||
-                !warehouseId ||
-                !storeId
-              }
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 disabled:opacity-50"
-            >
-              등록하기
-            </button>
-          </div>
-        </form>
-      </SectionCard>
+            </ErpSecondaryButton>
+            <ErpFooterPrimary>
+              <ErpPrimaryButton
+                type="submit"
+                disabled={
+                  submitting ||
+                  stocksLoading ||
+                  warehousesLoading ||
+                  storesLoading ||
+                  !warehouseId ||
+                  !storeId
+                }
+              >
+                {submitting ? '등록 중…' : '등록하기'}
+              </ErpPrimaryButton>
+            </ErpFooterPrimary>
+          </ErpFooterBar>
+      </form>
     </ErpPageFrame>
   )
 }

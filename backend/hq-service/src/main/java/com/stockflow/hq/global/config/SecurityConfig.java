@@ -77,6 +77,12 @@ public class SecurityConfig {
                         // 발주 입고완료 → 매장 관리자 + 본사
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/*/receive").hasAnyRole("HQ_STAFF", "STORE_MANAGER")
 
+                        // 주간 리포트 수동 트리거 → 본사만
+                        .requestMatchers(HttpMethod.POST, "/api/reports/weekly/trigger").hasRole("HQ_STAFF")
+
+                        .requestMatchers(HttpMethod.GET, "/api/reports/weekly", "/api/reports/weekly/*/download").hasRole("HQ_STAFF")
+
+
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )

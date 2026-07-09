@@ -18,6 +18,7 @@ import {
   Tag,
   AlertTriangle,
   Container,
+  FileText,
   Truck,
 } from 'lucide-react'
 import { getRole, getStoreId, getUserId, getWarehouseId, logout, roleLabel } from '../../lib/auth'
@@ -267,6 +268,23 @@ export default function Sidebar() {
                 {unresolvedAnomalyCount > 99 ? '99+' : unresolvedAnomalyCount}
               </span>
             ) : null}
+          </NavLink>
+        ) : null}
+
+        {isHq ? (
+          <NavLink
+            to="/reports/weekly"
+            className={({ isActive }) =>
+              [
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-white text-blue-700 shadow-sm ring-1 ring-slate-200/80'
+                  : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+              ].join(' ')
+            }
+          >
+            <FileText className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+            주간 리포트
           </NavLink>
         ) : null}
 

@@ -177,3 +177,11 @@ export interface AnomalyAlert {
   resolved: boolean
   createdAt: string
 }
+
+export interface WeeklyReportSummary {
+  id: number
+  periodStart: string
+  periodEnd: string
+  fileName: string
+  createdAt: string
+}
