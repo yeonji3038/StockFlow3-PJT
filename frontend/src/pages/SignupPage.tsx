@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { isAxiosError } from 'axios'
-import { Hash, Lock, Mail, User, Users } from 'lucide-react'
+import { Check, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { api } from '../lib/api'
 import { hasUserSession } from '../lib/auth'
 import { parseStoreApiError } from '../lib/store'
-import AuthPageShell, {
-  authCodeFieldClass,
-  authFieldClass,
-  authInputRowClass,
-  authPrimaryButtonClass,
-  authSecondaryLinkClass,
-} from '../components/auth/AuthPageShell'
+import {
+  isEmailFormatValid,
+  isPasswordValid,
+  PASSWORD_RULES,
+} from '../lib/signupValidation'
+import SignupPageShell, {
+  signupInputClass,
+  signupPrimaryButtonClass,
+  signupSelectClass,
+} from '../components/auth/SignupPageShell'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 
 type Role = 'HQ_STAFF' | 'STORE_MANAGER' | 'WAREHOUSE_STAFF' | 'STAFF'
@@ -24,22 +27,133 @@ type StorePreview = {
 
 const STORE_ROLES: Role[] = ['STORE_MANAGER', 'STAFF']
 
+const ROLE_OPTIONS: { value: Role; label: string }[] = [
+  { value: 'HQ_STAFF', label: '본사(HQ)' },
+  { value: 'STORE_MANAGER', label: '매장 관리자' },
+  { value: 'STAFF', label: '매장 직원' },
+  { value: 'WAREHOUSE_STAFF', label: '창고 담당자' },
+]
+
 function needsStoreCode(role: Role): boolean {
   return STORE_ROLES.includes(role)
+}
+
+function SignupField({
+  label,
+  required,
+  children,
+  className = '',
+}: {
+  label: string
+  required?: boolean
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={['space-y-2', className].filter(Boolean).join(' ')}>
+      <span className="text-sm font-semibold text-slate-900">
+        {label}
+        {required ? <span className="ml-0.5 text-rose-500">*</span> : null}
+      </span>
+      {children}
+    </div>
+  )
+}
+
+function ValidationChip({ label, met }: { label: string; met: boolean }) {
+  return (
+    <span
+      className={[
+        'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium',
+        met ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400',
+      ].join(' ')}
+    >
+      {met ? <Check className="h-3 w-3 shrink-0" aria-hidden /> : null}
+      {label}
+    </span>
+  )
+}
+
+function PasswordInput({
+  value,
+  onChange,
+  autoComplete,
+  placeholder,
+}: {
+  value: string
+  onChange: (value: string) => void
+  autoComplete: string
+  placeholder?: string
+}) {
+  const [visible, setVisible] = useState(false)
+
+  return (
+    <div className="relative">
+      <input
+        type={visible ? 'text' : 'password'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        className={[signupInputClass, 'pr-10'].join(' ')}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+        aria-label={visible ? '비밀번호 숨기기' : '비밀번호 보기'}
+      >
+        {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  )
+}
+
+function AgreementRow({
+  checked,
+  onChange,
+  label,
+  showChevron = false,
+}: {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  label: string
+  showChevron?: boolean
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-3 py-1.5">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-sky-200"
+      />
+      <span className="min-w-0 flex-1 text-sm text-slate-700">{label}</span>
+      {showChevron ? <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden /> : null}
+    </label>
+  )
 }
 
 export default function SignupPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
   const [role, setRole] = useState<Role>('STORE_MANAGER')
   const [storeCode, setStoreCode] = useState('')
   const [storePreview, setStorePreview] = useState<StorePreview | null>(null)
   const [storeLookupLoading, setStoreLookupLoading] = useState(false)
   const [storeLookupError, setStoreLookupError] = useState<string | null>(null)
+  const [agreeAll, setAgreeAll] = useState(false)
+  const [agreeAge, setAgreeAge] = useState(false)
+  const [agreeTerms, setAgreeTerms] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  const passwordsMatch = password.length > 0 && password === confirmPassword
+  const passwordReady = isPasswordValid(password)
+  const emailReady = isEmailFormatValid(email)
 
   useEffect(() => {
     if (hasUserSession()) {
@@ -75,9 +189,9 @@ export default function SignupPage() {
         } catch (err) {
           setStorePreview(null)
           if (isAxiosError(err) && err.response?.status === 404) {
-            setStoreLookupError('Store code not found.')
+            setStoreLookupError('매장 코드를 찾을 수 없습니다.')
           } else {
-            setStoreLookupError('Could not verify store code.')
+            setStoreLookupError('매장 코드를 확인하지 못했습니다.')
           }
         } finally {
           setStoreLookupLoading(false)
@@ -90,14 +204,37 @@ export default function SignupPage() {
     }
   }, [role, storeCode])
 
+  useEffect(() => {
+    setAgreeAll(agreeAge && agreeTerms)
+  }, [agreeAge, agreeTerms])
+
   const canSubmit = useMemo(() => {
-    if (!email.trim() || !password.trim() || !name.trim()) return false
+    if (!emailReady || !passwordReady || !passwordsMatch || !name.trim()) return false
+    if (!agreeAge || !agreeTerms) return false
     if (needsStoreCode(role)) {
       if (!storeCode.trim()) return false
       if (storeLookupLoading || storeLookupError || !storePreview) return false
     }
     return true
-  }, [email, password, name, role, storeCode, storeLookupLoading, storeLookupError, storePreview])
+  }, [
+    emailReady,
+    passwordReady,
+    passwordsMatch,
+    name,
+    agreeAge,
+    agreeTerms,
+    role,
+    storeCode,
+    storeLookupLoading,
+    storeLookupError,
+    storePreview,
+  ])
+
+  const handleAgreeAll = (checked: boolean) => {
+    setAgreeAll(checked)
+    setAgreeAge(checked)
+    setAgreeTerms(checked)
+  }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -106,133 +243,178 @@ export default function SignupPage() {
     setError('')
     try {
       await api.post('/api/auth/signup', {
-        email,
+        email: email.trim(),
         password,
-        name,
+        name: name.trim(),
         role,
         storeCode: needsStoreCode(role) ? storeCode.trim() : null,
       })
       navigate('/login', { replace: true })
     } catch (err) {
-      setError(parseStoreApiError(err, 'Sign up failed. Please check your input.'))
+      setError(parseStoreApiError(err, '회원가입에 실패했습니다. 입력값을 확인해 주세요.'))
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <AuthPageShell>
-      <form
-        onSubmit={(e) => void handleSignup(e)}
-        className="mt-10 w-full max-w-[340px] space-y-[14px]"
-      >
-        <label className={authInputRowClass}>
-          <Mail className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+    <SignupPageShell>
+      <form onSubmit={(e) => void handleSignup(e)} className="space-y-6">
+        <SignupField label="이메일 주소" required>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
             autoCapitalize="off"
-            placeholder="EMAIL"
-            className={authFieldClass}
+            placeholder="example@email.com"
+            className={signupInputClass}
           />
-        </label>
+          {email && !emailReady ? (
+            <p className="text-xs text-rose-600">올바른 이메일 형식을 입력해 주세요.</p>
+          ) : null}
+        </SignupField>
 
-        <label className={authInputRowClass}>
-          <Lock className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
-          <input
-            type="password"
+        <SignupField label="비밀번호" required>
+          <PasswordInput
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             autoComplete="new-password"
-            autoCapitalize="off"
-            placeholder="PASSWORD"
-            className={authFieldClass}
+            placeholder="비밀번호를 입력하세요"
           />
-        </label>
+          <div className="flex flex-wrap gap-1.5">
+            {PASSWORD_RULES.map((rule) => (
+              <ValidationChip
+                key={rule.id}
+                label={rule.label}
+                met={password.length > 0 && rule.test(password)}
+              />
+            ))}
+          </div>
+        </SignupField>
 
-        <label className={authInputRowClass}>
-          <User className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
+        <SignupField label="비밀번호 확인" required>
+          <PasswordInput
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            autoComplete="new-password"
+            placeholder="비밀번호를 다시 입력하세요"
+          />
+          {confirmPassword ? (
+            <span
+              className={[
+                'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium',
+                passwordsMatch ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500',
+              ].join(' ')}
+            >
+              {passwordsMatch ? <Check className="h-3 w-3 shrink-0" aria-hidden /> : null}
+              {passwordsMatch ? '비밀번호 일치' : '비밀번호가 일치하지 않습니다'}
+            </span>
+          ) : null}
+        </SignupField>
+
+        <SignupField label="이름 (실명)" required>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoComplete="name"
-            placeholder="NAME"
-            className={authFieldClass}
+            placeholder="실명을 입력하세요"
+            className={signupInputClass}
           />
-        </label>
+        </SignupField>
 
-        <label className={authInputRowClass}>
-          <Users className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
-          <select
-            value={role}
-            onChange={(e) => {
-              setRole(e.target.value as Role)
-              setStoreCode('')
-              setStorePreview(null)
-              setStoreLookupError(null)
-            }}
-            className={`${authFieldClass} cursor-pointer appearance-none normal-case`}
-          >
-            <option value="HQ_STAFF" className="bg-[#3b63e8] text-white">
-              HQ STAFF
-            </option>
-            <option value="STORE_MANAGER" className="bg-[#3b63e8] text-white">
-              STORE MANAGER
-            </option>
-            <option value="STAFF" className="bg-[#3b63e8] text-white">
-              STAFF
-            </option>
-            <option value="WAREHOUSE_STAFF" className="bg-[#3b63e8] text-white">
-              WAREHOUSE STAFF
-            </option>
-          </select>
-        </label>
+        <div className="space-y-2">
+          <span className="text-sm font-semibold text-slate-900">
+            계정 정보<span className="ml-0.5 text-rose-500">*</span>
+          </span>
+          <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
+            <div
+              className={[
+                'grid gap-4',
+                needsStoreCode(role) ? 'sm:grid-cols-2' : 'grid-cols-1',
+              ].join(' ')}
+            >
+              <SignupField label="역할" required>
+                <select
+                  value={role}
+                  onChange={(e) => {
+                    setRole(e.target.value as Role)
+                    setStoreCode('')
+                    setStorePreview(null)
+                    setStoreLookupError(null)
+                  }}
+                  className={signupSelectClass}
+                >
+                  {ROLE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </SignupField>
 
-        {needsStoreCode(role) ? (
-          <div className="space-y-2">
-            <label className={authInputRowClass}>
-              <Hash className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.75} aria-hidden />
-              <input
-                value={storeCode}
-                onChange={(e) => setStoreCode(e.target.value)}
-                placeholder="STORE CODE"
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck={false}
-                className={authCodeFieldClass}
-              />
-            </label>
-            {storeLookupLoading ? (
-              <div className="flex justify-center py-1">
-                <LoadingSpinner compact variant="light" label="매장 확인 중…" />
+              {needsStoreCode(role) ? (
+                <SignupField label="매장 코드" required>
+                  <input
+                    value={storeCode}
+                    onChange={(e) => setStoreCode(e.target.value)}
+                    placeholder="본사에서 발급한 코드"
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className={[signupInputClass, 'font-mono'].join(' ')}
+                  />
+                </SignupField>
+              ) : null}
+            </div>
+
+            {needsStoreCode(role) ? (
+              <div className="mt-3 text-xs">
+                {storeLookupLoading ? (
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <LoadingSpinner compact hideLabel />
+                    매장 확인 중…
+                  </div>
+                ) : storePreview ? (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 font-medium text-emerald-700">
+                    <Check className="h-3 w-3" aria-hidden />
+                    {storePreview.name}
+                  </span>
+                ) : storeLookupError ? (
+                  <p className="text-rose-600">{storeLookupError}</p>
+                ) : (
+                  <p className="text-slate-500">매장 관리자 가입 시 본사에서 발급한 매장 코드를 입력하세요.</p>
+                )}
               </div>
-            ) : storePreview ? (
-              <p className="text-center text-[11px] text-emerald-200">
-                Store: <span className="font-medium">{storePreview.name}</span>
-              </p>
-            ) : storeLookupError ? (
-              <p className="text-center text-[11px] text-red-200">{storeLookupError}</p>
-            ) : (
-              <p className="text-center text-[11px] text-white/70">
-                Enter the store code issued by HQ.
-              </p>
-            )}
+            ) : null}
           </div>
-        ) : null}
+        </div>
 
-        {error ? <p className="text-center text-xs text-red-200">{error}</p> : null}
+        <div className="space-y-1 border-t border-slate-100 pt-2">
+          <AgreementRow
+            checked={agreeAll}
+            onChange={handleAgreeAll}
+            label="필수 이용약관 모두 동의"
+          />
+          <AgreementRow checked={agreeAge} onChange={setAgreeAge} label="만 14세 이상 확인" />
+          <AgreementRow
+            checked={agreeTerms}
+            onChange={setAgreeTerms}
+            label="StockFlow 이용약관 동의"
+            showChevron
+          />
+          <p className="pt-2 text-[11px] leading-relaxed text-slate-400">
+            회원가입 시 개인정보는 관련 법령에 따라 안전하게 관리됩니다.
+          </p>
+        </div>
 
-        <button type="submit" disabled={!canSubmit || submitting} className={authPrimaryButtonClass}>
-          {submitting ? '…' : 'SIGN UP'}
+        {error ? <p className="text-center text-sm text-rose-600">{error}</p> : null}
+
+        <button type="submit" disabled={!canSubmit || submitting} className={signupPrimaryButtonClass}>
+          {submitting ? '가입 처리 중…' : '가입 완료'}
         </button>
-
-        <Link to="/login" className={authSecondaryLinkClass}>
-          LOG IN
-        </Link>
       </form>
-    </AuthPageShell>
+    </SignupPageShell>
   )
 }
